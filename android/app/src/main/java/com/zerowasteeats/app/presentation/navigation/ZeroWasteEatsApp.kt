@@ -24,33 +24,42 @@ fun ZeroWasteEatsApp() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    val isBottomBarVisible = currentRoute in listOf(
+        AppDestination.HOME.route,
+        AppDestination.EXPLORE.route,
+        AppDestination.ORDERS.route,
+        AppDestination.PROFILE.route
+    )
+
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0), // Handle edge-to-edge manually if needed
         containerColor = Color.Transparent, // Let screens draw their own background
         bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding(), // Keep above system nav bar
-                contentAlignment = Alignment.BottomCenter
-            ) {
-                GlassBottomBar(
-                    currentRoute = currentRoute,
-                    onNavigateTo = { destination ->
-                        navController.navigate(destination.route) {
-                            // Pop up to the start destination of the graph to
-                            // avoid building up a large stack of destinations
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+            if (isBottomBarVisible) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding(), // Keep above system nav bar
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    GlassBottomBar(
+                        currentRoute = currentRoute,
+                        onNavigateTo = { destination ->
+                            navController.navigate(destination.route) {
+                                // Pop up to the start destination of the graph to
+                                // avoid building up a large stack of destinations
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                // Avoid multiple copies of the same destination when
+                                // reselecting the same item
+                                launchSingleTop = true
+                                // Restore state when reselecting a previously selected item
+                                restoreState = true
                             }
-                            // Avoid multiple copies of the same destination when
-                            // reselecting the same item
-                            launchSingleTop = true
-                            // Restore state when reselecting a previously selected item
-                            restoreState = true
                         }
-                    }
-                )
+                    )
+                }
             }
         }
     ) { _ ->
