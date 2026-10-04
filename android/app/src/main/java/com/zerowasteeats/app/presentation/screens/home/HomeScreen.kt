@@ -153,7 +153,7 @@ fun HomeScreen(
                             offer = offer,
                             onClick = { onOfferClick(offer.id) },
                             onFavoriteClick = { onFavoriteClick(offer.id) },
-                            favoriteContentDescription = "Marcar como favorito"
+                            favoriteContentDescription = if (offer.isFavorite) "Quitar de favoritos" else "Marcar como favorito"
                         )
                     }
                 }
