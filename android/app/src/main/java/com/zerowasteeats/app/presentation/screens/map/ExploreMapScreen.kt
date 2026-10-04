@@ -1,5 +1,10 @@
 package com.zerowasteeats.app.presentation.screens.map
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -17,26 +22,38 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.rememberMarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.rememberMarkerState
 import com.zerowasteeats.app.presentation.components.glass.GlassButton
 import com.zerowasteeats.app.presentation.components.glass.GlassCard
 import com.zerowasteeats.app.presentation.data.MockMapCoordinates
@@ -44,7 +61,9 @@ import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.GlassTokens
+import kotlinx.coroutines.launch
 
+@SuppressLint("MissingPermission")
 @Composable
 fun ExploreMapScreen(
     onBackClick: () -> Unit,
@@ -53,20 +72,69 @@ fun ExploreMapScreen(
     val isDarkTheme = isSystemInDarkTheme()
     var selectedOfferId by rememberSaveable { mutableStateOf<String?>(null) }
     
-    val offers = MockOffers.getList()
-    val selectedOffer = offers.find { it.id == selectedOfferId }
+    val context = LocalContext.current
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    
+    var isLocationPermissionGranted by rememberSaveable { 
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        )
+    }
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(MockMapCoordinates.pastoCenter, 14f)
     }
 
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        
+        isLocationPermissionGranted = granted
+
+        if (granted) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    val latLng = LatLng(location.latitude, location.longitude)
+                    scope.launch {
+                        cameraPositionState.animate(
+                            update = CameraUpdateFactory.newLatLngZoom(latLng, 15f)
+                        )
+                    }
+                } else {
+                    scope.launch {
+                        snackbarHostState.showSnackbar("No pudimos obtener tu ubicación.")
+                    }
+                }
+            }.addOnFailureListener {
+                scope.launch {
+                    snackbarHostState.showSnackbar("No pudimos obtener tu ubicación.")
+                }
+            }
+        } else {
+            scope.launch {
+                snackbarHostState.showSnackbar("Activa el permiso de ubicación para usar esta función.")
+            }
+        }
+    }
+
+    val offers = MockOffers.getList()
+    val selectedOffer = offers.find { it.id == selectedOfferId }
+
     Scaffold(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize()) {
             GoogleMap(
                 modifier = Modifier.fillMaxSize(),
                 cameraPositionState = cameraPositionState,
+                properties = MapProperties(isMyLocationEnabled = isLocationPermissionGranted),
+                uiSettings = MapUiSettings(myLocationButtonEnabled = false), // We use custom UI
                 contentPadding = innerPadding,
                 onMapClick = { selectedOfferId = null }
             ) {
@@ -119,6 +187,46 @@ fun ExploreMapScreen(
                     MapOfferCard(
                         offer = selectedOffer,
                         onViewOfferClick = { onOfferClick(selectedOffer.id) }
+                    )
+                }
+            } else {
+                // Mi ubicación button (only visible when no offer is selected, to avoid clutter)
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(innerPadding)
+                        .padding(AppSpacing.regular)
+                ) {
+                    GlassTextButton(
+                        text = "◎", // Location symbol placeholder
+                        contentDescription = "Mi ubicación",
+                        onClick = {
+                            if (isLocationPermissionGranted) {
+                                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                                    if (location != null) {
+                                        val latLng = LatLng(location.latitude, location.longitude)
+                                        scope.launch {
+                                            cameraPositionState.animate(
+                                                update = CameraUpdateFactory.newLatLngZoom(latLng, 15f)
+                                            )
+                                        }
+                                    } else {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar("No pudimos obtener tu ubicación.")
+                                        }
+                                    }
+                                }
+                            } else {
+                                permissionLauncher.launch(
+                                    arrayOf(
+                                        Manifest.permission.ACCESS_FINE_LOCATION,
+                                        Manifest.permission.ACCESS_COARSE_LOCATION
+                                    )
+                                )
+                            }
+                        },
+                        surfaceColor = glassSurfaceColor,
+                        borderColor = glassBorderColor
                     )
                 }
             }
