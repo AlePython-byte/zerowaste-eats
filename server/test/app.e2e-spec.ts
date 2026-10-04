@@ -8,14 +8,17 @@ import {
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule, ObserveModule } from './../src/app.module';
+import { DatabaseService } from './../src/database/database.service';
 
 @Module({})
 class TestObserveModule {}
 
 describe('Application (e2e)', () => {
   let app: INestApplication<App>;
+  const databaseService = { checkConnection: jest.fn<Promise<boolean>, []>() };
 
   beforeEach(async () => {
+    databaseService.checkConnection.mockReset().mockResolvedValue(true);
     // Keep telemetry workers and external requests out of HTTP tests.
     const imports = Reflect.getMetadata(
       'imports',
@@ -31,6 +34,8 @@ describe('Application (e2e)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
+      .overrideProvider(DatabaseService)
+      .useValue(databaseService)
       .overrideModule(observeModule)
       .useModule(TestObserveModule)
       .compile();
@@ -64,6 +69,25 @@ describe('Application (e2e)', () => {
     'GET %s does not expose a default or unprefixed endpoint',
     (path) => request(app.getHttpServer()).get(path).expect(404),
   );
+
+  it('GET /api/v1/salud/base-datos reports database connectivity', () => {
+    return request(app.getHttpServer())
+      .get('/api/v1/salud/base-datos')
+      .expect(200)
+      .expect({ estado: 'ok', baseDatos: 'conectada' });
+  });
+
+  it('GET /api/v1/salud/base-datos returns a safe 503 when unavailable', () => {
+    databaseService.checkConnection.mockResolvedValue(false);
+    return request(app.getHttpServer())
+      .get('/api/v1/salud/base-datos')
+      .expect(503)
+      .expect({
+        estado: 'error',
+        baseDatos: 'desconectada',
+        mensaje: 'La base de datos no está disponible.',
+      });
+  });
 
   it('allows development CORS preflight requests', () => {
     return request(app.getHttpServer())

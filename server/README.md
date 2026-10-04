@@ -31,6 +31,31 @@
 $ npm install
 ```
 
+Configure `server/.env` using `.env.example` as a reference. Preserve any existing
+values; never commit or print database credentials. `DATABASE_URL` is required.
+`NODE_ENV` defaults to `development` and `PORT` defaults to `3000`.
+
+Generate Prisma Client before starting the application or running tests:
+
+```bash
+npm run prisma:generate
+```
+
+Prisma 7 reads the connection URL from the environment through `prisma.config.ts`.
+The generated client is ignored by Git and generated automatically by
+`npm run build`. The schema contains no models; no migration or seed is needed.
+
+`DatabaseModule` provides one shared Prisma client, initialized and disconnected
+through Nest lifecycle hooks. Connection and query timeouts are five seconds.
+
+`GET /api/v1/salud` returns the API status. `GET /api/v1/salud/base-datos` runs
+`SELECT 1`, returning HTTP 200 when reachable or a safe Spanish HTTP 503 response
+when unavailable. Neither endpoint returns connection details.
+
+Automated tests use placeholder environment variables and mock database access;
+they do not load `.env` or connect to Supabase. For a separate live check, start the
+application with its real environment and request `/api/v1/salud/base-datos`.
+
 ## Compile and run the project
 
 ```bash
