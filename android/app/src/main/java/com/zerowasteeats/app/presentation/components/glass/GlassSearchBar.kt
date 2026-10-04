@@ -40,7 +40,13 @@ fun GlassSearchBar(
 ) {
     val isDarkTheme = isSystemInDarkTheme()
 
-    val backgroundColor = if (isDarkTheme) GlassTokens.darkSurface else GlassTokens.lightSurface
+    // Slightly more translucent for a refined look
+    val backgroundColor = if (isDarkTheme) {
+        GlassTokens.darkSurface.copy(alpha = GlassTokens.darkSurface.alpha * 0.85f) 
+    } else {
+        GlassTokens.lightSurface.copy(alpha = GlassTokens.lightSurface.alpha * 0.90f)
+    }
+    
     val borderColor = if (isDarkTheme) GlassTokens.darkBorder else GlassTokens.lightBorder
 
     Surface(
@@ -48,7 +54,7 @@ fun GlassSearchBar(
         shape = RoundedCornerShape(AppRadius.large),
         color = backgroundColor,
         border = BorderStroke(GlassTokens.borderWidth, borderColor),
-        shadowElevation = GlassTokens.elevation
+        shadowElevation = GlassTokens.elevation / 1.5f // Softened shadow
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

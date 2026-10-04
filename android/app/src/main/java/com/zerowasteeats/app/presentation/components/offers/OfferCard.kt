@@ -1,8 +1,10 @@
 package com.zerowasteeats.app.presentation.components.offers
 
 import android.R
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,24 +46,38 @@ fun OfferCard(
     favoriteContentDescription: String,
     modifier: Modifier = Modifier,
 ) {
+    val isDarkTheme = isSystemInDarkTheme()
+    
+    val placeholderBrush = when (offer.category) {
+        "Panadería" -> Brush.linearGradient(listOf(Color(0xFFE5D9C5), Color(0xFFD4C1A3)))
+        "Comida preparada" -> Brush.linearGradient(listOf(Color(0xFFE5D5C5), Color(0xFFD4BBA3)))
+        "Postres" -> Brush.linearGradient(listOf(Color(0xFFE5C5D5), Color(0xFFD4A3BB)))
+        else -> Brush.linearGradient(listOf(Color(0xFFE5EBE7), Color(0xFFD4DBD7)))
+    }
+    
+    val glassSurfaceColor = if (isDarkTheme) GlassTokens.darkSurface else GlassTokens.lightSurface
+    val glassBorderColor = if (isDarkTheme) GlassTokens.darkBorder else GlassTokens.lightBorder
+
     GlassCard(
         modifier = modifier
             .fillMaxWidth()
             .clickable { onClick() },
         contentPadding = PaddingValues(0.dp)
     ) {
-        // Image Area (Large, dominant)
+        // Image Area (Large, dominant, optimized aspect ratio)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(1.2f)
+                .aspectRatio(1.45f)
                 .clip(RoundedCornerShape(topStart = AppRadius.large, topEnd = AppRadius.large))
-                .background(Color.LightGray.copy(alpha = 0.5f)) // Temporary placeholder for Coil
+                .background(placeholderBrush) // Visual richer placeholder
         ) {
             // Remaining quantity badge
             Surface(
-                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.9f),
+                color = glassSurfaceColor,
                 shape = RoundedCornerShape(AppRadius.medium),
+                border = BorderStroke(GlassTokens.borderWidth, glassBorderColor),
+                shadowElevation = GlassTokens.elevation / 2,
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(AppSpacing.medium)
@@ -68,7 +85,7 @@ fun OfferCard(
                 Text(
                     text = offer.remainingQuantityText,
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall)
                 )
             }
@@ -76,7 +93,9 @@ fun OfferCard(
             // Favorite Button
             Surface(
                 shape = CircleShape,
-                color = GlassTokens.lightSurface,
+                color = glassSurfaceColor,
+                border = BorderStroke(GlassTokens.borderWidth, glassBorderColor),
+                shadowElevation = GlassTokens.elevation / 2,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(AppSpacing.medium)
@@ -95,10 +114,12 @@ fun OfferCard(
                 }
             }
 
-            // Discount Badge (Glass effect)
+            // Discount Badge (Glass effect over primary color)
             Surface(
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
                 shape = RoundedCornerShape(AppRadius.medium),
+                border = BorderStroke(GlassTokens.borderWidth, glassBorderColor),
+                shadowElevation = GlassTokens.elevation / 2,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(AppSpacing.medium)

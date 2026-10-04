@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.zerowasteeats.app.presentation.screens.playground.GlassPlaygroundScreen
+import com.zerowasteeats.app.presentation.screens.home.HomeScreen
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
 
 class MainActivity : ComponentActivity() {
@@ -16,7 +16,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             ZeroWasteEatsTheme {
-                GlassPlaygroundScreen()
+                HomeScreen()
             }
         }
     }
