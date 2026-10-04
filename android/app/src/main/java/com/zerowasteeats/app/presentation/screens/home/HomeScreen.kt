@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.presentation.components.glass.GlassSearchBar
+import com.zerowasteeats.app.presentation.components.filters.CategoryChip
 import com.zerowasteeats.app.presentation.components.offers.OfferCard
 import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.model.OfferUiModel
@@ -204,58 +205,6 @@ private fun SectionHeader(
                 text = "Ver mapa",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary
-            )
-        }
-    }
-}
-
-@Composable
-private fun CategoryChip(
-    text: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val isDarkTheme = isSystemInDarkTheme()
-
-    // Highly refined, restrained chips
-    val containerColor = if (isSelected) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        if (isDarkTheme) GlassTokens.darkSurface.copy(alpha = 0.5f) 
-        else GlassTokens.lightSurface.copy(alpha = 0.5f)
-    }
-
-    val contentColor = if (isSelected) {
-        MaterialTheme.colorScheme.onPrimary
-    } else {
-        MaterialTheme.colorScheme.onSurface
-    }
-
-    val borderColor = if (isSelected) {
-        Color.Transparent
-    } else {
-        if (isDarkTheme) GlassTokens.darkBorder else GlassTokens.lightBorder
-    }
-
-    Surface(
-        modifier = modifier
-            .defaultMinSize(minHeight = 48.dp)
-            .clip(RoundedCornerShape(AppRadius.extraLarge))
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(AppRadius.extraLarge),
-        color = containerColor,
-        border = if (!isSelected) BorderStroke(GlassTokens.borderWidth, borderColor) else null,
-        shadowElevation = 0.dp // Flatter chips to let cards pop
-    ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.padding(horizontal = AppSpacing.large)
-        ) {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.labelLarge,
-                color = contentColor
             )
         }
     }

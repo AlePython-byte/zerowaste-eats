@@ -34,7 +34,13 @@ fun AppNavigation(
             )
         }
         composable(AppDestination.EXPLORE.route) {
-            ExploreScreen()
+            ExploreScreen(
+                onOfferClick = { offerId ->
+                    navController.navigate("offer/$offerId")
+                },
+                onFavoriteClick = { /* Handle favorite click temporarily */ },
+                onMapClick = { /* Handle map click temporarily */ }
+            )
         }
         composable(AppDestination.ORDERS.route) {
             OrdersScreen()
