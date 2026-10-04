@@ -1,0 +1,4 @@
+# Rename this file to local.properties or add the following line to your existing local.properties file.
+# The Google Maps Secrets Gradle Plugin will securely inject this into AndroidManifest.xml.
+# Do NOT commit your real local.properties to version control.
+MAPS_API_KEY=YOUR_REAL_GOOGLE_MAPS_API_KEY_HERE

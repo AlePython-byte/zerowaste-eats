@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.presentation.components.filters.CategoryChip
 import com.zerowasteeats.app.presentation.components.glass.GlassButton
+import com.zerowasteeats.app.presentation.components.glass.GlassButtonStyle
 import com.zerowasteeats.app.presentation.components.glass.GlassSearchBar
 import com.zerowasteeats.app.presentation.components.offers.OfferCard
 import com.zerowasteeats.app.presentation.data.MockOffers
@@ -93,7 +94,7 @@ fun ExploreScreen(
                     start = AppSpacing.regular,
                     end = AppSpacing.regular,
                     top = AppSpacing.regular,
-                    bottom = AppSpacing.huge * 3 + 80.dp // Padding for bottom nav and floating map button
+                    bottom = AppSpacing.huge + 64.dp // Padding for bottom nav
                 ),
                 verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
             ) {
@@ -155,6 +156,22 @@ fun ExploreScreen(
                     }
                 }
 
+                // Map Entry Point Inline
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = AppSpacing.small),
+                        contentAlignment = Alignment.CenterEnd
+                    ) {
+                        GlassButton(
+                            text = "Ver mapa",
+                            onClick = onMapClick,
+                            style = GlassButtonStyle.SECONDARY
+                        )
+                    }
+                }
+
                 // Results Header
                 item {
                     Spacer(modifier = Modifier.height(AppSpacing.medium))
@@ -179,18 +196,6 @@ fun ExploreScreen(
                         )
                     }
                 }
-            }
-
-            // Floating Map Entry Point
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = AppSpacing.huge + 80.dp) // Avoid colliding with GlassBottomBar
-            ) {
-                GlassButton(
-                    text = "Ver mapa",
-                    onClick = onMapClick
-                )
             }
         }
     }

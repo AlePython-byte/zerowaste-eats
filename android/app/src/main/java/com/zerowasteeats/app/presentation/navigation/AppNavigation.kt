@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.screens.explore.ExploreScreen
 import com.zerowasteeats.app.presentation.screens.home.HomeScreen
+import com.zerowasteeats.app.presentation.screens.map.ExploreMapScreen
 import com.zerowasteeats.app.presentation.screens.offerdetail.OfferDetailScreen
 import com.zerowasteeats.app.presentation.screens.orders.OrdersScreen
 import com.zerowasteeats.app.presentation.screens.profile.ProfileScreen
@@ -30,6 +31,9 @@ fun AppNavigation(
             HomeScreen(
                 onOfferClick = { offerId ->
                     navController.navigate("offer/$offerId")
+                },
+                onMapClick = {
+                    navController.navigate("explore/map")
                 }
             )
         }
@@ -39,7 +43,17 @@ fun AppNavigation(
                     navController.navigate("offer/$offerId")
                 },
                 onFavoriteClick = { /* Handle favorite click temporarily */ },
-                onMapClick = { /* Handle map click temporarily */ }
+                onMapClick = { 
+                    navController.navigate("explore/map") 
+                }
+            )
+        }
+        composable("explore/map") {
+            ExploreMapScreen(
+                onBackClick = { navController.popBackStack() },
+                onOfferClick = { offerId ->
+                    navController.navigate("offer/$offerId")
+                }
             )
         }
         composable(AppDestination.ORDERS.route) {
