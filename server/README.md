@@ -43,7 +43,10 @@ npm run prisma:generate
 
 Prisma 7 reads the connection URL from the environment through `prisma.config.ts`.
 The generated client is ignored by Git and generated automatically by
-`npm run build`. The schema contains no models; no migration or seed is needed.
+`npm run build`. The v1 schema contains six domain models. Versioned migrations
+are stored in `prisma/migrations`; apply reviewed migrations with
+`npx prisma migrate deploy` and check their status with `npx prisma migrate status`.
+No seed data is provided.
 
 `DatabaseModule` provides one shared Prisma client, initialized and disconnected
 through Nest lifecycle hooks. Connection and query timeouts are five seconds.

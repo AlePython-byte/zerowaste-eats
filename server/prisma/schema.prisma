@@ -8,3 +8,173 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum UserRole {
+  CUSTOMER
+  MERCHANT
+}
+
+enum OfferCategory {
+  BAKERY
+  PREPARED_FOOD
+  DESSERTS
+  PRODUCE
+  DAIRY
+  OTHER
+}
+
+enum OfferStatus {
+  AVAILABLE
+  SOLD_OUT
+  EXPIRED
+  CANCELLED
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  READY_FOR_PICKUP
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id          String   @id @db.Uuid
+  email       String   @unique
+  displayName String
+  role        UserRole @default(CUSTOMER)
+  city        String?
+  avatarUrl   String?
+
+  merchantProfile MerchantProfile?
+  reservations    Reservation[]
+  favorites       Favorite[]
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  @@map("users")
+}
+
+model MerchantProfile {
+  id           String  @id @default(uuid()) @db.Uuid
+  userId       String  @unique @db.Uuid
+  businessName String
+  description  String?
+  isVerified   Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  establishments Establishment[]
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  @@map("merchant_profiles")
+}
+
+model Establishment {
+  id                String @id @default(uuid()) @db.Uuid
+  merchantProfileId String @db.Uuid
+
+  name      String
+  address   String
+  city      String
+  latitude  Decimal @db.Decimal(9, 6)
+  longitude Decimal @db.Decimal(9, 6)
+
+  merchantProfile MerchantProfile @relation(fields: [merchantProfileId], references: [id], onDelete: Cascade)
+
+  offers Offer[]
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([merchantProfileId])
+  @@index([city])
+  @@map("establishments")
+}
+
+model Offer {
+  id              String @id @default(uuid()) @db.Uuid
+  establishmentId String @db.Uuid
+
+  title       String
+  description String?
+  category    OfferCategory
+
+  imageUrl String?
+
+  originalPrice   Decimal @db.Decimal(12, 2)
+  discountedPrice Decimal @db.Decimal(12, 2)
+
+  quantityTotal     Int
+  quantityAvailable Int
+
+  pickupStart DateTime @db.Timestamptz(3)
+  pickupEnd   DateTime @db.Timestamptz(3)
+  expiresAt   DateTime @db.Timestamptz(3)
+
+  status OfferStatus @default(AVAILABLE)
+
+  establishment Establishment @relation(fields: [establishmentId], references: [id], onDelete: Cascade)
+
+  reservations Reservation[]
+  favorites    Favorite[]
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([establishmentId])
+  @@index([category])
+  @@index([status])
+  @@index([pickupStart])
+  @@index([expiresAt])
+  @@map("offers")
+}
+
+model Reservation {
+  id         String @id @default(uuid()) @db.Uuid
+  customerId String @db.Uuid
+  offerId    String @db.Uuid
+
+  reservationCode String @unique
+
+  quantity Int
+
+  unitPrice  Decimal @db.Decimal(12, 2)
+  totalPrice Decimal @db.Decimal(12, 2)
+
+  status ReservationStatus @default(PENDING)
+
+  customer User @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  offer Offer @relation(fields: [offerId], references: [id], onDelete: Restrict)
+
+  completedAt DateTime? @db.Timestamptz(3)
+  cancelledAt DateTime? @db.Timestamptz(3)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([customerId])
+  @@index([offerId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("reservations")
+}
+
+model Favorite {
+  userId  String @db.Uuid
+  offerId String @db.Uuid
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  offer Offer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@id([userId, offerId])
+  @@index([offerId])
+  @@map("favorites")
+}
