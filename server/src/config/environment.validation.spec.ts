@@ -2,18 +2,25 @@ import { validateEnvironment } from './environment.validation';
 
 describe('validateEnvironment', () => {
   const databaseUrl = 'postgresql://test:test@127.0.0.1:5432/test';
+  const validConfig = {
+    DATABASE_URL: databaseUrl,
+    SUPABASE_URL: 'https://auth.example.invalid',
+    SUPABASE_PUBLISHABLE_KEY: 'test-publishable-placeholder',
+  };
 
   it('requires DATABASE_URL without including any supplied values in errors', () => {
     for (const value of [undefined, null, '', '  ', 'private-invalid-value']) {
-      expect(() => validateEnvironment({ DATABASE_URL: value })).toThrow(
+      expect(() =>
+        validateEnvironment({ ...validConfig, DATABASE_URL: value }),
+      ).toThrow(
         /^DATABASE_URL (is required|must be a valid PostgreSQL connection URL)/,
       );
     }
   });
 
   it('uses development defaults and preserves the supplied database URL', () => {
-    expect(validateEnvironment({ DATABASE_URL: databaseUrl })).toEqual({
-      DATABASE_URL: databaseUrl,
+    expect(validateEnvironment(validConfig)).toEqual({
+      ...validConfig,
       NODE_ENV: 'development',
       PORT: 3000,
     });
@@ -22,7 +29,7 @@ describe('validateEnvironment', () => {
   it('converts PORT to a number and accepts a configured environment', () => {
     expect(
       validateEnvironment({
-        DATABASE_URL: databaseUrl,
+        ...validConfig,
         NODE_ENV: 'production',
         PORT: '8080',
       }),
@@ -32,18 +39,52 @@ describe('validateEnvironment', () => {
   it.each(['', 'abc', '3.5', '1e3', 0, 65536, true])(
     'rejects invalid PORT %s',
     (port) => {
-      expect(() =>
-        validateEnvironment({ DATABASE_URL: databaseUrl, PORT: port }),
-      ).toThrow('PORT must be an integer between 1 and 65535.');
+      expect(() => validateEnvironment({ ...validConfig, PORT: port })).toThrow(
+        'PORT must be an integer between 1 and 65535.',
+      );
     },
   );
 
   it('rejects invalid NODE_ENV without reflecting its value', () => {
     expect(() =>
       validateEnvironment({
-        DATABASE_URL: databaseUrl,
+        ...validConfig,
         NODE_ENV: 'private-value',
       }),
     ).toThrow('NODE_ENV must be development, test, or production.');
   });
+
+  it.each([undefined, null, '', '   '])(
+    'requires SUPABASE_URL (%s)',
+    (value) => {
+      expect(() =>
+        validateEnvironment({ ...validConfig, SUPABASE_URL: value }),
+      ).toThrow('SUPABASE_URL is required.');
+    },
+  );
+
+  it.each([
+    'private-invalid-value',
+    'http://auth.example.invalid',
+    'https://user:private-value@auth.example.invalid',
+  ])(
+    'rejects invalid Supabase URLs without reflecting values (%s)',
+    (value) => {
+      expect(() =>
+        validateEnvironment({ ...validConfig, SUPABASE_URL: value }),
+      ).toThrow('SUPABASE_URL must be a valid HTTPS URL without credentials.');
+    },
+  );
+
+  it.each([undefined, null, '', '   '])(
+    'requires SUPABASE_PUBLISHABLE_KEY (%s)',
+    (value) => {
+      expect(() =>
+        validateEnvironment({
+          ...validConfig,
+          SUPABASE_PUBLISHABLE_KEY: value,
+        }),
+      ).toThrow('SUPABASE_PUBLISHABLE_KEY is required.');
+    },
+  );
 });

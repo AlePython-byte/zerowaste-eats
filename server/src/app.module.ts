@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { createObserveModule } from '@nestjs/observe';
 import { AuthModule } from './auth/auth.module';
+import { AuthService } from './auth/auth.service';
+import { SupabaseAuthGuard } from './auth/guards/supabase-auth.guard';
 import { validateEnvironment } from './config/environment.validation';
 import { DatabaseModule } from './database/database.module';
 import { DatabaseService } from './database/database.service';
@@ -12,9 +14,12 @@ import { ReservationsModule } from './reservations/reservations.module';
 import { UsersModule } from './users/users.module';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule({
-  // Configuration values and database errors must never enter telemetry.
+  // Credentials, access tokens, and raw database/auth errors must never enter telemetry.
   skipInstrumentation: (instance) =>
-    instance instanceof ConfigService || instance instanceof DatabaseService,
+    instance instanceof ConfigService ||
+    instance instanceof DatabaseService ||
+    instance instanceof AuthService ||
+    instance instanceof SupabaseAuthGuard,
 });
 
 @Module({

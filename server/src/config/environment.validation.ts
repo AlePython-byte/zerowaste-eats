@@ -1,5 +1,7 @@
 export interface EnvironmentVariables {
   DATABASE_URL: string;
+  SUPABASE_URL: string;
+  SUPABASE_PUBLISHABLE_KEY: string;
   NODE_ENV: 'development' | 'test' | 'production';
   PORT: number;
 }
@@ -23,6 +25,31 @@ export function validateEnvironment(
     throw new Error('DATABASE_URL must be a valid PostgreSQL connection URL.');
   }
 
+  const supabaseUrl = config.SUPABASE_URL;
+  if (typeof supabaseUrl !== 'string' || supabaseUrl.trim() === '') {
+    throw new Error('SUPABASE_URL is required.');
+  }
+  try {
+    const url = new URL(supabaseUrl);
+    if (
+      url.protocol !== 'https:' ||
+      !url.hostname ||
+      url.username ||
+      url.password
+    ) {
+      throw new Error();
+    }
+  } catch {
+    throw new Error(
+      'SUPABASE_URL must be a valid HTTPS URL without credentials.',
+    );
+  }
+
+  const publishableKey = config.SUPABASE_PUBLISHABLE_KEY;
+  if (typeof publishableKey !== 'string' || publishableKey.trim() === '') {
+    throw new Error('SUPABASE_PUBLISHABLE_KEY is required.');
+  }
+
   const nodeEnv = config.NODE_ENV ?? 'development';
   if (
     nodeEnv !== 'development' &&
@@ -44,5 +71,11 @@ export function validateEnvironment(
     throw new Error('PORT must be an integer between 1 and 65535.');
   }
 
-  return { DATABASE_URL: databaseUrl, NODE_ENV: nodeEnv, PORT: port };
+  return {
+    DATABASE_URL: databaseUrl,
+    SUPABASE_URL: supabaseUrl,
+    SUPABASE_PUBLISHABLE_KEY: publishableKey,
+    NODE_ENV: nodeEnv,
+    PORT: port,
+  };
 }

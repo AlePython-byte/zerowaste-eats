@@ -9,6 +9,8 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule, ObserveModule } from './../src/app.module';
 import { DatabaseService } from './../src/database/database.service';
+import { AuthService } from './../src/auth/auth.service';
+import type { AuthenticatedUser } from './../src/auth/interfaces/authenticated-user.interface';
 
 @Module({})
 class TestObserveModule {}
@@ -16,9 +18,16 @@ class TestObserveModule {}
 describe('Application (e2e)', () => {
   let app: INestApplication<App>;
   const databaseService = { checkConnection: jest.fn<Promise<boolean>, []>() };
+  const authService = {
+    verifyAccessToken: jest.fn<Promise<AuthenticatedUser>, [string]>(),
+  };
 
   beforeEach(async () => {
     databaseService.checkConnection.mockReset().mockResolvedValue(true);
+    authService.verifyAccessToken.mockReset().mockResolvedValue({
+      id: 'b7a2c1b3-736e-45fc-8df5-c1dd6cc88d13',
+      email: 'customer@example.test',
+    });
     // Keep telemetry workers and external requests out of HTTP tests.
     const imports = Reflect.getMetadata(
       'imports',
@@ -36,6 +45,8 @@ describe('Application (e2e)', () => {
     })
       .overrideProvider(DatabaseService)
       .useValue(databaseService)
+      .overrideProvider(AuthService)
+      .useValue(authService)
       .overrideModule(observeModule)
       .useModule(TestObserveModule)
       .compile();
@@ -101,5 +112,43 @@ describe('Application (e2e)', () => {
 
   afterEach(async () => {
     await app.close();
+  });
+
+  it('GET /api/v1/auth/me requires a Bearer token', async () => {
+    await request(app.getHttpServer())
+      .get('/api/v1/auth/me')
+      .expect(401)
+      .expect({
+        statusCode: 401,
+        error: 'No autorizado',
+        message: 'Se requiere un token de acceso válido.',
+      });
+    expect(authService.verifyAccessToken).not.toHaveBeenCalled();
+  });
+
+  it('GET /api/v1/auth/me rejects an invalid token safely', () => {
+    authService.verifyAccessToken.mockRejectedValue(
+      new Error('private-auth-details'),
+    );
+    return request(app.getHttpServer())
+      .get('/api/v1/auth/me')
+      .set('Authorization', 'Bearer opaque-test-token')
+      .expect(401)
+      .expect({
+        statusCode: 401,
+        error: 'No autorizado',
+        message: 'Se requiere un token de acceso válido.',
+      });
+  });
+
+  it('GET /api/v1/auth/me returns the verified identity through CurrentUser', () => {
+    return request(app.getHttpServer())
+      .get('/api/v1/auth/me')
+      .set('Authorization', 'Bearer opaque-test-token')
+      .expect(200)
+      .expect({
+        id: 'b7a2c1b3-736e-45fc-8df5-c1dd6cc88d13',
+        email: 'customer@example.test',
+      });
   });
 });

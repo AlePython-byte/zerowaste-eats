@@ -32,7 +32,8 @@ $ npm install
 ```
 
 Configure `server/.env` using `.env.example` as a reference. Preserve any existing
-values; never commit or print database credentials. `DATABASE_URL` is required.
+values; never commit or print database credentials or authentication tokens.
+`DATABASE_URL`, an HTTPS `SUPABASE_URL`, and `SUPABASE_PUBLISHABLE_KEY` are required.
 `NODE_ENV` defaults to `development` and `PORT` defaults to `3000`.
 
 Generate Prisma Client before starting the application or running tests:
@@ -55,7 +56,15 @@ through Nest lifecycle hooks. Connection and query timeouts are five seconds.
 `SELECT 1`, returning HTTP 200 when reachable or a safe Spanish HTTP 503 response
 when unavailable. Neither endpoint returns connection details.
 
-Automated tests use placeholder environment variables and mock database access;
+`GET /api/v1/auth/me` requires a Supabase access token in the Bearer authorization
+header. The official Supabase client verifies its signature and expiration through
+`getClaims`; the backend also checks the subject UUID and configured issuer.
+The response contains only the verified `id` and `email` (or `null`). It does not
+read or create application users, determine domain roles, or provide login/signup.
+Missing, malformed, invalid, or expired tokens receive a safe Spanish HTTP 401.
+Both health routes remain public. Auth sessions are neither persisted nor refreshed.
+
+Automated tests use placeholder environment variables and mock database/auth access;
 they do not load `.env` or connect to Supabase. For a separate live check, start the
 application with its real environment and request `/api/v1/salud/base-datos`.
 
