@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import {
+  BadRequestException,
   DynamicModule,
   INestApplication,
   Module,
@@ -11,19 +12,35 @@ import { AppModule, ObserveModule } from './../src/app.module';
 import { DatabaseService } from './../src/database/database.service';
 import { AuthService } from './../src/auth/auth.service';
 import type { AuthenticatedUser } from './../src/auth/interfaces/authenticated-user.interface';
+import { Prisma } from './../src/generated/prisma/client';
+import {
+  authenticatedUser,
+  publicUserProfile,
+  userRecord,
+} from './fixtures/user-profile';
 
 @Module({})
 class TestObserveModule {}
 
 describe('Application (e2e)', () => {
   let app: INestApplication<App>;
-  const databaseService = { checkConnection: jest.fn<Promise<boolean>, []>() };
+  const userRepository = {
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    update: jest.fn(),
+  };
+  const databaseService = {
+    checkConnection: jest.fn<Promise<boolean>, []>(),
+    client: { user: userRepository },
+  };
   const authService = {
     verifyAccessToken: jest.fn<Promise<AuthenticatedUser>, [string]>(),
   };
 
   beforeEach(async () => {
     databaseService.checkConnection.mockReset().mockResolvedValue(true);
+    for (const method of Object.values(userRepository))
+      method.mockReset().mockResolvedValue(userRecord);
     authService.verifyAccessToken.mockReset().mockResolvedValue({
       id: 'b7a2c1b3-736e-45fc-8df5-c1dd6cc88d13',
       email: 'customer@example.test',
@@ -59,6 +76,11 @@ describe('Application (e2e)', () => {
         whitelist: true,
         forbidNonWhitelisted: true,
         transform: true,
+        exceptionFactory: () =>
+          new BadRequestException(
+            'Los datos enviados no son válidos.',
+            'Solicitud inválida',
+          ),
       }),
     );
     await app.init();
@@ -149,6 +171,157 @@ describe('Application (e2e)', () => {
       .expect({
         id: 'b7a2c1b3-736e-45fc-8df5-c1dd6cc88d13',
         email: 'customer@example.test',
+      });
+  });
+
+  it.each(['get', 'post', 'patch'] as const)(
+    '%s /api/v1/users/me requires authentication',
+    async (method) => {
+      await request(app.getHttpServer())
+        [method]('/api/v1/users/me')
+        .expect(401);
+      for (const operation of Object.values(userRepository))
+        expect(operation).not.toHaveBeenCalled();
+    },
+  );
+
+  it('POST /api/v1/users/me creates a trimmed profile for the verified identity', async () => {
+    await request(app.getHttpServer())
+      .post('/api/v1/users/me')
+      .set('Authorization', 'Bearer opaque-test-token')
+      .send({ displayName: '  Alejandro  ', city: '  Pasto  ' })
+      .expect(201)
+      .expect(publicUserProfile);
+    expect(userRepository.create).toHaveBeenCalledWith({
+      data: {
+        id: authenticatedUser.id,
+        email: authenticatedUser.email,
+        displayName: 'Alejandro',
+        city: 'Pasto',
+        role: 'CUSTOMER',
+      },
+    });
+  });
+
+  it('GET /api/v1/users/me uses the verified UUID even with an unrelated query parameter', async () => {
+    await request(app.getHttpServer())
+      .get('/api/v1/users/me?userId=another-user')
+      .set('Authorization', 'Bearer opaque-test-token')
+      .expect(200)
+      .expect(publicUserProfile);
+    expect(userRepository.findUnique).toHaveBeenCalledWith({
+      where: { id: authenticatedUser.id },
+    });
+    expect(userRepository.create).not.toHaveBeenCalled();
+  });
+
+  it('PATCH /api/v1/users/me updates allowed fields and returns the public representation', async () => {
+    userRepository.update.mockResolvedValue({ ...userRecord, city: 'Bogotá' });
+    await request(app.getHttpServer())
+      .patch('/api/v1/users/me')
+      .set('Authorization', 'Bearer opaque-test-token')
+      .send({ city: ' Bogotá ' })
+      .expect(200)
+      .expect({ ...publicUserProfile, city: 'Bogotá' });
+    expect(userRepository.update).toHaveBeenCalledWith({
+      where: { id: authenticatedUser.id },
+      data: { city: 'Bogotá' },
+    });
+  });
+
+  it.each([
+    ['post', { displayName: '  ' }],
+    ['post', { displayName: 'Alejandro', email: 'other@example.test' }],
+    ['post', { displayName: 'Alejandro', id: 'another-user' }],
+    ['patch', {}],
+    ['patch', { city: 'Pasto', role: 'MERCHANT' }],
+    ['patch', { city: 'Pasto', email: 'other@example.test' }],
+    ['patch', { city: 'Pasto', id: 'another-user' }],
+  ] as const)(
+    '%s /api/v1/users/me rejects invalid or forbidden input (%j)',
+    async (method, body) => {
+      await request(app.getHttpServer())
+        [method]('/api/v1/users/me')
+        .set('Authorization', 'Bearer opaque-test-token')
+        .send(body)
+        .expect(400)
+        .expect({
+          statusCode: 400,
+          error: 'Solicitud inválida',
+          message: 'Los datos enviados no son válidos.',
+        });
+      expect(userRepository.create).not.toHaveBeenCalled();
+      expect(userRepository.update).not.toHaveBeenCalled();
+    },
+  );
+
+  it('GET /api/v1/users/me returns a safe 404 for a missing profile', () => {
+    userRepository.findUnique.mockResolvedValue(null);
+    return request(app.getHttpServer())
+      .get('/api/v1/users/me')
+      .set('Authorization', 'Bearer opaque-test-token')
+      .expect(404)
+      .expect({
+        statusCode: 404,
+        error: 'No encontrado',
+        message: 'No se encontró tu perfil.',
+      });
+  });
+
+  it('POST /api/v1/users/me rejects a verified identity without usable email', async () => {
+    authService.verifyAccessToken.mockResolvedValue({
+      ...authenticatedUser,
+      email: null,
+    });
+    await request(app.getHttpServer())
+      .post('/api/v1/users/me')
+      .set('Authorization', 'Bearer opaque-test-token')
+      .send({ displayName: 'Alejandro' })
+      .expect(422)
+      .expect({
+        statusCode: 422,
+        error: 'Datos no procesables',
+        message:
+          'La identidad autenticada no contiene un correo electrónico válido.',
+      });
+    expect(userRepository.create).not.toHaveBeenCalled();
+  });
+
+  it('POST /api/v1/users/me returns 409 for a unique conflict without exposing Prisma details', () => {
+    userRepository.create.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('private-database-details', {
+        code: 'P2002',
+        clientVersion: '7.10.0',
+      }),
+    );
+    return request(app.getHttpServer())
+      .post('/api/v1/users/me')
+      .set('Authorization', 'Bearer opaque-test-token')
+      .send({ displayName: 'Alejandro' })
+      .expect(409)
+      .expect({
+        statusCode: 409,
+        error: 'Conflicto',
+        message: 'Ya existe un perfil con estos datos.',
+      });
+  });
+
+  it('PATCH /api/v1/users/me returns 404 for a missing profile', () => {
+    userRepository.update.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError('private-database-details', {
+        code: 'P2025',
+        clientVersion: '7.10.0',
+      }),
+    );
+    return request(app.getHttpServer())
+      .patch('/api/v1/users/me')
+      .set('Authorization', 'Bearer opaque-test-token')
+      .send({ city: 'Pasto' })
+      .expect(404)
+      .expect({
+        statusCode: 404,
+        error: 'No encontrado',
+        message: 'No se encontró tu perfil.',
       });
   });
 });

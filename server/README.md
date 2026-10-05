@@ -64,6 +64,21 @@ read or create application users, determine domain roles, or provide login/signu
 Missing, malformed, invalid, or expired tokens receive a safe Spanish HTTP 401.
 Both health routes remain public. Auth sessions are neither persisted nor refreshed.
 
+Authenticated application profiles are available through `POST`, `GET`, and
+`PATCH /api/v1/users/me`. Creation takes `displayName`, optional `city`, and an
+optional `CUSTOMER` or `MERCHANT` role (default `CUSTOMER`). The UUID and email
+always come from the verified identity. Text is trimmed and must contain 2–80
+characters. Updates accept only `displayName` and `city`, with at least one field.
+Unknown body fields are rejected. Responses contain only public profile fields
+and ISO timestamps; no relations are returned.
+
+Profile creation returns 201, duplicates return 409, missing profiles return 404,
+and creation without a usable verified email returns 422. Invalid input returns
+400 and unauthenticated requests return 401, using safe Spanish errors. Reading
+a profile never creates one. Selecting `MERCHANT` creates neither a merchant
+profile nor business permissions. Profile tests mock Prisma and authentication;
+real authenticated profile testing is deferred until a controlled login flow exists.
+
 Automated tests use placeholder environment variables and mock database/auth access;
 they do not load `.env` or connect to Supabase. For a separate live check, start the
 application with its real environment and request `/api/v1/salud/base-datos`.

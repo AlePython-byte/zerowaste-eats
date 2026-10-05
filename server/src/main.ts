@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule, ObserveInstrument } from './app.module';
@@ -14,6 +14,11 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
+      exceptionFactory: () =>
+        new BadRequestException(
+          'Los datos enviados no son válidos.',
+          'Solicitud inválida',
+        ),
     }),
   );
   app.enableShutdownHooks();
