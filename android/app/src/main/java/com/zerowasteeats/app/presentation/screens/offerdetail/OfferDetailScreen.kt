@@ -1,48 +1,59 @@
 package com.zerowasteeats.app.presentation.screens.offerdetail
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.ui.graphics.graphicsLayer
 import com.zerowasteeats.app.presentation.components.glass.GlassButton
-import com.zerowasteeats.app.presentation.components.glass.GlassCard
+import com.zerowasteeats.app.presentation.data.offerPhotoRes
 import com.zerowasteeats.app.presentation.model.OfferUiModel
-import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
-import com.zerowasteeats.app.presentation.theme.GlassTokens
+import com.zerowasteeats.app.presentation.theme.RescateCarbon
+import com.zerowasteeats.app.presentation.theme.RescateCarbonElevated
+import com.zerowasteeats.app.presentation.theme.RescateCoral
+import com.zerowasteeats.app.presentation.theme.RescateCream
+import com.zerowasteeats.app.presentation.theme.RescateCreamMuted
+import com.zerowasteeats.app.presentation.theme.RescateButter
+import kotlinx.coroutines.launch
 
 @Composable
 fun OfferDetailScreen(
@@ -51,27 +62,12 @@ fun OfferDetailScreen(
     onFavoriteClick: () -> Unit,
     onReserveClick: () -> Unit,
 ) {
-    val isDarkTheme = isSystemInDarkTheme()
-
-    // Enhanced visual depth on the placeholder hero
-    val placeholderBrush = when (offer.category) {
-        "Panadería" -> Brush.verticalGradient(listOf(Color(0xFFF0E5D1), Color(0xFFC7B18E)))
-        "Comida preparada" -> Brush.verticalGradient(listOf(Color(0xFFF0E0D1), Color(0xFFC9A685)))
-        "Postres" -> Brush.verticalGradient(listOf(Color(0xFFF0D1E0), Color(0xFFC48FA7)))
-        else -> Brush.verticalGradient(listOf(Color(0xFFF0F5F2), Color(0xFFBBC9C1)))
-    }
-
-    // Highly translucent controls over hero
-    val glassSurfaceColor = if (isDarkTheme) {
-        GlassTokens.darkSurface.copy(alpha = GlassTokens.darkSurface.alpha * 0.85f)
-    } else {
-        GlassTokens.lightSurface.copy(alpha = GlassTokens.lightSurface.alpha * 0.90f)
-    }
-    
-    val glassBorderColor = if (isDarkTheme) GlassTokens.darkBorder else GlassTokens.lightBorder
+    val photo = offerPhotoRes(offer)
+    val heartScale = remember { Animatable(1f) }
+    val scope = rememberCoroutineScope()
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = RescateCarbon,
         bottomBar = {
             ReservationPanel(
                 offer = offer,
@@ -82,18 +78,38 @@ fun OfferDetailScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                // We do not pad the bottom with innerPadding so content scrolls under floating panel
                 .padding(top = innerPadding.calculateTopPadding())
                 .verticalScroll(rememberScrollState())
         ) {
-            // HERO IMAGE AREA
+            // HERO: full-bleed photo with a fade into the carbon background
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1.45f) // Reduced height to avoid unnecessary vertical empty space
-                    .background(placeholderBrush)
+                    .height(380.dp)
+                    .background(RescateCarbonElevated)
             ) {
-                // Top controls overlay
+                if (photo != null) {
+                    Image(
+                        painter = painterResource(id = photo),
+                        contentDescription = offer.title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                0f to Color.Transparent,
+                                0.6f to Color.Transparent,
+                                1f to RescateCarbon
+                            )
+                        )
+                )
+
+                // Top controls
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -102,186 +118,166 @@ fun OfferDetailScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Top
                 ) {
-                    GlassTextButton(
+                    CircleControl(
                         text = "←",
                         contentDescription = "Volver",
-                        onClick = onBackClick,
-                        surfaceColor = glassSurfaceColor,
-                        borderColor = glassBorderColor
+                        onClick = onBackClick
                     )
-                    
-                    GlassTextButton(
+                    CircleControl(
                         text = if (offer.isFavorite) "♥" else "♡",
                         contentDescription = if (offer.isFavorite) "Quitar de favoritos" else "Marcar como favorito",
-                        onClick = onFavoriteClick,
-                        surfaceColor = glassSurfaceColor,
-                        borderColor = glassBorderColor,
-                        tint = if (offer.isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+                        tint = if (offer.isFavorite) RescateCoral else RescateCream,
+                        onClick = {
+                            scope.launch {
+                                heartScale.animateTo(
+                                    1.35f,
+                                    spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium)
+                                )
+                                heartScale.animateTo(1f, spring())
+                            }
+                            onFavoriteClick()
+                        },
+                        heartScale = heartScale
                     )
                 }
             }
 
-            // INFO AREA
+            // INFO
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(AppSpacing.regular)
+                    .padding(horizontal = 20.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = offer.merchantName,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.weight(1f)
-                    )
-                    
-                    Surface(
-                        color = MaterialTheme.colorScheme.secondaryContainer,
-                        shape = RoundedCornerShape(AppRadius.small)
-                    ) {
-                        Text(
-                            text = offer.category,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer,
-                            modifier = Modifier.padding(horizontal = AppSpacing.small, vertical = AppSpacing.extraSmall)
-                        )
-                    }
-                }
+                Text(
+                    text = offer.merchantName.uppercase(),
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 1.2.sp
+                    ),
+                    color = RescateCreamMuted
+                )
 
-                Spacer(modifier = Modifier.height(AppSpacing.small))
+                Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
                     text = offer.title,
-                    style = MaterialTheme.typography.displayLarge,
-                    color = MaterialTheme.colorScheme.onBackground
+                    style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
+                    color = RescateCream
                 )
 
-                Spacer(modifier = Modifier.height(AppSpacing.small))
-                
-                Text(
-                    text = offer.distance,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-                )
+                Spacer(modifier = Modifier.height(16.dp))
 
-                Spacer(modifier = Modifier.height(AppSpacing.large))
-
-                // COMPACT PRICING BLOCK
-                Text(
-                    text = offer.discountedPrice,
-                    style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.primary
-                )
-                
-                Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.Bottom) {
+                    Text(
+                        text = offer.discountedPrice,
+                        style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.ExtraBold),
+                        color = RescateButter
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = offer.originalPrice,
                         style = MaterialTheme.typography.titleMedium.copy(textDecoration = TextDecoration.LineThrough),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = " · ${offer.discountPercentage}",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = RescateCreamMuted,
+                        modifier = Modifier.padding(bottom = 6.dp)
                     )
                 }
 
-                Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
+                Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = offer.remainingQuantityText,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.error,
-                    fontWeight = FontWeight.SemiBold
+                    text = "${offer.discountPercentage} · ${offer.remainingQuantityText}",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = RescateCoral
                 )
 
-                Spacer(modifier = Modifier.height(AppSpacing.extraLarge))
+                Spacer(modifier = Modifier.height(28.dp))
 
                 Text(
                     text = "Acerca de esta oferta",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onBackground
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = RescateCream
                 )
 
-                Spacer(modifier = Modifier.height(AppSpacing.small))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
                     text = "Disfruta de nuestros productos frescos del día, empacados para que no se desperdicien. Ideal para sorprenderte o compartir.",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
+                    color = RescateCream.copy(alpha = 0.8f)
                 )
 
-                Spacer(modifier = Modifier.height(AppSpacing.extraLarge))
+                Spacer(modifier = Modifier.height(28.dp))
 
-                // PICKUP SECTION
                 Text(
                     text = "Recogida",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onBackground
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = RescateCream
                 )
 
-                Spacer(modifier = Modifier.height(AppSpacing.small))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                GlassCard {
+                // Pickup card: flat carbon surface, no glass
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(RescateCarbonElevated)
+                        .padding(20.dp)
+                ) {
                     Text(
                         text = offer.merchantName,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = RescateCream
                     )
-                    Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = offer.pickupTime,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.SemiBold
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = RescateButter
                     )
-                    Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Cra. 27 #18-45, Pasto", // Updated temporary location text
+                        text = "Cra. 27 #18-45, Pasto", // Temporary location text
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = RescateCreamMuted
                     )
                 }
 
-                Spacer(modifier = Modifier.height(AppSpacing.huge * 3)) // Padding for bottom floating panel
+                // Space so the floating reservation panel does not cover the content
+                Spacer(modifier = Modifier.height(160.dp))
             }
         }
     }
 }
 
-// Simple custom visual solution to avoid android.R legacy icons
 @Composable
-private fun GlassTextButton(
+private fun CircleControl(
     text: String,
     contentDescription: String,
     onClick: () -> Unit,
-    surfaceColor: Color,
-    borderColor: Color,
-    tint: Color = MaterialTheme.colorScheme.onSurface
+    tint: Color = RescateCream,
+    heartScale: Animatable<Float, *>? = null,
 ) {
-    Surface(
-        shape = CircleShape,
-        color = surfaceColor,
-        border = BorderStroke(GlassTokens.borderWidth, borderColor),
-        shadowElevation = GlassTokens.elevation / 2, // Restrained shadow
+    Box(
         modifier = Modifier
             .size(48.dp)
             .clip(CircleShape)
-            .clickable { onClick() }
+            .background(RescateCarbon.copy(alpha = 0.55f))
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
     ) {
-        Box(contentAlignment = Alignment.Center) {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.headlineSmall,
-                color = tint,
-                modifier = Modifier.semantics { this.contentDescription = contentDescription }
-            )
-        }
+        Text(
+            text = text,
+            fontSize = 22.sp,
+            color = tint,
+            modifier = Modifier
+                .graphicsLayer {
+                    val s = heartScale?.value ?: 1f
+                    scaleX = s
+                    scaleY = s
+                }
+                .semantics { this.contentDescription = contentDescription }
+        )
     }
 }
 
@@ -290,67 +286,38 @@ private fun ReservationPanel(
     offer: OfferUiModel,
     onReserveClick: () -> Unit
 ) {
-    val isDarkTheme = isSystemInDarkTheme()
-    
-    val backgroundColor = if (isDarkTheme) {
-        GlassTokens.darkSurface.copy(alpha = GlassTokens.darkSurface.alpha * 0.9f)
-    } else {
-        GlassTokens.lightSurface.copy(alpha = GlassTokens.lightSurface.alpha * 0.95f)
-    }
-
-    val borderColor = if (isDarkTheme) GlassTokens.darkBorder else GlassTokens.lightBorder
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
             .padding(AppSpacing.regular)
     ) {
-        Surface(
-            color = backgroundColor,
-            shape = RoundedCornerShape(AppRadius.extraLarge),
-            border = BorderStroke(GlassTokens.borderWidth, borderColor),
-            shadowElevation = GlassTokens.elevation / 1.5f
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(32.dp))
+                .background(RescateCarbonElevated)
+                .padding(horizontal = 20.dp, vertical = 14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = AppSpacing.regular, vertical = AppSpacing.regular),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Row(verticalAlignment = Alignment.Bottom) {
-                        Text(
-                            text = offer.discountedPrice,
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.width(AppSpacing.small))
-                        Text(
-                            text = offer.originalPrice,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                textDecoration = TextDecoration.LineThrough
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(bottom = 2.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = offer.remainingQuantityText,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.error,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-
-                GlassButton(
-                    text = "Reservar",
-                    onClick = onReserveClick
+            Column {
+                Text(
+                    text = offer.discountedPrice,
+                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = RescateButter
+                )
+                Text(
+                    text = offer.remainingQuantityText,
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                    color = RescateCoral
                 )
             }
+
+            GlassButton(
+                text = "Reservar",
+                onClick = onReserveClick
+            )
         }
     }
 }
