@@ -14,6 +14,14 @@ val RescateCreamMuted = Color(0xFFB9AFA2)
 val RescateButter = Color(0xFFF2B84B)
 val RescateCoral = Color(0xFFE8553D)
 
+// Rescate light mode (default). Contrast ratios (WCAG):
+//   Carbon on Cream 16.7, Carbon on Surface 18.3, Carbon on Butter 10.5,
+//   TextMuted on Cream 5.3, CoralOnLight on Cream 4.7 (plain coral is 3.2).
+val RescateCreamBackground = Color(0xFFF7F1E8)
+val RescateSurfaceLight = Color(0xFFFFFCF7)
+val RescateTextMutedLight = Color(0xFF6B6258)
+val RescateCoralOnLight = Color(0xFFC23B26)
+
 // ---------------------------------------------------------------------------
 // Legacy Editorial Glass tokens (kept so untouched screens still compile.
 // Remove once every screen is migrated to Rescate.)
