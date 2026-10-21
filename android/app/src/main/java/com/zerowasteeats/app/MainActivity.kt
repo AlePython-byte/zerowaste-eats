@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.zerowasteeats.app.presentation.navigation.ZeroWasteEatsApp
+import com.zerowasteeats.app.presentation.theme.ThemePreferences
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
 
 class MainActivity : ComponentActivity() {
@@ -15,7 +16,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            ZeroWasteEatsTheme {
+            ZeroWasteEatsTheme(themeMode = ThemePreferences.mode) {
                 ZeroWasteEatsApp()
             }
         }
