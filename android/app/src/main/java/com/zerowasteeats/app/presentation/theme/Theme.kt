@@ -5,12 +5,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 // The user picks the mode; the system setting is intentionally ignored.
 enum class ThemeMode { LIGHT, DARK }
+
+private val LocalThemeMode = staticCompositionLocalOf { ThemeMode.LIGHT }
+
+// Replaces isSystemInDarkTheme() so components follow the user's choice.
+@Composable
+fun isAppInDarkTheme(): Boolean = LocalThemeMode.current == ThemeMode.DARK
 
 private val RescateLightColorScheme = lightColorScheme(
     primary = RescateButter,
@@ -81,7 +89,8 @@ fun ZeroWasteEatsTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = ZeroWasteTypography,
-        shapes = ZeroWasteShapes,
-        content = content
-    )
+        shapes = ZeroWasteShapes
+    ) {
+        CompositionLocalProvider(LocalThemeMode provides themeMode, content = content)
+    }
 }

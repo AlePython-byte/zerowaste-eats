@@ -1,7 +1,7 @@
 package com.zerowasteeats.app.presentation.components.glass
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.isSystemInDarkTheme
+import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,7 +20,7 @@ fun GlassCard(
     contentPadding: PaddingValues = PaddingValues(AppSpacing.regular),
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val isDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme = isAppInDarkTheme()
 
     val backgroundColor = if (isDarkTheme) {
         GlassTokens.darkSurface

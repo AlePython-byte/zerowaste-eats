@@ -1,7 +1,7 @@
 package com.zerowasteeats.app.presentation.screens.profile
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.isSystemInDarkTheme
+import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -194,7 +194,7 @@ private fun MetricCard(
     modifier: Modifier = Modifier,
     isHighlight: Boolean = false
 ) {
-    val isDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme = isAppInDarkTheme()
     
     val containerColor = if (isDarkTheme) GlassTokens.darkSurface else GlassTokens.lightSurface
     val borderColor = if (isDarkTheme) GlassTokens.darkBorder else GlassTokens.lightBorder
@@ -252,7 +252,7 @@ private fun PreferencesSection(categories: List<String>, modifier: Modifier = Mo
 
 @Composable
 private fun ProfilePreferenceChip(text: String, modifier: Modifier = Modifier) {
-    val isDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme = isAppInDarkTheme()
     
     val containerColor = if (isDarkTheme) {
         GlassTokens.darkSurface.copy(alpha = 0.5f)
