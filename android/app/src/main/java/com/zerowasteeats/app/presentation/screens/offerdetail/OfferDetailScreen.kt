@@ -2,6 +2,7 @@ package com.zerowasteeats.app.presentation.screens.offerdetail
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,11 +49,8 @@ import com.zerowasteeats.app.presentation.data.offerPhotoRes
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.RescateCarbon
-import com.zerowasteeats.app.presentation.theme.RescateCarbonElevated
 import com.zerowasteeats.app.presentation.theme.RescateCoral
 import com.zerowasteeats.app.presentation.theme.RescateCream
-import com.zerowasteeats.app.presentation.theme.RescateCreamMuted
-import com.zerowasteeats.app.presentation.theme.RescateButter
 import kotlinx.coroutines.launch
 
 @Composable
@@ -67,7 +65,7 @@ fun OfferDetailScreen(
     val scope = rememberCoroutineScope()
 
     Scaffold(
-        containerColor = RescateCarbon,
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             ReservationPanel(
                 offer = offer,
@@ -86,7 +84,7 @@ fun OfferDetailScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(380.dp)
-                    .background(RescateCarbonElevated)
+                    .background(MaterialTheme.colorScheme.surface)
             ) {
                 if (photo != null) {
                     Image(
@@ -104,7 +102,7 @@ fun OfferDetailScreen(
                             Brush.verticalGradient(
                                 0f to Color.Transparent,
                                 0.6f to Color.Transparent,
-                                1f to RescateCarbon
+                                1f to MaterialTheme.colorScheme.background
                             )
                         )
                 )
@@ -154,7 +152,7 @@ fun OfferDetailScreen(
                         fontWeight = FontWeight.SemiBold,
                         letterSpacing = 1.2.sp
                     ),
-                    color = RescateCreamMuted
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(modifier = Modifier.height(6.dp))
@@ -162,7 +160,7 @@ fun OfferDetailScreen(
                 Text(
                     text = offer.title,
                     style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
-                    color = RescateCream
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -171,13 +169,13 @@ fun OfferDetailScreen(
                     Text(
                         text = offer.discountedPrice,
                         style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.ExtraBold),
-                        color = RescateButter
+                        color = MaterialTheme.colorScheme.tertiary
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = offer.originalPrice,
                         style = MaterialTheme.typography.titleMedium.copy(textDecoration = TextDecoration.LineThrough),
-                        color = RescateCreamMuted,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(bottom = 6.dp)
                     )
                 }
@@ -187,7 +185,7 @@ fun OfferDetailScreen(
                 Text(
                     text = "${offer.discountPercentage} · ${offer.remainingQuantityText}",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = RescateCoral
+                    color = MaterialTheme.colorScheme.secondary
                 )
 
                 Spacer(modifier = Modifier.height(28.dp))
@@ -195,7 +193,7 @@ fun OfferDetailScreen(
                 Text(
                     text = "Acerca de esta oferta",
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    color = RescateCream
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -203,7 +201,7 @@ fun OfferDetailScreen(
                 Text(
                     text = "Disfruta de nuestros productos frescos del día, empacados para que no se desperdicien. Ideal para sorprenderte o compartir.",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = RescateCream.copy(alpha = 0.8f)
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
                 )
 
                 Spacer(modifier = Modifier.height(28.dp))
@@ -211,7 +209,7 @@ fun OfferDetailScreen(
                 Text(
                     text = "Recogida",
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    color = RescateCream
+                    color = MaterialTheme.colorScheme.onBackground
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -221,25 +219,26 @@ fun OfferDetailScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(24.dp))
-                        .background(RescateCarbonElevated)
+                        .background(MaterialTheme.colorScheme.surface)
+                        .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f), RoundedCornerShape(24.dp))
                         .padding(20.dp)
                 ) {
                     Text(
                         text = offer.merchantName,
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = RescateCream
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = offer.pickupTime,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = RescateButter
+                        color = MaterialTheme.colorScheme.tertiary
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Cra. 27 #18-45, Pasto", // Temporary location text
                         style = MaterialTheme.typography.bodyMedium,
-                        color = RescateCreamMuted
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
@@ -296,7 +295,8 @@ private fun ReservationPanel(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(32.dp))
-                .background(RescateCarbonElevated)
+                .background(MaterialTheme.colorScheme.surface)
+                .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
                 .padding(horizontal = 20.dp, vertical = 14.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -305,12 +305,12 @@ private fun ReservationPanel(
                 Text(
                     text = offer.discountedPrice,
                     style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
-                    color = RescateButter
+                    color = MaterialTheme.colorScheme.tertiary
                 )
                 Text(
                     text = offer.remainingQuantityText,
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = RescateCoral
+                    color = MaterialTheme.colorScheme.secondary
                 )
             }
 

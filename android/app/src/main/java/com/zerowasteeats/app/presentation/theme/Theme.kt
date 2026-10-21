@@ -19,6 +19,10 @@ private val RescateLightColorScheme = lightColorScheme(
     secondary = RescateCoralOnLight,
     onSecondary = RescateCream,
 
+    // tertiary = accent for text (prices, pickup time)
+    tertiary = RescateButterOnLight,
+    onTertiary = RescateCream,
+
     background = RescateCreamBackground,
     onBackground = RescateCarbon,
 
@@ -37,6 +41,9 @@ private val RescateDarkColorScheme = darkColorScheme(
 
     secondary = RescateCoral,
     onSecondary = RescateCarbon,
+
+    tertiary = RescateButter,
+    onTertiary = RescateCarbon,
 
     background = RescateCarbon,
     onBackground = RescateCream,
