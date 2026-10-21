@@ -1,7 +1,6 @@
 package com.zerowasteeats.app.presentation.theme
 
 import android.app.Activity
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -10,48 +9,54 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val LightColorScheme = lightColorScheme(
-    primary = EcoGreen,
-    onPrimary = TextOnPrimary,
+// The user picks the mode; the system setting is intentionally ignored.
+enum class ThemeMode { LIGHT, DARK }
 
-    secondary = EcoLime,
-    onSecondary = TextPrimaryLight,
+private val RescateLightColorScheme = lightColorScheme(
+    primary = RescateButter,
+    onPrimary = RescateCarbon,
 
-    background = BackgroundLight,
-    onBackground = TextPrimaryLight,
+    secondary = RescateCoralOnLight,
+    onSecondary = RescateCream,
 
-    surface = SurfaceLight,
-    onSurface = TextPrimaryLight,
+    background = RescateCreamBackground,
+    onBackground = RescateCarbon,
 
-    error = ErrorRed
+    surface = RescateSurfaceLight,
+    onSurface = RescateCarbon,
+    surfaceVariant = RescateSurfaceLight,
+    onSurfaceVariant = RescateTextMutedLight,
+
+    error = RescateCoralOnLight,
+    onError = RescateCream
 )
 
-private val DarkColorScheme = darkColorScheme(
-    primary = EcoLime,
-    onPrimary = BackgroundDark,
+private val RescateDarkColorScheme = darkColorScheme(
+    primary = RescateButter,
+    onPrimary = RescateCarbon,
 
-    secondary = EcoGreen,
-    onSecondary = TextPrimaryDark,
+    secondary = RescateCoral,
+    onSecondary = RescateCarbon,
 
-    background = BackgroundDark,
-    onBackground = TextPrimaryDark,
+    background = RescateCarbon,
+    onBackground = RescateCream,
 
-    surface = SurfaceDark,
-    onSurface = TextPrimaryDark,
+    surface = RescateCarbonElevated,
+    onSurface = RescateCream,
+    surfaceVariant = RescateCarbonElevated,
+    onSurfaceVariant = RescateCreamMuted,
 
-    error = ErrorRed
+    error = RescateCoral,
+    onError = RescateCarbon
 )
 
 @Composable
 fun ZeroWasteEatsTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    themeMode: ThemeMode = ThemeMode.LIGHT,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) {
-        DarkColorScheme
-    } else {
-        LightColorScheme
-    }
+    val isDark = themeMode == ThemeMode.DARK
+    val colorScheme = if (isDark) RescateDarkColorScheme else RescateLightColorScheme
 
     val view = LocalView.current
 
@@ -63,7 +68,7 @@ fun ZeroWasteEatsTheme(
 
         WindowCompat
             .getInsetsController(window, view)
-            .isAppearanceLightStatusBars = !darkTheme
+            .isAppearanceLightStatusBars = !isDark
     }
 
     MaterialTheme(
