@@ -20,7 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.R
-import com.zerowasteeats.app.presentation.components.glass.GlassCard
+import com.zerowasteeats.app.presentation.components.glass.AppCard
 import com.zerowasteeats.app.presentation.model.OrderStatus
 import com.zerowasteeats.app.presentation.model.OrderUiModel
 import com.zerowasteeats.app.presentation.theme.AppRadius
@@ -34,7 +34,7 @@ fun OrderCard(
 ) {
     val isActive = order.status == OrderStatus.RESERVED || order.status == OrderStatus.READY_FOR_PICKUP
 
-    GlassCard(modifier = modifier.fillMaxWidth()) {
+    AppCard(modifier = modifier.fillMaxWidth()) {
         // Header: Merchant & Status
         Row(
             modifier = Modifier.fillMaxWidth(),

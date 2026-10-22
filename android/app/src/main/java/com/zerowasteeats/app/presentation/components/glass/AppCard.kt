@@ -14,7 +14,7 @@ import com.zerowasteeats.app.presentation.theme.GlassTokens
 import androidx.compose.foundation.shape.RoundedCornerShape
 
 @Composable
-fun GlassCard(
+fun AppCard(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(AppSpacing.regular),
     content: @Composable ColumnScope.() -> Unit

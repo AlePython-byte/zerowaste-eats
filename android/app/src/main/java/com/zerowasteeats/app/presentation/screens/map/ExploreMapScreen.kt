@@ -56,7 +56,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.components.glass.GlassButton
-import com.zerowasteeats.app.presentation.components.glass.GlassCard
+import com.zerowasteeats.app.presentation.components.glass.AppCard
 import com.zerowasteeats.app.presentation.data.MockMapCoordinates
 import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.model.OfferUiModel
@@ -238,7 +238,7 @@ private fun MapOfferCard(
     offer: OfferUiModel,
     onViewOfferClick: () -> Unit
 ) {
-    GlassCard {
+    AppCard {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier.fillMaxWidth(),

@@ -37,7 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.zerowasteeats.app.presentation.components.glass.GlassCard
+import com.zerowasteeats.app.presentation.components.glass.AppCard
 import com.zerowasteeats.app.presentation.data.MockProfile
 import com.zerowasteeats.app.presentation.model.ProfileUiModel
 import com.zerowasteeats.app.presentation.theme.AppRadius
@@ -119,7 +119,7 @@ private fun ProfileHeader(modifier: Modifier = Modifier) {
 
 @Composable
 private fun ProfileHeroCard(profile: ProfileUiModel, modifier: Modifier = Modifier) {
-    GlassCard(modifier = modifier.fillMaxWidth()) {
+    AppCard(modifier = modifier.fillMaxWidth()) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
@@ -289,7 +289,7 @@ private fun AppearanceSection(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val isDark = ThemePreferences.mode == ThemeMode.DARK
 
-    GlassCard(modifier = modifier.fillMaxWidth()) {
+    AppCard(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -329,7 +329,7 @@ private fun LanguageSection(modifier: Modifier = Modifier) {
     // Spanish is the default, so an empty list means "es".
     val current = AppCompatDelegate.getApplicationLocales()[0]?.language ?: "es"
 
-    GlassCard(modifier = modifier.fillMaxWidth()) {
+    AppCard(modifier = modifier.fillMaxWidth()) {
         Text(
             text = stringResource(R.string.profile_language_title),
             style = MaterialTheme.typography.titleMedium,
@@ -364,7 +364,7 @@ private fun LanguageSection(modifier: Modifier = Modifier) {
 
 @Composable
 private fun InfoSection(modifier: Modifier = Modifier) {
-    GlassCard(modifier = modifier.fillMaxWidth()) {
+    AppCard(modifier = modifier.fillMaxWidth()) {
         Text(
             text = stringResource(R.string.profile_about_impact_title),
             style = MaterialTheme.typography.titleMedium,
