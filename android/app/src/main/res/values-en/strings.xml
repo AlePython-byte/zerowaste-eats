@@ -20,4 +20,17 @@
     <string name="nav_orders">Orders</string>
     <string name="nav_profile">Profile</string>
     <string name="navigation_offer_not_found">Offer not found</string>
+
+    <string name="common_back_cd">Back</string>
+    <string name="common_view_map">View map</string>
+    <string name="common_clear_search_cd">Clear search</string>
+    <string name="common_favorite_add_cd">Mark as favorite</string>
+    <string name="common_favorite_remove_cd">Remove from favorites</string>
+
+    <string name="home_greeting">Good morning</string>
+    <string name="home_subtitle">Find something good near you</string>
+    <string name="home_search_placeholder">Search for food near you</string>
+    <string name="home_section_nearby">Near you</string>
+    <string name="home_empty_title">We couldn\'t find offers with those filters.</string>
+    <string name="home_empty_subtitle">Try searching for something else or change the category.</string>
 </resources>

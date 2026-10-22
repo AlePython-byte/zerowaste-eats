@@ -1,5 +1,6 @@
 package com.zerowasteeats.app.presentation.screens.home
 
+import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.model.OfferCategory
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.BorderStroke
@@ -118,8 +119,8 @@ fun HomeScreen(
                     GlassSearchBar(
                         query = searchQuery,
                         onQueryChange = { searchQuery = it },
-                        placeholder = "Buscar comida cerca de ti",
-                        clearContentDescription = "Limpiar búsqueda",
+                        placeholder = stringResource(R.string.home_search_placeholder),
+                        clearContentDescription = stringResource(R.string.common_clear_search_cd),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -157,7 +158,9 @@ fun HomeScreen(
                             offer = offer,
                             onClick = { onOfferClick(offer.id) },
                             onFavoriteClick = { onFavoriteClick(offer.id) },
-                            favoriteContentDescription = if (offer.isFavorite) "Quitar de favoritos" else "Marcar como favorito"
+                            favoriteContentDescription = stringResource(
+                                if (offer.isFavorite) R.string.common_favorite_remove_cd else R.string.common_favorite_add_cd
+                            )
                         )
                     }
                 }
@@ -170,13 +173,13 @@ fun HomeScreen(
 private fun HomeHeader(modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = "Buenos días",
+            text = stringResource(R.string.home_greeting),
             style = MaterialTheme.typography.displayLarge,
             color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
         Text(
-            text = "Encuentra algo bueno cerca de ti",
+            text = stringResource(R.string.home_subtitle),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
         )
@@ -194,7 +197,7 @@ private fun SectionHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Cerca de ti",
+            text = stringResource(R.string.home_section_nearby),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold
@@ -204,7 +207,7 @@ private fun SectionHeader(
             modifier = Modifier.defaultMinSize(minHeight = 48.dp, minWidth = 48.dp)
         ) {
             Text(
-                text = "Ver mapa",
+                text = stringResource(R.string.common_view_map),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -222,14 +225,14 @@ private fun EmptyState(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "No encontramos ofertas con esos filtros.",
+            text = stringResource(R.string.home_empty_title),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(AppSpacing.small))
         Text(
-            text = "Intenta buscar otra cosa o cambia de categoría.",
+            text = stringResource(R.string.home_empty_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
             textAlign = TextAlign.Center
