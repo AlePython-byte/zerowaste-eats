@@ -33,6 +33,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -50,6 +51,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.ui.graphics.graphicsLayer
 import com.zerowasteeats.app.presentation.components.common.AppButton
+import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.data.offerPhotoRes
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.theme.AppSpacing
@@ -71,6 +73,8 @@ fun OfferDetailScreen(
     val heartScale = remember { Animatable(1f) }
     val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
+    val scrollState = rememberScrollState()
+    val animationsEnabled = rememberAnimationsEnabled()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -85,13 +89,14 @@ fun OfferDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = innerPadding.calculateTopPadding())
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
         ) {
             // HERO: full-bleed photo with a fade into the carbon background
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(380.dp)
+                    .clipToBounds() // the photo is shifted below, keep it inside the hero
                     .background(MaterialTheme.colorScheme.surface)
             ) {
                 if (photo != null) {
@@ -99,7 +104,13 @@ fun OfferDetailScreen(
                         painter = painterResource(id = photo),
                         contentDescription = offer.title,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .graphicsLayer {
+                                // Parallax: the content scrolls by `value`, the photo drifts back
+                                // down by half of it, so it moves at half speed.
+                                if (animationsEnabled) translationY = scrollState.value * 0.5f
+                            }
                     )
                 }
 
