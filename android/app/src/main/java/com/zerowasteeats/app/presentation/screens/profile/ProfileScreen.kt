@@ -2,7 +2,6 @@ package com.zerowasteeats.app.presentation.screens.profile
 
 import com.zerowasteeats.app.presentation.model.OfferCategory
 import androidx.compose.foundation.BorderStroke
-import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -214,17 +213,11 @@ private fun MetricCard(
     modifier: Modifier = Modifier,
     isHighlight: Boolean = false
 ) {
-    val isDarkTheme = isAppInDarkTheme()
-    
-    val containerColor = if (isDarkTheme) GlassTokens.darkSurface else GlassTokens.lightSurface
-    val borderColor = if (isDarkTheme) GlassTokens.darkBorder else GlassTokens.lightBorder
-
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(AppRadius.large),
-        color = containerColor,
-        border = BorderStroke(GlassTokens.borderWidth, borderColor),
-        shadowElevation = GlassTokens.elevation / 2
+        color = GlassTokens.surface,
+        border = BorderStroke(GlassTokens.borderWidth, GlassTokens.border)
     ) {
         Column(
             modifier = Modifier.padding(AppSpacing.regular),
@@ -272,20 +265,11 @@ private fun PreferencesSection(categories: List<OfferCategory>, modifier: Modifi
 
 @Composable
 private fun ProfilePreferenceChip(text: String, modifier: Modifier = Modifier) {
-    val isDarkTheme = isAppInDarkTheme()
-    
-    val containerColor = if (isDarkTheme) {
-        GlassTokens.darkSurface.copy(alpha = 0.5f)
-    } else {
-        GlassTokens.lightSurface.copy(alpha = 0.5f)
-    }
-    val borderColor = if (isDarkTheme) GlassTokens.darkBorder else GlassTokens.lightBorder
-
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(AppRadius.extraLarge),
-        color = containerColor,
-        border = BorderStroke(GlassTokens.borderWidth, borderColor)
+        color = GlassTokens.surface,
+        border = BorderStroke(GlassTokens.borderWidth, GlassTokens.border)
     ) {
         Box(
             modifier = Modifier.padding(horizontal = AppSpacing.large, vertical = AppSpacing.small),

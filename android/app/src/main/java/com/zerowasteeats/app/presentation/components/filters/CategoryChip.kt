@@ -2,7 +2,6 @@ package com.zerowasteeats.app.presentation.components.filters
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
@@ -27,14 +26,11 @@ fun CategoryChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isDarkTheme = isAppInDarkTheme()
-
-    // Highly refined, restrained chips
+// Highly refined, restrained chips
     val containerColor = if (isSelected) {
         MaterialTheme.colorScheme.primary
     } else {
-        if (isDarkTheme) GlassTokens.darkSurface.copy(alpha = 0.5f) 
-        else GlassTokens.lightSurface.copy(alpha = 0.5f)
+        GlassTokens.surface
     }
 
     val contentColor = if (isSelected) {
@@ -46,7 +42,7 @@ fun CategoryChip(
     val borderColor = if (isSelected) {
         Color.Transparent
     } else {
-        if (isDarkTheme) GlassTokens.darkBorder else GlassTokens.lightBorder
+        GlassTokens.border
     }
 
     Surface(

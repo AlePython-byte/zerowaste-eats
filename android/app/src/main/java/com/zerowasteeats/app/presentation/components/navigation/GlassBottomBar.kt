@@ -2,7 +2,6 @@ package com.zerowasteeats.app.presentation.components.navigation
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,24 +36,14 @@ fun GlassBottomBar(
     onNavigateTo: (AppDestination) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isDarkTheme = isAppInDarkTheme()
-
-    val backgroundColor = if (isDarkTheme) {
-        GlassTokens.darkSurface.copy(alpha = GlassTokens.darkSurface.alpha * 0.9f)
-    } else {
-        GlassTokens.lightSurface.copy(alpha = GlassTokens.lightSurface.alpha * 0.95f)
-    }
-
-    val borderColor = if (isDarkTheme) GlassTokens.darkBorder else GlassTokens.lightBorder
-
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = AppSpacing.regular, vertical = AppSpacing.regular),
         shape = RoundedCornerShape(AppRadius.extraLarge),
-        color = backgroundColor,
-        border = BorderStroke(GlassTokens.borderWidth, borderColor),
-        shadowElevation = GlassTokens.elevation / 1.5f
+        color = GlassTokens.surface,
+        border = BorderStroke(GlassTokens.borderWidth, GlassTokens.border),
+        shadowElevation = GlassTokens.barElevation
     ) {
         Row(
             modifier = Modifier

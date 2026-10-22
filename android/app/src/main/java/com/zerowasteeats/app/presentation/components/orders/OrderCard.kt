@@ -1,7 +1,6 @@
 package com.zerowasteeats.app.presentation.components.orders
 
 import androidx.compose.foundation.BorderStroke
-import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -107,12 +106,10 @@ fun OrderCard(
 
 @Composable
 private fun OrderStatusBadge(status: OrderStatus) {
-    val isDarkTheme = isAppInDarkTheme()
-    
-    val containerColor = when (status) {
+val containerColor = when (status) {
         OrderStatus.RESERVED -> MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
         OrderStatus.READY_FOR_PICKUP -> MaterialTheme.colorScheme.primary
-        OrderStatus.COMPLETED -> if (isDarkTheme) GlassTokens.darkSurface else GlassTokens.lightSurface
+        OrderStatus.COMPLETED -> GlassTokens.surface
         OrderStatus.CANCELLED -> MaterialTheme.colorScheme.errorContainer
     }
 
@@ -124,7 +121,7 @@ private fun OrderStatusBadge(status: OrderStatus) {
     }
 
     val borderColor = if (status == OrderStatus.COMPLETED) {
-        if (isDarkTheme) GlassTokens.darkBorder else GlassTokens.lightBorder
+        GlassTokens.border
     } else {
         Color.Transparent
     }

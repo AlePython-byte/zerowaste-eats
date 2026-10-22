@@ -7,7 +7,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -71,8 +70,7 @@ fun ExploreMapScreen(
     onBackClick: () -> Unit,
     onOfferClick: (String) -> Unit
 ) {
-    val isDarkTheme = isAppInDarkTheme()
-    var selectedOfferId by rememberSaveable { mutableStateOf<String?>(null) }
+var selectedOfferId by rememberSaveable { mutableStateOf<String?>(null) }
     
     val context = LocalContext.current
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
@@ -159,12 +157,8 @@ fun ExploreMapScreen(
             }
 
             // Top controls
-            val glassSurfaceColor = if (isDarkTheme) {
-                GlassTokens.darkSurface.copy(alpha = GlassTokens.darkSurface.alpha * 0.85f)
-            } else {
-                GlassTokens.lightSurface.copy(alpha = GlassTokens.lightSurface.alpha * 0.90f)
-            }
-            val glassBorderColor = if (isDarkTheme) GlassTokens.darkBorder else GlassTokens.lightBorder
+            val glassSurfaceColor = GlassTokens.surface
+            val glassBorderColor = GlassTokens.border
 
             Box(
                 modifier = Modifier
@@ -307,7 +301,7 @@ private fun GlassTextButton(
         shape = CircleShape,
         color = surfaceColor,
         border = BorderStroke(GlassTokens.borderWidth, borderColor),
-        shadowElevation = GlassTokens.elevation / 2,
+        shadowElevation = GlassTokens.elevation,
         modifier = Modifier
             .size(48.dp)
             .clip(CircleShape)
