@@ -14,4 +14,10 @@
 
     <string name="profile_language_title">Language</string>
     <string name="profile_language_subtitle">Choose the app language.</string>
+
+    <string name="nav_home">Home</string>
+    <string name="nav_explore">Explore</string>
+    <string name="nav_orders">Orders</string>
+    <string name="nav_profile">Profile</string>
+    <string name="navigation_offer_not_found">Offer not found</string>
 </resources>

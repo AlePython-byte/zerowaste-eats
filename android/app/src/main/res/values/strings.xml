@@ -17,4 +17,10 @@
     <string name="profile_language_subtitle">Elige el idioma de la aplicación.</string>
     <string name="language_name_es" translatable="false">Español</string>
     <string name="language_name_en" translatable="false">English</string>
+
+    <string name="nav_home">Inicio</string>
+    <string name="nav_explore">Explorar</string>
+    <string name="nav_orders">Pedidos</string>
+    <string name="nav_profile">Perfil</string>
+    <string name="navigation_offer_not_found">Oferta no encontrada</string>
 </resources>

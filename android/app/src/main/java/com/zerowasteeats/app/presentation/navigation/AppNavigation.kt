@@ -5,10 +5,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.screens.explore.ExploreScreen
 import com.zerowasteeats.app.presentation.screens.home.HomeScreen
@@ -77,7 +79,7 @@ fun AppNavigation(
             } else {
                 // Safe fallback state for missing offer
                 Text(
-                    text = "Oferta no encontrada",
+                    text = stringResource(R.string.navigation_offer_not_found),
                     modifier = Modifier.padding(16.dp),
                     style = MaterialTheme.typography.bodyLarge
                 )
