@@ -87,6 +87,12 @@ class ExploreState(
 
     fun clearAppliedFilters() = applyFilters(OfferFilters())
 
+    /** Empty search and no filters. */
+    fun clearAll() {
+        query = ""
+        clearAppliedFilters()
+    }
+
     companion object {
         fun saver(offers: List<OfferUiModel>) = listSaver<ExploreState, Any>(
             save = {

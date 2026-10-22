@@ -66,7 +66,7 @@
     <string name="explore_sort_distance">Cercanía</string>
     <string name="explore_sort_price">Precio</string>
     <string name="explore_sort_discount">Descuento</string>
-    <string name="explore_results_title">Ofertas encontradas</string>
+    <string name="explore_empty_clear">Quitar filtros</string>
     <plurals name="explore_offers_count">
         <item quantity="one">%1$d oferta</item>
         <item quantity="many">%1$d ofertas</item>

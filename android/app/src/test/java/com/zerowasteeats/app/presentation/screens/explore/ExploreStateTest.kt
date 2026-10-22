@@ -133,6 +133,19 @@ class ExploreStateTest {
     }
 
     @Test
+    fun clearAll_emptiesSearchAndFilters() {
+        val state = state()
+        state.query = "zzz"
+        state.applyFilters(OfferFilters(OfferCategory.DESSERTS, OfferSort.PRICE))
+
+        state.clearAll()
+
+        assertEquals("", state.query)
+        assertEquals(0, state.activeFilterCount)
+        assertEquals(3, state.filteredOffers.size)
+    }
+
+    @Test
     fun clearAppliedFilters_keepsTheSearchText() {
         val state = state()
         state.query = "oferta 1"

@@ -50,10 +50,7 @@ fun AppNavigation(
                         onOfferClick = { offerId ->
                             navController.navigate("offer/$offerId")
                         },
-                        onFavoriteClick = { /* Handle favorite click temporarily */ },
-                        onMapClick = { 
-                            navController.navigate("explore/map") 
-                        }
+                        onFavoriteClick = { /* Handle favorite click temporarily */ }
                     )
                 }
                 sharedComposable("explore/map") {
