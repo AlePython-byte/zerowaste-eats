@@ -1,4 +1,4 @@
-package com.zerowasteeats.app.presentation.components.glass
+package com.zerowasteeats.app.presentation.components.common
 
 import android.R
 import androidx.compose.foundation.BorderStroke

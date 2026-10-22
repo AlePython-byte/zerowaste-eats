@@ -20,7 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.R
-import com.zerowasteeats.app.presentation.components.glass.AppCard
+import com.zerowasteeats.app.presentation.components.common.AppCard
 import com.zerowasteeats.app.presentation.model.OrderStatus
 import com.zerowasteeats.app.presentation.model.OrderUiModel
 import com.zerowasteeats.app.presentation.theme.AppRadius

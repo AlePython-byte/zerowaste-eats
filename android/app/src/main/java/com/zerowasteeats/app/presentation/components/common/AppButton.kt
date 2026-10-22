@@ -1,4 +1,4 @@
-package com.zerowasteeats.app.presentation.components.glass
+package com.zerowasteeats.app.presentation.components.common
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
