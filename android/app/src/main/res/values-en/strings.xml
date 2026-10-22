@@ -72,6 +72,13 @@
     <string name="filter_sheet_category">Category</string>
     <string name="filter_sheet_apply">Apply</string>
     <string name="filter_sheet_clear">Clear</string>
+    <string name="filter_button_cd">Filters</string>
+    <plurals name="filter_button_active_cd">
+        <item quantity="one">Filters, %1$d active</item>
+        <item quantity="other">Filters, %1$d active</item>
+    </plurals>
+    <string name="filter_chip_sort">Sort: %1$s</string>
+    <string name="filter_chip_remove_cd">Remove %1$s filter</string>
     <string name="explore_empty_title">No results found</string>
     <string name="explore_empty_subtitle">Try another search or change the filters.</string>
 

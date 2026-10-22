@@ -76,6 +76,14 @@
     <string name="filter_sheet_category">Categoría</string>
     <string name="filter_sheet_apply">Aplicar</string>
     <string name="filter_sheet_clear">Limpiar</string>
+    <string name="filter_button_cd">Filtros</string>
+    <plurals name="filter_button_active_cd">
+        <item quantity="one">Filtros, %1$d activo</item>
+        <item quantity="many">Filtros, %1$d activos</item>
+        <item quantity="other">Filtros, %1$d activos</item>
+    </plurals>
+    <string name="filter_chip_sort">Orden: %1$s</string>
+    <string name="filter_chip_remove_cd">Quitar filtro %1$s</string>
     <string name="explore_empty_title">No encontramos resultados</string>
     <string name="explore_empty_subtitle">Prueba con otra búsqueda o cambia los filtros.</string>
 

@@ -29,7 +29,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.zerowasteeats.app.presentation.components.filters.ActiveFilterChips
 import com.zerowasteeats.app.presentation.components.filters.CategoryChip
+import com.zerowasteeats.app.presentation.components.filters.ExploreFilterSheet
+import com.zerowasteeats.app.presentation.components.filters.FilterButton
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppButtonStyle
 import com.zerowasteeats.app.presentation.components.common.AppSearchBar
@@ -78,12 +81,27 @@ fun ExploreScreen(
                 // Search Bar
                 item {
                     Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
-                    AppSearchBar(
-                        query = state.query,
-                        onQueryChange = { state.query = it },
-                        placeholder = stringResource(R.string.explore_search_placeholder),
-                        clearContentDescription = stringResource(R.string.common_clear_search_cd),
-                        modifier = Modifier.fillMaxWidth()
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(AppSpacing.small),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        AppSearchBar(
+                            query = state.query,
+                            onQueryChange = { state.query = it },
+                            placeholder = stringResource(R.string.explore_search_placeholder),
+                            clearContentDescription = stringResource(R.string.common_clear_search_cd),
+                            modifier = Modifier.weight(1f)
+                        )
+                        FilterButton(
+                            activeCount = state.activeFilterCount,
+                            onClick = state::openFilterSheet
+                        )
+                    }
+                    ActiveFilterChips(
+                        filters = state.appliedFilters,
+                        onRemoveCategory = state::removeCategoryFilter,
+                        onRemoveSort = state::removeSortFilter
                     )
                 }
 
@@ -173,6 +191,16 @@ fun ExploreScreen(
                 }
             }
         }
+    }
+
+    if (state.isFilterSheetOpen) {
+        ExploreFilterSheet(
+            draft = state.draftFilters,
+            onDraftChange = state::updateDraft,
+            onApply = state::applyDraft,
+            onClear = state::clearDraft,
+            onDismiss = state::discardDraft
+        )
     }
 }
 
