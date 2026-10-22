@@ -31,7 +31,7 @@ import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.GlassTokens
 
 @Composable
-fun GlassBottomBar(
+fun AppBottomBar(
     currentRoute: String?,
     onNavigateTo: (AppDestination) -> Unit,
     modifier: Modifier = Modifier
@@ -57,7 +57,7 @@ fun GlassBottomBar(
             destinations.forEach { destination ->
                 val isSelected = currentRoute == destination.route
                 
-                GlassBottomBarItem(
+                AppBottomBarItem(
                     destination = destination,
                     isSelected = isSelected,
                     onClick = { onNavigateTo(destination) }
@@ -68,7 +68,7 @@ fun GlassBottomBar(
 }
 
 @Composable
-private fun GlassBottomBarItem(
+private fun AppBottomBarItem(
     destination: AppDestination,
     isSelected: Boolean,
     onClick: () -> Unit

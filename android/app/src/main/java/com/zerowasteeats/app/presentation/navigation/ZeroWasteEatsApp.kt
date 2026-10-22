@@ -19,7 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.zerowasteeats.app.presentation.components.navigation.GlassBottomBar
+import com.zerowasteeats.app.presentation.components.navigation.AppBottomBar
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -48,7 +48,7 @@ fun ZeroWasteEatsApp() {
                         .navigationBarsPadding(), // Keep above system nav bar
                     contentAlignment = Alignment.BottomCenter
                 ) {
-                    GlassBottomBar(
+                    AppBottomBar(
                         currentRoute = currentRoute,
                         onNavigateTo = { destination ->
                             navController.navigate(destination.route) {
