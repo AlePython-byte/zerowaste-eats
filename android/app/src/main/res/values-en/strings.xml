@@ -33,4 +33,9 @@
     <string name="home_section_nearby">Near you</string>
     <string name="home_empty_title">We couldn\'t find offers with those filters.</string>
     <string name="home_empty_subtitle">Try searching for something else or change the category.</string>
+
+    <string name="offer_detail_about_title">About this offer</string>
+    <string name="offer_detail_about_body">Enjoy our fresh products of the day, packed so they don\'t go to waste. Perfect for a surprise or to share.</string>
+    <string name="offer_detail_pickup_title">Pickup</string>
+    <string name="offer_detail_reserve">Reserve</string>
 </resources>

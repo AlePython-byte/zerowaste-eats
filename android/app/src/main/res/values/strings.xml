@@ -36,4 +36,9 @@
     <string name="home_section_nearby">Cerca de ti</string>
     <string name="home_empty_title">No encontramos ofertas con esos filtros.</string>
     <string name="home_empty_subtitle">Intenta buscar otra cosa o cambia de categoría.</string>
+
+    <string name="offer_detail_about_title">Acerca de esta oferta</string>
+    <string name="offer_detail_about_body">Disfruta de nuestros productos frescos del día, empacados para que no se desperdicien. Ideal para sorprenderte o compartir.</string>
+    <string name="offer_detail_pickup_title">Recogida</string>
+    <string name="offer_detail_reserve">Reservar</string>
 </resources>

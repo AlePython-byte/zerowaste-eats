@@ -123,12 +123,14 @@ fun OfferDetailScreen(
                 ) {
                     CircleControl(
                         text = "←",
-                        contentDescription = "Volver",
+                        contentDescription = stringResource(R.string.common_back_cd),
                         onClick = onBackClick
                     )
                     CircleControl(
                         text = if (offer.isFavorite) "♥" else "♡",
-                        contentDescription = if (offer.isFavorite) "Quitar de favoritos" else "Marcar como favorito",
+                        contentDescription = stringResource(
+                            if (offer.isFavorite) R.string.common_favorite_remove_cd else R.string.common_favorite_add_cd
+                        ),
                         tint = if (offer.isFavorite) RescateCoral else RescateCream,
                         onClick = {
                             scope.launch {
@@ -196,7 +198,7 @@ fun OfferDetailScreen(
                 Spacer(modifier = Modifier.height(28.dp))
 
                 Text(
-                    text = "Acerca de esta oferta",
+                    text = stringResource(R.string.offer_detail_about_title),
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -204,7 +206,7 @@ fun OfferDetailScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Disfruta de nuestros productos frescos del día, empacados para que no se desperdicien. Ideal para sorprenderte o compartir.",
+                    text = stringResource(R.string.offer_detail_about_body),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
                 )
@@ -212,7 +214,7 @@ fun OfferDetailScreen(
                 Spacer(modifier = Modifier.height(28.dp))
 
                 Text(
-                    text = "Recogida",
+                    text = stringResource(R.string.offer_detail_pickup_title),
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -321,7 +323,7 @@ private fun ReservationPanel(
             }
 
             GlassButton(
-                text = "Reservar",
+                text = stringResource(R.string.offer_detail_reserve),
                 onClick = onReserveClick
             )
         }
