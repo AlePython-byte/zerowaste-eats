@@ -1,10 +1,13 @@
 package com.zerowasteeats.app.presentation.model
 
-enum class OrderStatus(val label: String) {
-    RESERVED("Reservado"),
-    READY_FOR_PICKUP("Listo para recoger"),
-    COMPLETED("Recogido"),
-    CANCELLED("Cancelado")
+import androidx.annotation.StringRes
+import com.zerowasteeats.app.R
+
+enum class OrderStatus(@StringRes val labelRes: Int) {
+    RESERVED(R.string.order_status_reserved),
+    READY_FOR_PICKUP(R.string.order_status_ready_for_pickup),
+    COMPLETED(R.string.order_status_completed),
+    CANCELLED(R.string.order_status_cancelled)
 }
 
 data class OrderUiModel(

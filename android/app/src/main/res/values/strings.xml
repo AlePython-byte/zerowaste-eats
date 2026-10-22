@@ -41,4 +41,19 @@
     <string name="offer_detail_about_body">Disfruta de nuestros productos frescos del día, empacados para que no se desperdicien. Ideal para sorprenderte o compartir.</string>
     <string name="offer_detail_pickup_title">Recogida</string>
     <string name="offer_detail_reserve">Reservar</string>
+
+    <string name="orders_title">Pedidos</string>
+    <string name="orders_subtitle">Gestiona tus reservas y recogidas.</string>
+    <string name="orders_tab_active">Activos</string>
+    <string name="orders_tab_history">Historial</string>
+    <string name="orders_empty_active">No tienes pedidos activos.</string>
+    <string name="orders_empty_history">Aún no tienes pedidos anteriores.</string>
+
+    <string name="order_status_reserved">Reservado</string>
+    <string name="order_status_ready_for_pickup">Listo para recoger</string>
+    <string name="order_status_completed">Recogido</string>
+    <string name="order_status_cancelled">Cancelado</string>
+
+    <string name="order_card_quantity">Cantidad: %1$d</string>
+    <string name="order_card_code">Código: %1$s</string>
 </resources>

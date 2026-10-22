@@ -38,4 +38,19 @@
     <string name="offer_detail_about_body">Enjoy our fresh products of the day, packed so they don\'t go to waste. Perfect for a surprise or to share.</string>
     <string name="offer_detail_pickup_title">Pickup</string>
     <string name="offer_detail_reserve">Reserve</string>
+
+    <string name="orders_title">Orders</string>
+    <string name="orders_subtitle">Manage your reservations and pickups.</string>
+    <string name="orders_tab_active">Active</string>
+    <string name="orders_tab_history">History</string>
+    <string name="orders_empty_active">You have no active orders.</string>
+    <string name="orders_empty_history">You have no past orders yet.</string>
+
+    <string name="order_status_reserved">Reserved</string>
+    <string name="order_status_ready_for_pickup">Ready for pickup</string>
+    <string name="order_status_completed">Picked up</string>
+    <string name="order_status_cancelled">Cancelled</string>
+
+    <string name="order_card_quantity">Quantity: %1$d</string>
+    <string name="order_card_code">Code: %1$s</string>
 </resources>
