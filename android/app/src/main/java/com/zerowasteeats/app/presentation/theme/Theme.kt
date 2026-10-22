@@ -34,13 +34,39 @@ private val RescateLightColorScheme = lightColorScheme(
     background = RescateCreamBackground,
     onBackground = RescateCarbon,
 
+    // Butter as a fill with carbon text (selected segment, chips)
+    primaryContainer = RescatePrimaryContainerLight,
+    onPrimaryContainer = RescateOnPrimaryContainerLight,
+    secondaryContainer = RescateButter,
+    onSecondaryContainer = RescateCarbon,
+    tertiaryContainer = RescateTertiaryContainerLight,
+    onTertiaryContainer = RescateOnPrimaryContainerLight,
+
     surface = RescateSurfaceLight,
     onSurface = RescateCarbon,
-    surfaceVariant = RescateSurfaceLight,
+    surfaceVariant = RescateSurfaceVariantLight,
     onSurfaceVariant = RescateTextMutedLight,
+    surfaceTint = RescateButter,
+    surfaceBright = RescateSurfaceLight,
+    surfaceDim = RescateSurfaceDimLight,
+    surfaceContainerLowest = RescateSurfaceLight,
+    surfaceContainerLow = RescateContainerLowLight,
+    surfaceContainer = RescateContainerLight,
+    surfaceContainerHigh = RescateContainerHighLight,
+    surfaceContainerHighest = RescateContainerHighestLight,
+
+    outline = RescateOutlineLight,
+    outlineVariant = RescateOutlineVariantLight,
+    scrim = RescateCarbonOverlay,
+
+    inverseSurface = RescateCarbon,
+    inverseOnSurface = RescateCream,
+    inversePrimary = RescateButter,
 
     error = RescateCoralOnLight,
-    onError = RescateCream
+    onError = RescateCream,
+    errorContainer = RescateErrorContainerLight,
+    onErrorContainer = RescateOnErrorContainerLight
 )
 
 private val RescateDarkColorScheme = darkColorScheme(
@@ -56,13 +82,38 @@ private val RescateDarkColorScheme = darkColorScheme(
     background = RescateCarbon,
     onBackground = RescateCream,
 
+    primaryContainer = RescatePrimaryContainerDark,
+    onPrimaryContainer = RescateOnPrimaryContainerDark,
+    secondaryContainer = RescateButter,
+    onSecondaryContainer = RescateCarbon,
+    tertiaryContainer = RescatePrimaryContainerDark,
+    onTertiaryContainer = RescateOnPrimaryContainerDark,
+
     surface = RescateCarbonElevated,
     onSurface = RescateCream,
-    surfaceVariant = RescateCarbonElevated,
+    surfaceVariant = RescateSurfaceVariantDark,
     onSurfaceVariant = RescateCreamMuted,
+    surfaceTint = RescateButter,
+    surfaceBright = RescateSurfaceBrightDark,
+    surfaceDim = RescateCarbon,
+    surfaceContainerLowest = RescateContainerLowestDark,
+    surfaceContainerLow = RescateContainerLowDark,
+    surfaceContainer = RescateCarbonElevated,
+    surfaceContainerHigh = RescateContainerHighDark,
+    surfaceContainerHighest = RescateContainerHighestDark,
+
+    outline = RescateOutlineDark,
+    outlineVariant = RescateOutlineVariantDark,
+    scrim = RescateCarbonOverlay,
+
+    inverseSurface = RescateCream,
+    inverseOnSurface = RescateCarbon,
+    inversePrimary = RescateButterOnLight,
 
     error = RescateCoral,
-    onError = RescateCarbon
+    onError = RescateCarbon,
+    errorContainer = RescateErrorContainerDark,
+    onErrorContainer = RescateOnErrorContainerDark
 )
 
 @Composable
