@@ -5,6 +5,7 @@
     <string name="category_bakery">Panadería</string>
     <string name="category_prepared_food">Comida preparada</string>
     <string name="category_desserts">Postres</string>
+    <string name="category_produce">Frutas y verduras</string>
 
     <plurals name="offer_remaining_count">
         <item quantity="one">Queda %1$d</item>

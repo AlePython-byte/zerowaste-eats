@@ -5,6 +5,7 @@
     <string name="category_bakery">Bakery</string>
     <string name="category_prepared_food">Prepared food</string>
     <string name="category_desserts">Desserts</string>
+    <string name="category_produce">Produce</string>
 
     <plurals name="offer_remaining_count">
         <item quantity="one">%1$d left</item>

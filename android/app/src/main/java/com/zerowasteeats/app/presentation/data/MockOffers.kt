@@ -46,6 +46,34 @@ object MockOffers {
             pickupTime = "Recoge mañana, 10:00 a. m. - 12:00 p. m.",
             isFavorite = false,
             category = OfferCategory.DESSERTS
+        ),
+        OfferUiModel(
+            id = "4",
+            title = "Hamburguesa artesanal con papas",
+            merchantName = "Burger Taller",
+            imageUrl = "",
+            originalPrice = "$24.000",
+            discountedPrice = "$14.400",
+            discountPercent = 40,
+            distance = "1.8 km",
+            remainingQuantity = 1,
+            pickupTime = "Recoge hoy, 7:00 p. m. - 8:30 p. m.",
+            isFavorite = false,
+            category = OfferCategory.PREPARED_FOOD
+        ),
+        OfferUiModel(
+            id = "5",
+            title = "Canasta de verduras frescas",
+            merchantName = "Mercado Verde",
+            imageUrl = "",
+            originalPrice = "$15.000",
+            discountedPrice = "$7.500",
+            discountPercent = 50,
+            distance = "3.1 km",
+            remainingQuantity = 4,
+            pickupTime = "Recoge mañana, 8:00 a. m. - 10:00 a. m.",
+            isFavorite = false,
+            category = OfferCategory.PRODUCE
         )
     )
 }

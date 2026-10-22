@@ -8,5 +8,6 @@ enum class OfferCategory(@StringRes val labelRes: Int) {
     ALL(R.string.category_all),
     BAKERY(R.string.category_bakery),
     PREPARED_FOOD(R.string.category_prepared_food),
-    DESSERTS(R.string.category_desserts)
+    DESSERTS(R.string.category_desserts),
+    PRODUCE(R.string.category_produce)
 }
