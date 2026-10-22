@@ -1,7 +1,7 @@
 package com.zerowasteeats.app.presentation.components.orders
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.isSystemInDarkTheme
+import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -105,7 +105,7 @@ fun OrderCard(
 
 @Composable
 private fun OrderStatusBadge(status: OrderStatus) {
-    val isDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme = isAppInDarkTheme()
     
     val containerColor = when (status) {
         OrderStatus.RESERVED -> MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)

@@ -2,7 +2,7 @@ package com.zerowasteeats.app.presentation.components.glass
 
 import android.R
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.isSystemInDarkTheme
+import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -38,7 +38,7 @@ fun GlassSearchBar(
     modifier: Modifier = Modifier,
     onClearClick: () -> Unit = { onQueryChange("") }
 ) {
-    val isDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme = isAppInDarkTheme()
 
     // Slightly more translucent for a refined look
     val backgroundColor = if (isDarkTheme) {

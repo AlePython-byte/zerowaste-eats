@@ -1,7 +1,7 @@
 package com.zerowasteeats.app.presentation.components.glass
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.isSystemInDarkTheme
+import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -33,7 +33,7 @@ fun GlassButton(
     enabled: Boolean = true,
     leadingIcon: (@Composable () -> Unit)? = null,
 ) {
-    val isDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme = isAppInDarkTheme()
 
     val backgroundColor = when (style) {
         GlassButtonStyle.PRIMARY -> MaterialTheme.colorScheme.primary.copy(alpha = if (enabled) 0.85f else 0.4f)
