@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
-import com.zerowasteeats.app.presentation.theme.GlassTokens
+import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 
 enum class AppButtonStyle {
     PRIMARY,
@@ -34,7 +34,7 @@ fun AppButton(
 ) {
     val backgroundColor = when (style) {
         AppButtonStyle.PRIMARY -> MaterialTheme.colorScheme.primary.copy(alpha = if (enabled) 1f else 0.4f)
-        AppButtonStyle.SECONDARY -> GlassTokens.surface
+        AppButtonStyle.SECONDARY -> SurfaceTokens.surface
     }
 
     val finalBackgroundColor = if (style == AppButtonStyle.SECONDARY && !enabled) {
@@ -50,7 +50,7 @@ fun AppButton(
 
     val borderColor = when (style) {
         AppButtonStyle.PRIMARY -> Color.Transparent
-        AppButtonStyle.SECONDARY -> GlassTokens.border
+        AppButtonStyle.SECONDARY -> SurfaceTokens.border
     }
 
     Button(
@@ -64,7 +64,7 @@ fun AppButton(
             disabledContainerColor = finalBackgroundColor,
             disabledContentColor = contentColor
         ),
-        border = if (style == AppButtonStyle.SECONDARY) BorderStroke(GlassTokens.borderWidth, borderColor) else null,
+        border = if (style == AppButtonStyle.SECONDARY) BorderStroke(SurfaceTokens.borderWidth, borderColor) else null,
         contentPadding = PaddingValues(
             horizontal = AppSpacing.extraLarge,
             vertical = AppSpacing.medium

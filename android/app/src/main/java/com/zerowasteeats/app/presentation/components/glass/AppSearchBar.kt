@@ -26,7 +26,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
-import com.zerowasteeats.app.presentation.theme.GlassTokens
+import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 
 @Composable
 fun AppSearchBar(
@@ -40,8 +40,8 @@ fun AppSearchBar(
     Surface(
         modifier = modifier.defaultMinSize(minHeight = 48.dp),
         shape = RoundedCornerShape(AppRadius.large),
-        color = GlassTokens.surface,
-        border = BorderStroke(GlassTokens.borderWidth, GlassTokens.border)
+        color = SurfaceTokens.surface,
+        border = BorderStroke(SurfaceTokens.borderWidth, SurfaceTokens.border)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

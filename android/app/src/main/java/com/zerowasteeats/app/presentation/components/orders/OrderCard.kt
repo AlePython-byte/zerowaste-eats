@@ -25,7 +25,7 @@ import com.zerowasteeats.app.presentation.model.OrderStatus
 import com.zerowasteeats.app.presentation.model.OrderUiModel
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
-import com.zerowasteeats.app.presentation.theme.GlassTokens
+import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 
 @Composable
 fun OrderCard(
@@ -109,7 +109,7 @@ private fun OrderStatusBadge(status: OrderStatus) {
 val containerColor = when (status) {
         OrderStatus.RESERVED -> MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
         OrderStatus.READY_FOR_PICKUP -> MaterialTheme.colorScheme.primary
-        OrderStatus.COMPLETED -> GlassTokens.surface
+        OrderStatus.COMPLETED -> SurfaceTokens.surface
         OrderStatus.CANCELLED -> MaterialTheme.colorScheme.errorContainer
     }
 
@@ -121,7 +121,7 @@ val containerColor = when (status) {
     }
 
     val borderColor = if (status == OrderStatus.COMPLETED) {
-        GlassTokens.border
+        SurfaceTokens.border
     } else {
         Color.Transparent
     }
@@ -129,7 +129,7 @@ val containerColor = when (status) {
     Surface(
         shape = RoundedCornerShape(AppRadius.small),
         color = containerColor,
-        border = if (status == OrderStatus.COMPLETED) BorderStroke(GlassTokens.borderWidth, borderColor) else null
+        border = if (status == OrderStatus.COMPLETED) BorderStroke(SurfaceTokens.borderWidth, borderColor) else null
     ) {
         Text(
             text = stringResource(status.labelRes),

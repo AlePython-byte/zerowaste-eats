@@ -38,7 +38,7 @@ import com.zerowasteeats.app.presentation.data.MockOrders
 import com.zerowasteeats.app.presentation.model.OrderStatus
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
-import com.zerowasteeats.app.presentation.theme.GlassTokens
+import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 
 enum class OrdersTab(@StringRes val labelRes: Int) {
     ACTIVE(R.string.orders_tab_active),
@@ -131,8 +131,8 @@ Surface(
             .fillMaxWidth()
             .height(48.dp),
         shape = RoundedCornerShape(AppRadius.extraLarge),
-        color = GlassTokens.surface,
-        border = BorderStroke(GlassTokens.borderWidth, GlassTokens.border)
+        color = SurfaceTokens.surface,
+        border = BorderStroke(SurfaceTokens.borderWidth, SurfaceTokens.border)
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),

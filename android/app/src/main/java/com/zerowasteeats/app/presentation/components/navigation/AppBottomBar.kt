@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.presentation.navigation.AppDestination
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
-import com.zerowasteeats.app.presentation.theme.GlassTokens
+import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 
 @Composable
 fun AppBottomBar(
@@ -41,9 +41,9 @@ fun AppBottomBar(
             .fillMaxWidth()
             .padding(horizontal = AppSpacing.regular, vertical = AppSpacing.regular),
         shape = RoundedCornerShape(AppRadius.extraLarge),
-        color = GlassTokens.surface,
-        border = BorderStroke(GlassTokens.borderWidth, GlassTokens.border),
-        shadowElevation = GlassTokens.barElevation
+        color = SurfaceTokens.surface,
+        border = BorderStroke(SurfaceTokens.borderWidth, SurfaceTokens.border),
+        shadowElevation = SurfaceTokens.barElevation
     ) {
         Row(
             modifier = Modifier

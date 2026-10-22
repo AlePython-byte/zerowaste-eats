@@ -61,7 +61,7 @@ import com.zerowasteeats.app.presentation.data.MockMapCoordinates
 import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.theme.AppSpacing
-import com.zerowasteeats.app.presentation.theme.GlassTokens
+import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 import kotlinx.coroutines.launch
 
 @SuppressLint("MissingPermission")
@@ -157,8 +157,8 @@ var selectedOfferId by rememberSaveable { mutableStateOf<String?>(null) }
             }
 
             // Top controls
-            val glassSurfaceColor = GlassTokens.surface
-            val glassBorderColor = GlassTokens.border
+            val glassSurfaceColor = SurfaceTokens.surface
+            val glassBorderColor = SurfaceTokens.border
 
             Box(
                 modifier = Modifier
@@ -300,8 +300,8 @@ private fun GlassTextButton(
     Surface(
         shape = CircleShape,
         color = surfaceColor,
-        border = BorderStroke(GlassTokens.borderWidth, borderColor),
-        shadowElevation = GlassTokens.elevation,
+        border = BorderStroke(SurfaceTokens.borderWidth, borderColor),
+        shadowElevation = SurfaceTokens.elevation,
         modifier = Modifier
             .size(48.dp)
             .clip(CircleShape)

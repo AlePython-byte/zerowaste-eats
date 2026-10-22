@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
-import com.zerowasteeats.app.presentation.theme.GlassTokens
+import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 
 @Composable
 fun CategoryChip(
@@ -30,7 +30,7 @@ fun CategoryChip(
     val containerColor = if (isSelected) {
         MaterialTheme.colorScheme.primary
     } else {
-        GlassTokens.surface
+        SurfaceTokens.surface
     }
 
     val contentColor = if (isSelected) {
@@ -42,7 +42,7 @@ fun CategoryChip(
     val borderColor = if (isSelected) {
         Color.Transparent
     } else {
-        GlassTokens.border
+        SurfaceTokens.border
     }
 
     Surface(
@@ -52,7 +52,7 @@ fun CategoryChip(
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(AppRadius.extraLarge),
         color = containerColor,
-        border = if (!isSelected) BorderStroke(GlassTokens.borderWidth, borderColor) else null,
+        border = if (!isSelected) BorderStroke(SurfaceTokens.borderWidth, borderColor) else null,
         shadowElevation = 0.dp // Flatter chips to let cards pop
     ) {
         Box(

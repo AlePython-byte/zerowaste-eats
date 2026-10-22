@@ -44,7 +44,7 @@ import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
-import com.zerowasteeats.app.presentation.theme.GlassTokens
+import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
 
 @Composable

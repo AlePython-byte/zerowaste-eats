@@ -7,7 +7,7 @@ import androidx.compose.ui.unit.dp
 
 // Opaque surfaces: a translucent Surface with a shadow lets the shadow show
 // through the card as an inner rectangle, so surfaces follow the theme instead.
-object GlassTokens {
+object SurfaceTokens {
 
     val surface: Color
         @Composable get() = MaterialTheme.colorScheme.surface

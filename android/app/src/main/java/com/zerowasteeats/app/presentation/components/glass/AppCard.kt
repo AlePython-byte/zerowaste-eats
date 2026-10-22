@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
-import com.zerowasteeats.app.presentation.theme.GlassTokens
+import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 import androidx.compose.foundation.shape.RoundedCornerShape
 
 @Composable
@@ -22,12 +22,12 @@ fun AppCard(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(AppRadius.large),
-        color = GlassTokens.surface,
+        color = SurfaceTokens.surface,
         border = BorderStroke(
-            width = GlassTokens.borderWidth,
-            color = GlassTokens.border
+            width = SurfaceTokens.borderWidth,
+            color = SurfaceTokens.border
         ),
-        shadowElevation = GlassTokens.elevation
+        shadowElevation = SurfaceTokens.elevation
     ) {
         Column(
             modifier = Modifier.padding(contentPadding),

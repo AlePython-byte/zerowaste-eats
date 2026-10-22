@@ -42,7 +42,7 @@ import com.zerowasteeats.app.presentation.data.MockProfile
 import com.zerowasteeats.app.presentation.model.ProfileUiModel
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
-import com.zerowasteeats.app.presentation.theme.GlassTokens
+import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 import com.zerowasteeats.app.presentation.theme.ThemeMode
 import com.zerowasteeats.app.presentation.theme.ThemePreferences
 
@@ -216,8 +216,8 @@ private fun MetricCard(
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(AppRadius.large),
-        color = GlassTokens.surface,
-        border = BorderStroke(GlassTokens.borderWidth, GlassTokens.border)
+        color = SurfaceTokens.surface,
+        border = BorderStroke(SurfaceTokens.borderWidth, SurfaceTokens.border)
     ) {
         Column(
             modifier = Modifier.padding(AppSpacing.regular),
@@ -268,8 +268,8 @@ private fun ProfilePreferenceChip(text: String, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(AppRadius.extraLarge),
-        color = GlassTokens.surface,
-        border = BorderStroke(GlassTokens.borderWidth, GlassTokens.border)
+        color = SurfaceTokens.surface,
+        border = BorderStroke(SurfaceTokens.borderWidth, SurfaceTokens.border)
     ) {
         Box(
             modifier = Modifier.padding(horizontal = AppSpacing.large, vertical = AppSpacing.small),
