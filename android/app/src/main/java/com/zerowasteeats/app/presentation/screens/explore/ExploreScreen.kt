@@ -1,9 +1,7 @@
 package com.zerowasteeats.app.presentation.screens.explore
 
 import com.zerowasteeats.app.presentation.model.OfferCategory
-import com.zerowasteeats.app.presentation.model.OfferFilters
 import com.zerowasteeats.app.presentation.model.OfferSort
-import com.zerowasteeats.app.presentation.model.filterAndSort
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.zerowasteeats.app.R
@@ -26,10 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import com.zerowasteeats.app.presentation.components.common.offerListItem
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -49,18 +43,14 @@ fun ExploreScreen(
     onFavoriteClick: (String) -> Unit = {},
     onMapClick: () -> Unit = {}
 ) {
-    var searchQuery by rememberSaveable { mutableStateOf("") }
-    var selectedCategory by rememberSaveable { mutableStateOf(OfferCategory.ALL) }
-    var sortOption by rememberSaveable { mutableStateOf(OfferSort.DISTANCE) }
+    val mockOffers = remember { MockOffers.getList() }
+    val state = rememberExploreState(mockOffers)
+    val filteredOffers = state.filteredOffers
 
     val categories = OfferCategory.entries
     // Cards already shown once; they skip the entrance animation when they reappear
     val seenOfferIds = remember { mutableSetOf<String>() }
     val sortOptions = OfferSort.entries
-
-    val mockOffers = MockOffers.getList()
-
-    val filteredOffers = mockOffers.filterAndSort(searchQuery, OfferFilters(selectedCategory, sortOption))
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
@@ -89,8 +79,8 @@ fun ExploreScreen(
                 item {
                     Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
                     AppSearchBar(
-                        query = searchQuery,
-                        onQueryChange = { searchQuery = it },
+                        query = state.query,
+                        onQueryChange = { state.query = it },
                         placeholder = stringResource(R.string.explore_search_placeholder),
                         clearContentDescription = stringResource(R.string.common_clear_search_cd),
                         modifier = Modifier.fillMaxWidth()
@@ -107,8 +97,8 @@ fun ExploreScreen(
                         items(categories) { category ->
                             CategoryChip(
                                 text = stringResource(category.labelRes),
-                                isSelected = selectedCategory == category,
-                                onClick = { selectedCategory = category }
+                                isSelected = state.appliedFilters.category == category,
+                                onClick = { state.applyFilters(state.appliedFilters.copy(category = category)) }
                             )
                         }
                     }
@@ -131,8 +121,8 @@ fun ExploreScreen(
                         items(sortOptions) { option ->
                             CategoryChip(
                                 text = stringResource(option.labelRes),
-                                isSelected = sortOption == option,
-                                onClick = { sortOption = option }
+                                isSelected = state.appliedFilters.sort == option,
+                                onClick = { state.applyFilters(state.appliedFilters.copy(sort = option)) }
                             )
                         }
                     }
