@@ -29,6 +29,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.os.LocaleListCompat
@@ -326,8 +327,8 @@ private fun LanguageSection(modifier: Modifier = Modifier) {
         "es" to R.string.language_name_es,
         "en" to R.string.language_name_en
     )
-    // Spanish is the default, so an empty list means "es".
-    val current = AppCompatDelegate.getApplicationLocales()[0]?.language ?: "es"
+    // Read from the configuration so the selector updates without an activity recreation.
+    val current = LocalConfiguration.current.locales[0]?.language ?: "es"
 
     AppCard(modifier = modifier.fillMaxWidth()) {
         Text(
