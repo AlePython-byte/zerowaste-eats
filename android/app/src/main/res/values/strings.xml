@@ -112,4 +112,5 @@
 
     <string name="field_show_password">Mostrar contraseña</string>
     <string name="field_hide_password">Ocultar contraseña</string>
+    <string name="button_loading">Cargando</string>
 </resources>
