@@ -248,7 +248,7 @@ private fun MapOfferCard(
                 Text(
                     text = offer.merchantName,
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.tertiary
                 )
                 Text(
                     text = offer.distance,
@@ -276,7 +276,7 @@ private fun MapOfferCard(
                 Text(
                     text = offer.discountedPrice,
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.tertiary
                 )
                 
                 GlassButton(

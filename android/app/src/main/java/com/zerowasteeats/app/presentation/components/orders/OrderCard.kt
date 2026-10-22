@@ -65,7 +65,7 @@ fun OrderCard(
         Text(
             text = order.pickupTime,
             style = MaterialTheme.typography.bodyMedium,
-            color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+            color = if (isActive) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Normal
         )
 
@@ -97,7 +97,7 @@ fun OrderCard(
             Text(
                 text = order.totalPrice,
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.tertiary,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -114,7 +114,7 @@ val containerColor = when (status) {
     }
 
     val contentColor = when (status) {
-        OrderStatus.RESERVED -> MaterialTheme.colorScheme.primary
+        OrderStatus.RESERVED -> MaterialTheme.colorScheme.tertiary
         OrderStatus.READY_FOR_PICKUP -> MaterialTheme.colorScheme.onPrimary
         OrderStatus.COMPLETED -> MaterialTheme.colorScheme.onSurface
         OrderStatus.CANCELLED -> MaterialTheme.colorScheme.onErrorContainer

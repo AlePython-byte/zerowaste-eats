@@ -134,7 +134,7 @@ private fun ProfileHeroCard(profile: ProfileUiModel, modifier: Modifier = Modifi
                     Text(
                         text = profile.initials,
                         style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.tertiary
                     )
                 }
             }
@@ -153,7 +153,7 @@ private fun ProfileHeroCard(profile: ProfileUiModel, modifier: Modifier = Modifi
                 Text(
                     text = profile.roleLabel,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.tertiary,
                     fontWeight = FontWeight.Medium
                 )
                 Spacer(modifier = Modifier.height(2.dp))
@@ -226,7 +226,7 @@ private fun MetricCard(
             Text(
                 text = value,
                 style = if (isHighlight) MaterialTheme.typography.displaySmall else MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.tertiary,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(AppSpacing.extraSmall))

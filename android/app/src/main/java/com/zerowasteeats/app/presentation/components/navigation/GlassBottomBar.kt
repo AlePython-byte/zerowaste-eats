@@ -86,7 +86,7 @@ private fun GlassBottomBarItem(
             verticalArrangement = Arrangement.Center
         ) {
             val contentColor = if (isSelected) {
-                MaterialTheme.colorScheme.primary
+                MaterialTheme.colorScheme.tertiary
             } else {
                 MaterialTheme.colorScheme.onSurfaceVariant
             }
@@ -105,7 +105,7 @@ private fun GlassBottomBarItem(
             Surface(
                 modifier = Modifier.size(4.dp),
                 shape = CircleShape,
-                color = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
+                color = if (isSelected) MaterialTheme.colorScheme.tertiary else Color.Transparent
             ) {}
         }
     }

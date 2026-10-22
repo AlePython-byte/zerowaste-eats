@@ -241,7 +241,7 @@ private fun ResultsHeader(count: Int, modifier: Modifier = Modifier) {
         Text(
             text = countText,
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.tertiary
         )
     }
 }

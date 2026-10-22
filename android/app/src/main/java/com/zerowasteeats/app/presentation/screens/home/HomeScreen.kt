@@ -209,7 +209,7 @@ private fun SectionHeader(
             Text(
                 text = stringResource(R.string.common_view_map),
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.tertiary
             )
         }
     }
