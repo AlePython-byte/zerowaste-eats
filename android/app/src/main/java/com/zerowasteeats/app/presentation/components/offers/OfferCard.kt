@@ -94,8 +94,9 @@ fun OfferCard(
                 .background(
                     Brush.verticalGradient(
                         0f to Color.Transparent,
-                        0.35f to Color.Transparent,
-                        1f to RescateCarbon.copy(alpha = 0.95f)
+                        0.2f to RescateCarbon.copy(alpha = 0.10f),
+                        0.45f to RescateCarbon.copy(alpha = 0.70f),
+                        1f to RescateCarbon.copy(alpha = 0.96f)
                     )
                 )
         )
@@ -158,7 +159,7 @@ fun OfferCard(
                         fontWeight = FontWeight.SemiBold,
                         letterSpacing = 1.2.sp
                     ),
-                    color = RescateCreamMuted,
+                    color = RescateCream,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
@@ -166,7 +167,7 @@ fun OfferCard(
                 Text(
                     text = offer.distance,
                     style = MaterialTheme.typography.labelSmall,
-                    color = RescateCreamMuted
+                    color = RescateCream
                 )
             }
 
