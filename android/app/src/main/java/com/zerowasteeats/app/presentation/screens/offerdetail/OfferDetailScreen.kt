@@ -86,6 +86,7 @@ fun OfferDetailScreen(
             )
         }
     ) { innerPadding ->
+        Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -128,42 +129,6 @@ fun OfferDetailScreen(
                         )
                 )
 
-                // Top controls
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .statusBarsPadding()
-                        .padding(AppSpacing.regular),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
-                ) {
-                    CircleControl(
-                        text = "←",
-                        contentDescription = stringResource(R.string.common_back_cd),
-                        onClick = onBackClick
-                    )
-                    CircleControl(
-                        text = if (offer.isFavorite) "♥" else "♡",
-                        contentDescription = stringResource(
-                            if (offer.isFavorite) R.string.common_favorite_remove_cd else R.string.common_favorite_add_cd
-                        ),
-                        tint = if (offer.isFavorite) RescateCoral else RescateCream,
-                        onClick = {
-                            haptics.performHapticFeedback(
-                                if (offer.isFavorite) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn
-                            )
-                            scope.launch {
-                                heartScale.animateTo(
-                                    1.35f,
-                                    spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium)
-                                )
-                                heartScale.animateTo(1f, spring())
-                            }
-                            onFavoriteClick()
-                        },
-                        heartScale = heartScale
-                    )
-                }
             }
 
             // INFO
@@ -271,6 +236,44 @@ fun OfferDetailScreen(
                 // Space so the floating reservation panel does not cover the content
                 Spacer(modifier = Modifier.height(160.dp))
             }
+        }
+
+        // Pinned controls: outside the scrolling column so they stay visible over photo and content
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(AppSpacing.regular),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            CircleControl(
+                text = "←",
+                contentDescription = stringResource(R.string.common_back_cd),
+                onClick = onBackClick
+            )
+            CircleControl(
+                text = if (offer.isFavorite) "♥" else "♡",
+                contentDescription = stringResource(
+                    if (offer.isFavorite) R.string.common_favorite_remove_cd else R.string.common_favorite_add_cd
+                ),
+                tint = if (offer.isFavorite) RescateCoral else RescateCream,
+                onClick = {
+                    haptics.performHapticFeedback(
+                        if (offer.isFavorite) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn
+                    )
+                    scope.launch {
+                        heartScale.animateTo(
+                            1.35f,
+                            spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium)
+                        )
+                        heartScale.animateTo(1f, spring())
+                    }
+                    onFavoriteClick()
+                },
+                heartScale = heartScale
+            )
+        }
         }
     }
 }
