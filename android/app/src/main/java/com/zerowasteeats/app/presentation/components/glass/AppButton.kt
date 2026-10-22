@@ -18,39 +18,39 @@ import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.GlassTokens
 
-enum class GlassButtonStyle {
+enum class AppButtonStyle {
     PRIMARY,
     SECONDARY
 }
 
 @Composable
-fun GlassButton(
+fun AppButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    style: GlassButtonStyle = GlassButtonStyle.PRIMARY,
+    style: AppButtonStyle = AppButtonStyle.PRIMARY,
     enabled: Boolean = true,
     leadingIcon: (@Composable () -> Unit)? = null,
 ) {
     val backgroundColor = when (style) {
-        GlassButtonStyle.PRIMARY -> MaterialTheme.colorScheme.primary.copy(alpha = if (enabled) 1f else 0.4f)
-        GlassButtonStyle.SECONDARY -> GlassTokens.surface
+        AppButtonStyle.PRIMARY -> MaterialTheme.colorScheme.primary.copy(alpha = if (enabled) 1f else 0.4f)
+        AppButtonStyle.SECONDARY -> GlassTokens.surface
     }
 
-    val finalBackgroundColor = if (style == GlassButtonStyle.SECONDARY && !enabled) {
+    val finalBackgroundColor = if (style == AppButtonStyle.SECONDARY && !enabled) {
         backgroundColor.copy(alpha = backgroundColor.alpha * 0.5f)
     } else {
         backgroundColor
     }
 
     val contentColor = when (style) {
-        GlassButtonStyle.PRIMARY -> MaterialTheme.colorScheme.onPrimary.copy(alpha = if (enabled) 1f else 0.6f)
-        GlassButtonStyle.SECONDARY -> MaterialTheme.colorScheme.onSurface.copy(alpha = if (enabled) 1f else 0.6f)
+        AppButtonStyle.PRIMARY -> MaterialTheme.colorScheme.onPrimary.copy(alpha = if (enabled) 1f else 0.6f)
+        AppButtonStyle.SECONDARY -> MaterialTheme.colorScheme.onSurface.copy(alpha = if (enabled) 1f else 0.6f)
     }
 
     val borderColor = when (style) {
-        GlassButtonStyle.PRIMARY -> Color.Transparent
-        GlassButtonStyle.SECONDARY -> GlassTokens.border
+        AppButtonStyle.PRIMARY -> Color.Transparent
+        AppButtonStyle.SECONDARY -> GlassTokens.border
     }
 
     Button(
@@ -64,7 +64,7 @@ fun GlassButton(
             disabledContainerColor = finalBackgroundColor,
             disabledContentColor = contentColor
         ),
-        border = if (style == GlassButtonStyle.SECONDARY) BorderStroke(GlassTokens.borderWidth, borderColor) else null,
+        border = if (style == AppButtonStyle.SECONDARY) BorderStroke(GlassTokens.borderWidth, borderColor) else null,
         contentPadding = PaddingValues(
             horizontal = AppSpacing.extraLarge,
             vertical = AppSpacing.medium

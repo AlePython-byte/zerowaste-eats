@@ -47,7 +47,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.ui.graphics.graphicsLayer
-import com.zerowasteeats.app.presentation.components.glass.GlassButton
+import com.zerowasteeats.app.presentation.components.glass.AppButton
 import com.zerowasteeats.app.presentation.data.offerPhotoRes
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.theme.AppSpacing
@@ -322,7 +322,7 @@ private fun ReservationPanel(
                 )
             }
 
-            GlassButton(
+            AppButton(
                 text = stringResource(R.string.offer_detail_reserve),
                 onClick = onReserveClick
             )

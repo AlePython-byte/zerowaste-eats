@@ -55,7 +55,7 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import com.zerowasteeats.app.R
-import com.zerowasteeats.app.presentation.components.glass.GlassButton
+import com.zerowasteeats.app.presentation.components.glass.AppButton
 import com.zerowasteeats.app.presentation.components.glass.AppCard
 import com.zerowasteeats.app.presentation.data.MockMapCoordinates
 import com.zerowasteeats.app.presentation.data.MockOffers
@@ -279,7 +279,7 @@ private fun MapOfferCard(
                     color = MaterialTheme.colorScheme.tertiary
                 )
                 
-                GlassButton(
+                AppButton(
                     text = stringResource(R.string.map_view_offer),
                     onClick = onViewOfferClick
                 )
