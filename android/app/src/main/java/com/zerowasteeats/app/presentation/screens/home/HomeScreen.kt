@@ -26,6 +26,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import com.zerowasteeats.app.presentation.components.common.offerListItem
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -57,6 +59,8 @@ fun HomeScreen(
     var selectedCategory by rememberSaveable { mutableStateOf(OfferCategory.ALL) }
 
     val categories = OfferCategory.entries
+    // Cards already shown once; they skip the entrance animation when they reappear
+    val seenOfferIds = remember { mutableSetOf<String>() }
     val mockOffers = MockOffers.getList()
 
     val filteredOffers = mockOffers.filter { offer ->
@@ -129,6 +133,7 @@ LazyColumn(
                         key = { it.id }
                     ) { offer ->
                         OfferCard(
+                            modifier = offerListItem(seenOfferIds, offer.id),
                             offer = offer,
                             onClick = { onOfferClick(offer.id) },
                             onFavoriteClick = { onFavoriteClick(offer.id) },

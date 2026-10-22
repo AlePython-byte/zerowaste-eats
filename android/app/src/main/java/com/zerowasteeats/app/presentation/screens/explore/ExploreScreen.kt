@@ -22,6 +22,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import com.zerowasteeats.app.presentation.components.common.offerListItem
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -56,6 +58,8 @@ fun ExploreScreen(
     var sortOption by rememberSaveable { mutableStateOf(ExploreSortOption.DISTANCE) }
 
     val categories = OfferCategory.entries
+    // Cards already shown once; they skip the entrance animation when they reappear
+    val seenOfferIds = remember { mutableSetOf<String>() }
     val sortOptions = ExploreSortOption.entries
 
     val mockOffers = MockOffers.getList()
@@ -192,6 +196,7 @@ fun ExploreScreen(
                         key = { it.id }
                     ) { offer ->
                         OfferCard(
+                            modifier = offerListItem(seenOfferIds, offer.id),
                             offer = offer,
                             onClick = { onOfferClick(offer.id) },
                             onFavoriteClick = { onFavoriteClick(offer.id) },
