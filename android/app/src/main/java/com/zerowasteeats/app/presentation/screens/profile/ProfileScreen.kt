@@ -2,7 +2,6 @@ package com.zerowasteeats.app.presentation.screens.profile
 
 import com.zerowasteeats.app.presentation.model.OfferCategory
 import androidx.compose.foundation.BorderStroke
-import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,12 +37,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.zerowasteeats.app.presentation.components.glass.GlassCard
+import com.zerowasteeats.app.presentation.components.common.AppCard
 import com.zerowasteeats.app.presentation.data.MockProfile
 import com.zerowasteeats.app.presentation.model.ProfileUiModel
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
-import com.zerowasteeats.app.presentation.theme.GlassTokens
+import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 import com.zerowasteeats.app.presentation.theme.ThemeMode
 import com.zerowasteeats.app.presentation.theme.ThemePreferences
 
@@ -62,7 +61,7 @@ fun ProfileScreen() {
                 start = AppSpacing.regular,
                 end = AppSpacing.regular,
                 top = AppSpacing.regular,
-                bottom = AppSpacing.huge + 80.dp // Padding for GlassBottomBar
+                bottom = AppSpacing.large // Trailing gap; the bottom bar inset comes from the app scaffold
             ),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.extraLarge)
         ) {
@@ -120,7 +119,7 @@ private fun ProfileHeader(modifier: Modifier = Modifier) {
 
 @Composable
 private fun ProfileHeroCard(profile: ProfileUiModel, modifier: Modifier = Modifier) {
-    GlassCard(modifier = modifier.fillMaxWidth()) {
+    AppCard(modifier = modifier.fillMaxWidth()) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
@@ -135,7 +134,7 @@ private fun ProfileHeroCard(profile: ProfileUiModel, modifier: Modifier = Modifi
                     Text(
                         text = profile.initials,
                         style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.tertiary
                     )
                 }
             }
@@ -154,7 +153,7 @@ private fun ProfileHeroCard(profile: ProfileUiModel, modifier: Modifier = Modifi
                 Text(
                     text = profile.roleLabel,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.tertiary,
                     fontWeight = FontWeight.Medium
                 )
                 Spacer(modifier = Modifier.height(2.dp))
@@ -214,17 +213,11 @@ private fun MetricCard(
     modifier: Modifier = Modifier,
     isHighlight: Boolean = false
 ) {
-    val isDarkTheme = isAppInDarkTheme()
-    
-    val containerColor = if (isDarkTheme) GlassTokens.darkSurface else GlassTokens.lightSurface
-    val borderColor = if (isDarkTheme) GlassTokens.darkBorder else GlassTokens.lightBorder
-
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(AppRadius.large),
-        color = containerColor,
-        border = BorderStroke(GlassTokens.borderWidth, borderColor),
-        shadowElevation = GlassTokens.elevation / 2
+        color = SurfaceTokens.surface,
+        border = BorderStroke(SurfaceTokens.borderWidth, SurfaceTokens.border)
     ) {
         Column(
             modifier = Modifier.padding(AppSpacing.regular),
@@ -233,7 +226,7 @@ private fun MetricCard(
             Text(
                 text = value,
                 style = if (isHighlight) MaterialTheme.typography.displaySmall else MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.tertiary,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
@@ -272,20 +265,11 @@ private fun PreferencesSection(categories: List<OfferCategory>, modifier: Modifi
 
 @Composable
 private fun ProfilePreferenceChip(text: String, modifier: Modifier = Modifier) {
-    val isDarkTheme = isAppInDarkTheme()
-    
-    val containerColor = if (isDarkTheme) {
-        GlassTokens.darkSurface.copy(alpha = 0.5f)
-    } else {
-        GlassTokens.lightSurface.copy(alpha = 0.5f)
-    }
-    val borderColor = if (isDarkTheme) GlassTokens.darkBorder else GlassTokens.lightBorder
-
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(AppRadius.extraLarge),
-        color = containerColor,
-        border = BorderStroke(GlassTokens.borderWidth, borderColor)
+        color = SurfaceTokens.surface,
+        border = BorderStroke(SurfaceTokens.borderWidth, SurfaceTokens.border)
     ) {
         Box(
             modifier = Modifier.padding(horizontal = AppSpacing.large, vertical = AppSpacing.small),
@@ -305,7 +289,7 @@ private fun AppearanceSection(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val isDark = ThemePreferences.mode == ThemeMode.DARK
 
-    GlassCard(modifier = modifier.fillMaxWidth()) {
+    AppCard(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -345,7 +329,7 @@ private fun LanguageSection(modifier: Modifier = Modifier) {
     // Spanish is the default, so an empty list means "es".
     val current = AppCompatDelegate.getApplicationLocales()[0]?.language ?: "es"
 
-    GlassCard(modifier = modifier.fillMaxWidth()) {
+    AppCard(modifier = modifier.fillMaxWidth()) {
         Text(
             text = stringResource(R.string.profile_language_title),
             style = MaterialTheme.typography.titleMedium,
@@ -380,7 +364,7 @@ private fun LanguageSection(modifier: Modifier = Modifier) {
 
 @Composable
 private fun InfoSection(modifier: Modifier = Modifier) {
-    GlassCard(modifier = modifier.fillMaxWidth()) {
+    AppCard(modifier = modifier.fillMaxWidth()) {
         Text(
             text = stringResource(R.string.profile_about_impact_title),
             style = MaterialTheme.typography.titleMedium,

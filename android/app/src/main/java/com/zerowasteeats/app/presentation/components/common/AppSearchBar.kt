@@ -1,8 +1,7 @@
-package com.zerowasteeats.app.presentation.components.glass
+package com.zerowasteeats.app.presentation.components.common
 
 import android.R
 import androidx.compose.foundation.BorderStroke
-import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,10 +26,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
-import com.zerowasteeats.app.presentation.theme.GlassTokens
+import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 
 @Composable
-fun GlassSearchBar(
+fun AppSearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
     placeholder: String,
@@ -38,23 +37,11 @@ fun GlassSearchBar(
     modifier: Modifier = Modifier,
     onClearClick: () -> Unit = { onQueryChange("") }
 ) {
-    val isDarkTheme = isAppInDarkTheme()
-
-    // Slightly more translucent for a refined look
-    val backgroundColor = if (isDarkTheme) {
-        GlassTokens.darkSurface.copy(alpha = GlassTokens.darkSurface.alpha * 0.85f) 
-    } else {
-        GlassTokens.lightSurface.copy(alpha = GlassTokens.lightSurface.alpha * 0.90f)
-    }
-    
-    val borderColor = if (isDarkTheme) GlassTokens.darkBorder else GlassTokens.lightBorder
-
     Surface(
         modifier = modifier.defaultMinSize(minHeight = 48.dp),
         shape = RoundedCornerShape(AppRadius.large),
-        color = backgroundColor,
-        border = BorderStroke(GlassTokens.borderWidth, borderColor),
-        shadowElevation = GlassTokens.elevation / 1.5f // Softened shadow
+        color = SurfaceTokens.surface,
+        border = BorderStroke(SurfaceTokens.borderWidth, SurfaceTokens.border)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

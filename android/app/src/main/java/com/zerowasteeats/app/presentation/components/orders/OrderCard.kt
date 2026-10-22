@@ -1,7 +1,6 @@
 package com.zerowasteeats.app.presentation.components.orders
 
 import androidx.compose.foundation.BorderStroke
-import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,12 +20,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.R
-import com.zerowasteeats.app.presentation.components.glass.GlassCard
+import com.zerowasteeats.app.presentation.components.common.AppCard
 import com.zerowasteeats.app.presentation.model.OrderStatus
 import com.zerowasteeats.app.presentation.model.OrderUiModel
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
-import com.zerowasteeats.app.presentation.theme.GlassTokens
+import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 
 @Composable
 fun OrderCard(
@@ -35,7 +34,7 @@ fun OrderCard(
 ) {
     val isActive = order.status == OrderStatus.RESERVED || order.status == OrderStatus.READY_FOR_PICKUP
 
-    GlassCard(modifier = modifier.fillMaxWidth()) {
+    AppCard(modifier = modifier.fillMaxWidth()) {
         // Header: Merchant & Status
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -66,7 +65,7 @@ fun OrderCard(
         Text(
             text = order.pickupTime,
             style = MaterialTheme.typography.bodyMedium,
-            color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+            color = if (isActive) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Normal
         )
 
@@ -98,7 +97,7 @@ fun OrderCard(
             Text(
                 text = order.totalPrice,
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.tertiary,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -107,24 +106,22 @@ fun OrderCard(
 
 @Composable
 private fun OrderStatusBadge(status: OrderStatus) {
-    val isDarkTheme = isAppInDarkTheme()
-    
-    val containerColor = when (status) {
+val containerColor = when (status) {
         OrderStatus.RESERVED -> MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
         OrderStatus.READY_FOR_PICKUP -> MaterialTheme.colorScheme.primary
-        OrderStatus.COMPLETED -> if (isDarkTheme) GlassTokens.darkSurface else GlassTokens.lightSurface
+        OrderStatus.COMPLETED -> SurfaceTokens.surface
         OrderStatus.CANCELLED -> MaterialTheme.colorScheme.errorContainer
     }
 
     val contentColor = when (status) {
-        OrderStatus.RESERVED -> MaterialTheme.colorScheme.primary
+        OrderStatus.RESERVED -> MaterialTheme.colorScheme.tertiary
         OrderStatus.READY_FOR_PICKUP -> MaterialTheme.colorScheme.onPrimary
         OrderStatus.COMPLETED -> MaterialTheme.colorScheme.onSurface
         OrderStatus.CANCELLED -> MaterialTheme.colorScheme.onErrorContainer
     }
 
     val borderColor = if (status == OrderStatus.COMPLETED) {
-        if (isDarkTheme) GlassTokens.darkBorder else GlassTokens.lightBorder
+        SurfaceTokens.border
     } else {
         Color.Transparent
     }
@@ -132,7 +129,7 @@ private fun OrderStatusBadge(status: OrderStatus) {
     Surface(
         shape = RoundedCornerShape(AppRadius.small),
         color = containerColor,
-        border = if (status == OrderStatus.COMPLETED) BorderStroke(GlassTokens.borderWidth, borderColor) else null
+        border = if (status == OrderStatus.COMPLETED) BorderStroke(SurfaceTokens.borderWidth, borderColor) else null
     ) {
         Text(
             text = stringResource(status.labelRes),

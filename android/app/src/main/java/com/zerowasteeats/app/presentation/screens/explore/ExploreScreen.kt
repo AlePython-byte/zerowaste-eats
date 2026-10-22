@@ -22,6 +22,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import com.zerowasteeats.app.presentation.components.common.offerListItem
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -32,9 +34,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.presentation.components.filters.CategoryChip
-import com.zerowasteeats.app.presentation.components.glass.GlassButton
-import com.zerowasteeats.app.presentation.components.glass.GlassButtonStyle
-import com.zerowasteeats.app.presentation.components.glass.GlassSearchBar
+import com.zerowasteeats.app.presentation.components.common.AppButton
+import com.zerowasteeats.app.presentation.components.common.AppButtonStyle
+import com.zerowasteeats.app.presentation.components.common.AppSearchBar
 import com.zerowasteeats.app.presentation.components.offers.OfferCard
 import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.theme.AppSpacing
@@ -56,6 +58,8 @@ fun ExploreScreen(
     var sortOption by rememberSaveable { mutableStateOf(ExploreSortOption.DISTANCE) }
 
     val categories = OfferCategory.entries
+    // Cards already shown once; they skip the entrance animation when they reappear
+    val seenOfferIds = remember { mutableSetOf<String>() }
     val sortOptions = ExploreSortOption.entries
 
     val mockOffers = MockOffers.getList()
@@ -97,7 +101,7 @@ fun ExploreScreen(
                     start = AppSpacing.regular,
                     end = AppSpacing.regular,
                     top = AppSpacing.regular,
-                    bottom = AppSpacing.huge + 64.dp // Padding for bottom nav
+                    bottom = AppSpacing.large // Trailing gap; the bottom bar inset comes from the app scaffold
                 ),
                 verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
             ) {
@@ -109,7 +113,7 @@ fun ExploreScreen(
                 // Search Bar
                 item {
                     Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
-                    GlassSearchBar(
+                    AppSearchBar(
                         query = searchQuery,
                         onQueryChange = { searchQuery = it },
                         placeholder = stringResource(R.string.explore_search_placeholder),
@@ -167,10 +171,10 @@ fun ExploreScreen(
                             .padding(vertical = AppSpacing.small),
                         contentAlignment = Alignment.CenterEnd
                     ) {
-                        GlassButton(
+                        AppButton(
                             text = stringResource(R.string.common_view_map),
                             onClick = onMapClick,
-                            style = GlassButtonStyle.SECONDARY
+                            style = AppButtonStyle.SECONDARY
                         )
                     }
                 }
@@ -192,6 +196,7 @@ fun ExploreScreen(
                         key = { it.id }
                     ) { offer ->
                         OfferCard(
+                            modifier = offerListItem(seenOfferIds, offer.id),
                             offer = offer,
                             onClick = { onOfferClick(offer.id) },
                             onFavoriteClick = { onFavoriteClick(offer.id) },
@@ -241,7 +246,7 @@ private fun ResultsHeader(count: Int, modifier: Modifier = Modifier) {
         Text(
             text = countText,
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.tertiary
         )
     }
 }

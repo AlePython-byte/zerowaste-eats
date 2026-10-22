@@ -3,7 +3,6 @@ package com.zerowasteeats.app.presentation.screens.orders
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,7 +38,7 @@ import com.zerowasteeats.app.presentation.data.MockOrders
 import com.zerowasteeats.app.presentation.model.OrderStatus
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
-import com.zerowasteeats.app.presentation.theme.GlassTokens
+import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 
 enum class OrdersTab(@StringRes val labelRes: Int) {
     ACTIVE(R.string.orders_tab_active),
@@ -108,7 +107,7 @@ fun OrdersScreen() {
                         start = AppSpacing.regular,
                         end = AppSpacing.regular,
                         top = AppSpacing.small,
-                        bottom = AppSpacing.huge + 80.dp // To prevent hidden content under GlassBottomBar
+                        bottom = AppSpacing.large // Trailing gap; the bottom bar inset comes from the app scaffold
                     ),
                     verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
                 ) {
@@ -127,22 +126,13 @@ private fun OrdersSegmentedSelector(
     onTabSelected: (OrdersTab) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isDarkTheme = isAppInDarkTheme()
-    
-    val backgroundColor = if (isDarkTheme) {
-        GlassTokens.darkSurface.copy(alpha = GlassTokens.darkSurface.alpha * 0.5f)
-    } else {
-        GlassTokens.lightSurface.copy(alpha = GlassTokens.lightSurface.alpha * 0.5f)
-    }
-    val borderColor = if (isDarkTheme) GlassTokens.darkBorder else GlassTokens.lightBorder
-
-    Surface(
+Surface(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp),
         shape = RoundedCornerShape(AppRadius.extraLarge),
-        color = backgroundColor,
-        border = BorderStroke(GlassTokens.borderWidth, borderColor)
+        color = SurfaceTokens.surface,
+        border = BorderStroke(SurfaceTokens.borderWidth, SurfaceTokens.border)
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -186,7 +176,7 @@ private fun EmptyOrdersState(selectedTab: OrdersTab, modifier: Modifier = Modifi
     Box(
         modifier = modifier
             .fillMaxSize()
-            .padding(bottom = AppSpacing.huge + 80.dp), // offset for bottom bar
+            .padding(bottom = AppSpacing.large),
         contentAlignment = Alignment.Center
     ) {
         val text = when (selectedTab) {

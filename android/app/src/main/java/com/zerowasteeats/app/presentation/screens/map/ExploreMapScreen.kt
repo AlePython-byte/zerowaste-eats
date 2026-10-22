@@ -7,7 +7,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,13 +55,13 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import com.zerowasteeats.app.R
-import com.zerowasteeats.app.presentation.components.glass.GlassButton
-import com.zerowasteeats.app.presentation.components.glass.GlassCard
+import com.zerowasteeats.app.presentation.components.common.AppButton
+import com.zerowasteeats.app.presentation.components.common.AppCard
 import com.zerowasteeats.app.presentation.data.MockMapCoordinates
 import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.theme.AppSpacing
-import com.zerowasteeats.app.presentation.theme.GlassTokens
+import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 import kotlinx.coroutines.launch
 
 @SuppressLint("MissingPermission")
@@ -71,8 +70,7 @@ fun ExploreMapScreen(
     onBackClick: () -> Unit,
     onOfferClick: (String) -> Unit
 ) {
-    val isDarkTheme = isAppInDarkTheme()
-    var selectedOfferId by rememberSaveable { mutableStateOf<String?>(null) }
+var selectedOfferId by rememberSaveable { mutableStateOf<String?>(null) }
     
     val context = LocalContext.current
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
@@ -159,12 +157,8 @@ fun ExploreMapScreen(
             }
 
             // Top controls
-            val glassSurfaceColor = if (isDarkTheme) {
-                GlassTokens.darkSurface.copy(alpha = GlassTokens.darkSurface.alpha * 0.85f)
-            } else {
-                GlassTokens.lightSurface.copy(alpha = GlassTokens.lightSurface.alpha * 0.90f)
-            }
-            val glassBorderColor = if (isDarkTheme) GlassTokens.darkBorder else GlassTokens.lightBorder
+            val surfaceColor = SurfaceTokens.surface
+            val borderColor = SurfaceTokens.border
 
             Box(
                 modifier = Modifier
@@ -172,12 +166,12 @@ fun ExploreMapScreen(
                     .statusBarsPadding()
                     .padding(AppSpacing.regular)
             ) {
-                GlassTextButton(
+                CircleTextButton(
                     text = "←",
                     contentDescription = stringResource(R.string.common_back_cd),
                     onClick = onBackClick,
-                    surfaceColor = glassSurfaceColor,
-                    borderColor = glassBorderColor
+                    surfaceColor = surfaceColor,
+                    borderColor = borderColor
                 )
             }
 
@@ -202,7 +196,7 @@ fun ExploreMapScreen(
                         .padding(innerPadding)
                         .padding(AppSpacing.regular)
                 ) {
-                    GlassTextButton(
+                    CircleTextButton(
                         text = "◎", // Location symbol placeholder
                         contentDescription = stringResource(R.string.map_my_location_cd),
                         onClick = {
@@ -230,8 +224,8 @@ fun ExploreMapScreen(
                                 )
                             }
                         },
-                        surfaceColor = glassSurfaceColor,
-                        borderColor = glassBorderColor
+                        surfaceColor = surfaceColor,
+                        borderColor = borderColor
                     )
                 }
             }
@@ -244,7 +238,7 @@ private fun MapOfferCard(
     offer: OfferUiModel,
     onViewOfferClick: () -> Unit
 ) {
-    GlassCard {
+    AppCard {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -254,7 +248,7 @@ private fun MapOfferCard(
                 Text(
                     text = offer.merchantName,
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.tertiary
                 )
                 Text(
                     text = offer.distance,
@@ -282,10 +276,10 @@ private fun MapOfferCard(
                 Text(
                     text = offer.discountedPrice,
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.tertiary
                 )
                 
-                GlassButton(
+                AppButton(
                     text = stringResource(R.string.map_view_offer),
                     onClick = onViewOfferClick
                 )
@@ -295,7 +289,7 @@ private fun MapOfferCard(
 }
 
 @Composable
-private fun GlassTextButton(
+private fun CircleTextButton(
     text: String,
     contentDescription: String,
     onClick: () -> Unit,
@@ -306,8 +300,8 @@ private fun GlassTextButton(
     Surface(
         shape = CircleShape,
         color = surfaceColor,
-        border = BorderStroke(GlassTokens.borderWidth, borderColor),
-        shadowElevation = GlassTokens.elevation / 2,
+        border = BorderStroke(SurfaceTokens.borderWidth, borderColor),
+        shadowElevation = SurfaceTokens.elevation,
         modifier = Modifier
             .size(48.dp)
             .clip(CircleShape)

@@ -24,35 +24,31 @@ val RescateCoralOnLight = Color(0xFFC23B26)
 // Amber for prices/accent text on light surfaces (5.9 on Cream; plain Butter is 1.6).
 val RescateButterOnLight = Color(0xFF805400)
 
-// ---------------------------------------------------------------------------
-// Legacy Editorial Glass tokens (kept so untouched screens still compile.
-// Remove once every screen is migrated to Rescate.)
-// ---------------------------------------------------------------------------
-val EcoGreen = Color(0xFF247A52)
-val EcoGreenDark = Color(0xFF185A3B)
-val EcoLime = Color(0xFFA8D672)
+// Neutral and container roles, so Material components never fall back to the
+// default lilac palette. Pairs checked >= 4.5:1 for text, >= 3:1 for outlines.
+val RescateSurfaceVariantLight = Color(0xFFEDE5D8)
+val RescateOutlineLight = Color(0xFF857A6D)
+val RescateOutlineVariantLight = Color(0xFFD9CEBE)
+val RescateContainerLowLight = Color(0xFFFBF6EC)
+val RescateContainerLight = Color(0xFFF4EDE0)
+val RescateContainerHighLight = Color(0xFFEFE7D8)
+val RescateContainerHighestLight = Color(0xFFE9E0CF)
+val RescateSurfaceDimLight = Color(0xFFE6DDCC)
+val RescatePrimaryContainerLight = Color(0xFFFBE3AE)
+val RescateOnPrimaryContainerLight = Color(0xFF3D2800)
+val RescateTertiaryContainerLight = Color(0xFFF3DFB8)
+val RescateErrorContainerLight = Color(0xFFF9D9D2)
+val RescateOnErrorContainerLight = Color(0xFF5C1608)
 
-val BackgroundLight = Color(0xFFF4F7F3)
-val SurfaceLight = Color(0xFFFFFFFF)
-val SurfaceMuted = Color(0xFFE9EFEB)
-
-val GlassLight = Color(0xCCFFFFFF)
-val GlassLightStrong = Color(0xE6FFFFFF)
-val GlassBorderLight = Color(0x66FFFFFF)
-
-val TextPrimaryLight = Color(0xFF151A17)
-val TextSecondaryLight = Color(0xFF68716B)
-val TextOnPrimary = Color(0xFFFFFFFF)
-
-// Status (success stays green on purpose: "Reservado", "Recogido")
-val SuccessGreen = Color(0xFF2E7D4F)
-val WarningAmber = Color(0xFFF2A93B)
-val ErrorRed = Color(0xFFBA3A3A)
-
-val BackgroundDark = Color(0xFF101512)
-val SurfaceDark = Color(0xFF171D19)
-val GlassDark = Color(0x991D2520)
-val GlassBorderDark = Color(0x33FFFFFF)
-
-val TextPrimaryDark = Color(0xFFF2F5F3)
-val TextSecondaryDark = Color(0xFFADB7B0)
+val RescateSurfaceVariantDark = Color(0xFF2A241E)
+val RescateOutlineDark = Color(0xFF8F8579)
+val RescateOutlineVariantDark = Color(0xFF3A332B)
+val RescateContainerLowestDark = Color(0xFF0F0D0B)
+val RescateContainerLowDark = Color(0xFF1A1713)
+val RescateContainerHighDark = Color(0xFF28231D)
+val RescateContainerHighestDark = Color(0xFF332D26)
+val RescateSurfaceBrightDark = Color(0xFF3A342D)
+val RescatePrimaryContainerDark = Color(0xFF4A3410)
+val RescateOnPrimaryContainerDark = Color(0xFFFBE3AE)
+val RescateErrorContainerDark = Color(0xFF5C1F14)
+val RescateOnErrorContainerDark = Color(0xFFFFDAD3)

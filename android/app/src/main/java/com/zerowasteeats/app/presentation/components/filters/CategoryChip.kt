@@ -2,7 +2,6 @@ package com.zerowasteeats.app.presentation.components.filters
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
@@ -18,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
-import com.zerowasteeats.app.presentation.theme.GlassTokens
+import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 
 @Composable
 fun CategoryChip(
@@ -27,14 +26,11 @@ fun CategoryChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isDarkTheme = isAppInDarkTheme()
-
-    // Highly refined, restrained chips
+// Highly refined, restrained chips
     val containerColor = if (isSelected) {
         MaterialTheme.colorScheme.primary
     } else {
-        if (isDarkTheme) GlassTokens.darkSurface.copy(alpha = 0.5f) 
-        else GlassTokens.lightSurface.copy(alpha = 0.5f)
+        SurfaceTokens.surface
     }
 
     val contentColor = if (isSelected) {
@@ -46,7 +42,7 @@ fun CategoryChip(
     val borderColor = if (isSelected) {
         Color.Transparent
     } else {
-        if (isDarkTheme) GlassTokens.darkBorder else GlassTokens.lightBorder
+        SurfaceTokens.border
     }
 
     Surface(
@@ -56,7 +52,7 @@ fun CategoryChip(
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(AppRadius.extraLarge),
         color = containerColor,
-        border = if (!isSelected) BorderStroke(GlassTokens.borderWidth, borderColor) else null,
+        border = if (!isSelected) BorderStroke(SurfaceTokens.borderWidth, borderColor) else null,
         shadowElevation = 0.dp // Flatter chips to let cards pop
     ) {
         Box(

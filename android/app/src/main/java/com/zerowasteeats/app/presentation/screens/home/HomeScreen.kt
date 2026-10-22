@@ -4,9 +4,7 @@ import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.model.OfferCategory
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +26,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import com.zerowasteeats.app.presentation.components.common.offerListItem
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -35,20 +35,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zerowasteeats.app.presentation.components.glass.GlassSearchBar
+import com.zerowasteeats.app.presentation.components.common.AppSearchBar
 import com.zerowasteeats.app.presentation.components.filters.CategoryChip
 import com.zerowasteeats.app.presentation.components.offers.OfferCard
 import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
-import com.zerowasteeats.app.presentation.theme.GlassTokens
+import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
 
 @Composable
@@ -61,6 +59,8 @@ fun HomeScreen(
     var selectedCategory by rememberSaveable { mutableStateOf(OfferCategory.ALL) }
 
     val categories = OfferCategory.entries
+    // Cards already shown once; they skip the entrance animation when they reappear
+    val seenOfferIds = remember { mutableSetOf<String>() }
     val mockOffers = MockOffers.getList()
 
     val filteredOffers = mockOffers.filter { offer ->
@@ -78,35 +78,13 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Subtle tonal depth in the background header area
-            val isDark = isAppInDarkTheme()
-            val gradientColor = if (isDark) {
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
-            } else {
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
-            }
-            
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp)
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                gradientColor,
-                                Color.Transparent
-                            )
-                        )
-                    )
-            )
-
-            LazyColumn(
+LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
                     start = AppSpacing.regular,
                     end = AppSpacing.regular,
                     top = AppSpacing.regular, // Slightly tighter top spacing
-                    bottom = AppSpacing.huge + 64.dp // Padding for future FAB/Nav
+                    bottom = AppSpacing.large // Trailing gap; the bottom bar inset comes from the app scaffold
                 ),
                 verticalArrangement = Arrangement.spacedBy(AppSpacing.medium) // Improved info density
             ) {
@@ -116,7 +94,7 @@ fun HomeScreen(
 
                 item {
                     Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
-                    GlassSearchBar(
+                    AppSearchBar(
                         query = searchQuery,
                         onQueryChange = { searchQuery = it },
                         placeholder = stringResource(R.string.home_search_placeholder),
@@ -155,6 +133,7 @@ fun HomeScreen(
                         key = { it.id }
                     ) { offer ->
                         OfferCard(
+                            modifier = offerListItem(seenOfferIds, offer.id),
                             offer = offer,
                             onClick = { onOfferClick(offer.id) },
                             onFavoriteClick = { onFavoriteClick(offer.id) },
@@ -209,7 +188,7 @@ private fun SectionHeader(
             Text(
                 text = stringResource(R.string.common_view_map),
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.tertiary
             )
         }
     }

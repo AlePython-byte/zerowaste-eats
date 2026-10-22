@@ -33,8 +33,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
@@ -47,9 +50,11 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.ui.graphics.graphicsLayer
-import com.zerowasteeats.app.presentation.components.glass.GlassButton
+import com.zerowasteeats.app.presentation.components.common.AppButton
+import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.data.offerPhotoRes
 import com.zerowasteeats.app.presentation.model.OfferUiModel
+import com.zerowasteeats.app.presentation.navigation.sharedOfferImage
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.RescateCarbon
 import com.zerowasteeats.app.presentation.theme.RescateCoral
@@ -68,6 +73,9 @@ fun OfferDetailScreen(
     val remainingText = pluralStringResource(R.plurals.offer_remaining_count, offer.remainingQuantity, offer.remainingQuantity)
     val heartScale = remember { Animatable(1f) }
     val scope = rememberCoroutineScope()
+    val haptics = LocalHapticFeedback.current
+    val scrollState = rememberScrollState()
+    val animationsEnabled = rememberAnimationsEnabled()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -78,17 +86,19 @@ fun OfferDetailScreen(
             )
         }
     ) { innerPadding ->
+        Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = innerPadding.calculateTopPadding())
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
         ) {
             // HERO: full-bleed photo with a fade into the carbon background
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(380.dp)
+                    .clipToBounds() // the photo is shifted below, keep it inside the hero
                     .background(MaterialTheme.colorScheme.surface)
             ) {
                 if (photo != null) {
@@ -96,7 +106,14 @@ fun OfferDetailScreen(
                         painter = painterResource(id = photo),
                         contentDescription = offer.title,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .sharedOfferImage(offer.id)
+                            .graphicsLayer {
+                                // Parallax: the content scrolls by `value`, the photo drifts back
+                                // down by half of it, so it moves at half speed.
+                                if (animationsEnabled) translationY = scrollState.value * 0.5f
+                            }
                     )
                 }
 
@@ -112,39 +129,6 @@ fun OfferDetailScreen(
                         )
                 )
 
-                // Top controls
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .statusBarsPadding()
-                        .padding(AppSpacing.regular),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
-                ) {
-                    CircleControl(
-                        text = "←",
-                        contentDescription = stringResource(R.string.common_back_cd),
-                        onClick = onBackClick
-                    )
-                    CircleControl(
-                        text = if (offer.isFavorite) "♥" else "♡",
-                        contentDescription = stringResource(
-                            if (offer.isFavorite) R.string.common_favorite_remove_cd else R.string.common_favorite_add_cd
-                        ),
-                        tint = if (offer.isFavorite) RescateCoral else RescateCream,
-                        onClick = {
-                            scope.launch {
-                                heartScale.animateTo(
-                                    1.35f,
-                                    spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium)
-                                )
-                                heartScale.animateTo(1f, spring())
-                            }
-                            onFavoriteClick()
-                        },
-                        heartScale = heartScale
-                    )
-                }
             }
 
             // INFO
@@ -221,7 +205,7 @@ fun OfferDetailScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Pickup card: flat carbon surface, no glass
+                // Pickup card: flat surface card
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -252,6 +236,64 @@ fun OfferDetailScreen(
                 // Space so the floating reservation panel does not cover the content
                 Spacer(modifier = Modifier.height(160.dp))
             }
+        }
+
+        // Soft backdrop that fades in once the content scrolls past the photo, so text
+        // does not collide with the clock or the pinned buttons.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer {
+                    val start = 240.dp.toPx() // hero is 380dp tall; begin fading near its end
+                    alpha = ((scrollState.value - start) / 100.dp.toPx()).coerceIn(0f, 1f)
+                }
+                .background(
+                    Brush.verticalGradient(
+                        0f to MaterialTheme.colorScheme.background,
+                        0.75f to MaterialTheme.colorScheme.background.copy(alpha = 0.9f),
+                        1f to Color.Transparent
+                    )
+                )
+                .statusBarsPadding()
+                .height(88.dp)
+        )
+
+        // Pinned controls: outside the scrolling column so they stay visible over photo and content
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(AppSpacing.regular),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
+        ) {
+            CircleControl(
+                text = "←",
+                contentDescription = stringResource(R.string.common_back_cd),
+                onClick = onBackClick
+            )
+            CircleControl(
+                text = if (offer.isFavorite) "♥" else "♡",
+                contentDescription = stringResource(
+                    if (offer.isFavorite) R.string.common_favorite_remove_cd else R.string.common_favorite_add_cd
+                ),
+                tint = if (offer.isFavorite) RescateCoral else RescateCream,
+                onClick = {
+                    haptics.performHapticFeedback(
+                        if (offer.isFavorite) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn
+                    )
+                    scope.launch {
+                        heartScale.animateTo(
+                            1.35f,
+                            spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium)
+                        )
+                        heartScale.animateTo(1f, spring())
+                    }
+                    onFavoriteClick()
+                },
+                heartScale = heartScale
+            )
+        }
         }
     }
 }
@@ -322,7 +364,7 @@ private fun ReservationPanel(
                 )
             }
 
-            GlassButton(
+            AppButton(
                 text = stringResource(R.string.offer_detail_reserve),
                 onClick = onReserveClick
             )

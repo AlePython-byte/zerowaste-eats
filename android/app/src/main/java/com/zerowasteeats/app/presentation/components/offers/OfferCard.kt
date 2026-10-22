@@ -5,10 +5,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -32,6 +36,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
@@ -41,8 +47,10 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.data.offerPhotoRes
 import com.zerowasteeats.app.presentation.model.OfferUiModel
+import com.zerowasteeats.app.presentation.navigation.sharedOfferImage
 import com.zerowasteeats.app.presentation.theme.RescateButter
 import com.zerowasteeats.app.presentation.theme.RescateCarbon
 import com.zerowasteeats.app.presentation.theme.RescateCarbonElevated
@@ -66,24 +74,45 @@ fun OfferCard(
     val photo = offerPhotoRes(offer)
     val heartScale = remember { Animatable(1f) }
     val scope = rememberCoroutineScope()
+    val haptics = LocalHapticFeedback.current
 
     val fallbackBrush = Brush.linearGradient(listOf(RescateCarbonElevated, RescateCarbon))
     val cardShape = RoundedCornerShape(28.dp)
+
+    // Press feedback: the card shrinks slightly instead of showing a ripple
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val animationsEnabled = rememberAnimationsEnabled()
+    val pressScale by animateFloatAsState(
+        targetValue = if (isPressed && animationsEnabled) 0.98f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
+        label = "offerCardPressScale"
+    )
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(320.dp)
+            .graphicsLayer {
+                scaleX = pressScale
+                scaleY = pressScale
+            }
             .clip(cardShape)
             .background(fallbackBrush)
-            .clickable { onClick() }
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
     ) {
         if (photo != null) {
             Image(
                 painter = painterResource(id = photo),
                 contentDescription = offer.title,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .sharedOfferImage(offer.id)
             )
         }
 
@@ -94,8 +123,9 @@ fun OfferCard(
                 .background(
                     Brush.verticalGradient(
                         0f to Color.Transparent,
-                        0.35f to Color.Transparent,
-                        1f to RescateCarbon.copy(alpha = 0.95f)
+                        0.2f to RescateCarbon.copy(alpha = 0.10f),
+                        0.45f to RescateCarbon.copy(alpha = 0.70f),
+                        1f to RescateCarbon.copy(alpha = 0.96f)
                     )
                 )
         )
@@ -108,7 +138,7 @@ fun OfferCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            GlassPill(text = pluralStringResource(R.plurals.offer_remaining_count, offer.remainingQuantity, offer.remainingQuantity))
+            InfoPill(text = pluralStringResource(R.plurals.offer_remaining_count, offer.remainingQuantity, offer.remainingQuantity))
 
             Box(
                 modifier = Modifier
@@ -116,6 +146,9 @@ fun OfferCard(
                     .clip(CircleShape)
                     .background(RescateCarbon.copy(alpha = 0.55f))
                     .clickable {
+                        haptics.performHapticFeedback(
+                            if (offer.isFavorite) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn
+                        )
                         scope.launch {
                             heartScale.animateTo(
                                 1.35f,
@@ -158,7 +191,7 @@ fun OfferCard(
                         fontWeight = FontWeight.SemiBold,
                         letterSpacing = 1.2.sp
                     ),
-                    color = RescateCreamMuted,
+                    color = RescateCream,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
@@ -166,7 +199,7 @@ fun OfferCard(
                 Text(
                     text = offer.distance,
                     style = MaterialTheme.typography.labelSmall,
-                    color = RescateCreamMuted
+                    color = RescateCream
                 )
             }
 
@@ -199,7 +232,7 @@ fun OfferCard(
                     modifier = Modifier.padding(bottom = 3.dp)
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                GlassPill(
+                InfoPill(
                     text = stringResource(R.string.offer_discount_off, offer.discountPercent),
                     background = RescateCoral,
                     textColor = RescateCream
@@ -220,7 +253,7 @@ fun OfferCard(
 }
 
 @Composable
-private fun GlassPill(
+private fun InfoPill(
     text: String,
     background: Color = RescateCarbon.copy(alpha = 0.6f),
     textColor: Color = RescateCream,

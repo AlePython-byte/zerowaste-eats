@@ -1,7 +1,6 @@
-package com.zerowasteeats.app.presentation.components.glass
+package com.zerowasteeats.app.presentation.components.common
 
 import androidx.compose.foundation.BorderStroke
-import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,38 +10,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
-import com.zerowasteeats.app.presentation.theme.GlassTokens
+import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 import androidx.compose.foundation.shape.RoundedCornerShape
 
 @Composable
-fun GlassCard(
+fun AppCard(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(AppSpacing.regular),
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val isDarkTheme = isAppInDarkTheme()
-
-    val backgroundColor = if (isDarkTheme) {
-        GlassTokens.darkSurface
-    } else {
-        GlassTokens.lightSurface
-    }
-
-    val borderColor = if (isDarkTheme) {
-        GlassTokens.darkBorder
-    } else {
-        GlassTokens.lightBorder
-    }
-
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(AppRadius.large),
-        color = backgroundColor,
+        color = SurfaceTokens.surface,
         border = BorderStroke(
-            width = GlassTokens.borderWidth,
-            color = borderColor
+            width = SurfaceTokens.borderWidth,
+            color = SurfaceTokens.border
         ),
-        shadowElevation = GlassTokens.elevation
+        shadowElevation = SurfaceTokens.elevation
     ) {
         Column(
             modifier = Modifier.padding(contentPadding),
