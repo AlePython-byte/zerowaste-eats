@@ -68,4 +68,9 @@
     </plurals>
     <string name="explore_empty_title">No results found</string>
     <string name="explore_empty_subtitle">Try another search or change the filters.</string>
+
+    <string name="map_my_location_cd">My location</string>
+    <string name="map_view_offer">View offer</string>
+    <string name="map_location_unavailable">We couldn\'t get your location.</string>
+    <string name="map_location_permission_required">Turn on location permission to use this feature.</string>
 </resources>

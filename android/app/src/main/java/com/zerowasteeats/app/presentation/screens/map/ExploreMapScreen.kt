@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -54,6 +55,7 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
+import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.components.glass.GlassButton
 import com.zerowasteeats.app.presentation.components.glass.GlassCard
 import com.zerowasteeats.app.presentation.data.MockMapCoordinates
@@ -76,6 +78,9 @@ fun ExploreMapScreen(
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    // Resolved here because snackbars are shown from callbacks, outside composition
+    val locationUnavailableMessage = stringResource(R.string.map_location_unavailable)
+    val locationPermissionMessage = stringResource(R.string.map_location_permission_required)
     
     var isLocationPermissionGranted by rememberSaveable { 
         mutableStateOf(
@@ -107,17 +112,17 @@ fun ExploreMapScreen(
                     }
                 } else {
                     scope.launch {
-                        snackbarHostState.showSnackbar("No pudimos obtener tu ubicación.")
+                        snackbarHostState.showSnackbar(locationUnavailableMessage)
                     }
                 }
             }.addOnFailureListener {
                 scope.launch {
-                    snackbarHostState.showSnackbar("No pudimos obtener tu ubicación.")
+                    snackbarHostState.showSnackbar(locationUnavailableMessage)
                 }
             }
         } else {
             scope.launch {
-                snackbarHostState.showSnackbar("Activa el permiso de ubicación para usar esta función.")
+                snackbarHostState.showSnackbar(locationPermissionMessage)
             }
         }
     }
@@ -169,7 +174,7 @@ fun ExploreMapScreen(
             ) {
                 GlassTextButton(
                     text = "←",
-                    contentDescription = "Volver",
+                    contentDescription = stringResource(R.string.common_back_cd),
                     onClick = onBackClick,
                     surfaceColor = glassSurfaceColor,
                     borderColor = glassBorderColor
@@ -199,7 +204,7 @@ fun ExploreMapScreen(
                 ) {
                     GlassTextButton(
                         text = "◎", // Location symbol placeholder
-                        contentDescription = "Mi ubicación",
+                        contentDescription = stringResource(R.string.map_my_location_cd),
                         onClick = {
                             if (isLocationPermissionGranted) {
                                 fusedLocationClient.lastLocation.addOnSuccessListener { location ->
@@ -212,7 +217,7 @@ fun ExploreMapScreen(
                                         }
                                     } else {
                                         scope.launch {
-                                            snackbarHostState.showSnackbar("No pudimos obtener tu ubicación.")
+                                            snackbarHostState.showSnackbar(locationUnavailableMessage)
                                         }
                                     }
                                 }
@@ -281,7 +286,7 @@ private fun MapOfferCard(
                 )
                 
                 GlassButton(
-                    text = "Ver oferta",
+                    text = stringResource(R.string.map_view_offer),
                     onClick = onViewOfferClick
                 )
             }
