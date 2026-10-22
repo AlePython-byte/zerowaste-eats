@@ -19,7 +19,6 @@ import com.zerowasteeats.app.presentation.screens.explore.ExploreScreen
 import com.zerowasteeats.app.presentation.screens.explore.ExploreViewMode
 import com.zerowasteeats.app.presentation.screens.explore.ExploreViewRequest
 import com.zerowasteeats.app.presentation.screens.home.HomeScreen
-import com.zerowasteeats.app.presentation.screens.map.ExploreMapScreen
 import com.zerowasteeats.app.presentation.screens.offerdetail.OfferDetailScreen
 import com.zerowasteeats.app.presentation.screens.orders.OrdersScreen
 import com.zerowasteeats.app.presentation.screens.profile.ProfileScreen
@@ -56,14 +55,6 @@ fun AppNavigation(
                             navController.navigate("offer/$offerId")
                         },
                         onFavoriteClick = { /* Handle favorite click temporarily */ }
-                    )
-                }
-                sharedComposable("explore/map") {
-                    ExploreMapScreen(
-                        onBackClick = { navController.popBackStack() },
-                        onOfferClick = { offerId ->
-                            navController.navigate("offer/$offerId")
-                        }
                     )
                 }
                 composable(AppDestination.ORDERS.route) {
