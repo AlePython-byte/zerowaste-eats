@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.data.offerPhotoRes
 import com.zerowasteeats.app.presentation.model.OfferUiModel
+import com.zerowasteeats.app.presentation.navigation.sharedOfferImage
 import com.zerowasteeats.app.presentation.theme.RescateButter
 import com.zerowasteeats.app.presentation.theme.RescateCarbon
 import com.zerowasteeats.app.presentation.theme.RescateCarbonElevated
@@ -109,7 +110,9 @@ fun OfferCard(
                 painter = painterResource(id = photo),
                 contentDescription = offer.title,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .sharedOfferImage(offer.id)
             )
         }
 

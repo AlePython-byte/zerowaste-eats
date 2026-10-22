@@ -54,6 +54,7 @@ import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.data.offerPhotoRes
 import com.zerowasteeats.app.presentation.model.OfferUiModel
+import com.zerowasteeats.app.presentation.navigation.sharedOfferImage
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.RescateCarbon
 import com.zerowasteeats.app.presentation.theme.RescateCoral
@@ -106,6 +107,7 @@ fun OfferDetailScreen(
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxSize()
+                            .sharedOfferImage(offer.id)
                             .graphicsLayer {
                                 // Parallax: the content scrolls by `value`, the photo drifts back
                                 // down by half of it, so it moves at half speed.
