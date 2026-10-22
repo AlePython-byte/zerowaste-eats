@@ -107,7 +107,7 @@ fun OrdersScreen() {
                         start = AppSpacing.regular,
                         end = AppSpacing.regular,
                         top = AppSpacing.small,
-                        bottom = AppSpacing.huge + 80.dp // To prevent hidden content under GlassBottomBar
+                        bottom = AppSpacing.large // Trailing gap; the bottom bar inset comes from the app scaffold
                     ),
                     verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
                 ) {
@@ -176,7 +176,7 @@ private fun EmptyOrdersState(selectedTab: OrdersTab, modifier: Modifier = Modifi
     Box(
         modifier = modifier
             .fillMaxSize()
-            .padding(bottom = AppSpacing.huge + 80.dp), // offset for bottom bar
+            .padding(bottom = AppSpacing.large),
         contentAlignment = Alignment.Center
     ) {
         val text = when (selectedTab) {

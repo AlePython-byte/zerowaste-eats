@@ -1,11 +1,15 @@
 package com.zerowasteeats.app.presentation.navigation
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,6 +43,8 @@ fun ZeroWasteEatsApp() {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
+                        // Opaque backdrop so no scrolled content shows around the bar
+                        .background(MaterialTheme.colorScheme.background)
                         .navigationBarsPadding(), // Keep above system nav bar
                     contentAlignment = Alignment.BottomCenter
                 ) {
@@ -62,13 +68,15 @@ fun ZeroWasteEatsApp() {
                 }
             }
         }
-    ) { _ ->
-        // We do not apply innerPadding to AppNavigation because we want
-        // the content to flow under the floating glass bottom bar.
-        // Screens must add their own top/bottom padding (like HomeScreen does)
+    ) { innerPadding ->
+        // innerPadding reserves the bottom bar's height, so content ends above it
+        // instead of flowing underneath. Screens only add a small trailing gap.
         AppNavigation(
             navController = navController,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
         )
     }
 }

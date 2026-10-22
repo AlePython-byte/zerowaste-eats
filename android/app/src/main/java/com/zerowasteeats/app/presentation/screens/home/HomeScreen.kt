@@ -106,7 +106,7 @@ fun HomeScreen(
                     start = AppSpacing.regular,
                     end = AppSpacing.regular,
                     top = AppSpacing.regular, // Slightly tighter top spacing
-                    bottom = AppSpacing.huge + 64.dp // Padding for future FAB/Nav
+                    bottom = AppSpacing.large // Trailing gap; the bottom bar inset comes from the app scaffold
                 ),
                 verticalArrangement = Arrangement.spacedBy(AppSpacing.medium) // Improved info density
             ) {

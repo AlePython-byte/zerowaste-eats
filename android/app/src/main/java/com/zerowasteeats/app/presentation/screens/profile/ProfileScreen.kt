@@ -61,7 +61,7 @@ fun ProfileScreen() {
                 start = AppSpacing.regular,
                 end = AppSpacing.regular,
                 top = AppSpacing.regular,
-                bottom = AppSpacing.huge + 80.dp // Padding for GlassBottomBar
+                bottom = AppSpacing.large // Trailing gap; the bottom bar inset comes from the app scaffold
             ),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.extraLarge)
         ) {
