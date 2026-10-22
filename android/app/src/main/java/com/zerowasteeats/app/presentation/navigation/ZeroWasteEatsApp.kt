@@ -13,12 +13,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.zerowasteeats.app.presentation.components.navigation.AppBottomBar
+import com.zerowasteeats.app.presentation.screens.explore.ExploreViewRequest
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -26,6 +28,9 @@ fun ZeroWasteEatsApp() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    // Next to the nav controller: outlives Explore, but not the activity, so a consumed
+    // request cannot come back after rotation or a language change
+    val exploreViewRequest = remember { ExploreViewRequest() }
 
     val isBottomBarVisible = currentRoute in listOf(
         AppDestination.HOME.route,
@@ -59,6 +64,7 @@ fun ZeroWasteEatsApp() {
         // instead of flowing underneath. Screens only add a small trailing gap.
         AppNavigation(
             navController = navController,
+            exploreViewRequest = exploreViewRequest,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)

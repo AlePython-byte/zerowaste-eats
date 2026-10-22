@@ -16,6 +16,8 @@ import androidx.navigation.compose.composable
 import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.screens.explore.ExploreScreen
+import com.zerowasteeats.app.presentation.screens.explore.ExploreViewMode
+import com.zerowasteeats.app.presentation.screens.explore.ExploreViewRequest
 import com.zerowasteeats.app.presentation.screens.home.HomeScreen
 import com.zerowasteeats.app.presentation.screens.map.ExploreMapScreen
 import com.zerowasteeats.app.presentation.screens.offerdetail.OfferDetailScreen
@@ -25,6 +27,7 @@ import com.zerowasteeats.app.presentation.screens.profile.ProfileScreen
 @Composable
 fun AppNavigation(
     navController: NavHostController,
+    exploreViewRequest: ExploreViewRequest,
     modifier: Modifier = Modifier
 ) {
     // Lets the offer photo travel between the card and the detail screen
@@ -41,12 +44,14 @@ fun AppNavigation(
                             navController.navigate("offer/$offerId")
                         },
                         onMapClick = {
-                            navController.navigate("explore/map")
+                            exploreViewRequest.request(ExploreViewMode.MAP)
+                            navController.navigateToTab(AppDestination.EXPLORE)
                         }
                     )
                 }
                 sharedComposable(AppDestination.EXPLORE.route) {
                     ExploreScreen(
+                        viewRequest = exploreViewRequest,
                         onOfferClick = { offerId ->
                             navController.navigate("offer/$offerId")
                         },

@@ -82,11 +82,16 @@ private val GridSpacing = 12.dp
 
 @Composable
 fun ExploreScreen(
+    viewRequest: ExploreViewRequest = remember { ExploreViewRequest() },
     onOfferClick: (String) -> Unit = {},
     onFavoriteClick: (String) -> Unit = {}
 ) {
     val offers = remember { MockOffers.getList() }
     val state = rememberExploreState(offers)
+    // Applied over the restored state, so search and filters are kept
+    LaunchedEffect(viewRequest.pending) {
+        viewRequest.consume()?.let { state.viewMode = it }
+    }
     val filteredOffers = state.filteredOffers
     // Cards already shown once; they skip the entrance animation when they reappear
     val seenOfferIds = remember { mutableSetOf<String>() }
