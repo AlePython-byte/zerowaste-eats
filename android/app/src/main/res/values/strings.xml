@@ -77,4 +77,17 @@
     <string name="map_view_offer">Ver oferta</string>
     <string name="map_location_unavailable">No pudimos obtener tu ubicación.</string>
     <string name="map_location_permission_required">Activa el permiso de ubicación para usar esta función.</string>
+
+    <string name="profile_title">Perfil</string>
+    <string name="profile_subtitle">Tu cuenta e impacto en ZeroWaste Eats.</string>
+    <string name="profile_impact_title">Tu impacto</string>
+    <string name="profile_metric_rescued_orders">Pedidos rescatados</string>
+    <string name="profile_metric_rescued_food">Comida rescatada</string>
+    <string name="profile_metric_estimated_savings">Ahorro estimado</string>
+    <string name="profile_rescued_food_value">%1$.1f kg</string>
+    <string name="profile_preferences_title">Preferencias</string>
+    <string name="profile_dark_mode_title">Modo oscuro</string>
+    <string name="profile_dark_mode_subtitle">Cambia entre el tema claro y el oscuro.</string>
+    <string name="profile_about_impact_title">Sobre tu impacto</string>
+    <string name="profile_about_impact_body">Cada pedido rescatado ayuda a aprovechar alimentos que aún están en buen estado y reduce el desperdicio.</string>
 </resources>

@@ -105,13 +105,13 @@ private fun ProfileHeader(modifier: Modifier = Modifier) {
             .padding(top = AppSpacing.small)
     ) {
         Text(
-            text = "Perfil",
+            text = stringResource(R.string.profile_title),
             style = MaterialTheme.typography.displayLarge,
             color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
         Text(
-            text = "Tu cuenta e impacto en ZeroWaste Eats.",
+            text = stringResource(R.string.profile_subtitle),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
         )
@@ -172,7 +172,7 @@ private fun ProfileHeroCard(profile: ProfileUiModel, modifier: Modifier = Modifi
 private fun ImpactSection(profile: ProfileUiModel, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = "Tu impacto",
+            text = stringResource(R.string.profile_impact_title),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold
@@ -185,13 +185,13 @@ private fun ImpactSection(profile: ProfileUiModel, modifier: Modifier = Modifier
             horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
         ) {
             MetricCard(
-                label = "Pedidos rescatados",
+                label = stringResource(R.string.profile_metric_rescued_orders),
                 value = profile.completedOrders.toString(),
                 modifier = Modifier.weight(1f)
             )
             MetricCard(
-                label = "Comida rescatada",
-                value = "${profile.rescuedFoodKg.toString().replace('.', ',')} kg",
+                label = stringResource(R.string.profile_metric_rescued_food),
+                value = stringResource(R.string.profile_rescued_food_value, profile.rescuedFoodKg),
                 modifier = Modifier.weight(1f)
             )
         }
@@ -199,7 +199,7 @@ private fun ImpactSection(profile: ProfileUiModel, modifier: Modifier = Modifier
         Spacer(modifier = Modifier.height(AppSpacing.small))
         
         MetricCard(
-            label = "Ahorro estimado",
+            label = stringResource(R.string.profile_metric_estimated_savings),
             value = profile.estimatedSavings,
             modifier = Modifier.fillMaxWidth(),
             isHighlight = true
@@ -251,7 +251,7 @@ private fun MetricCard(
 private fun PreferencesSection(categories: List<OfferCategory>, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = "Preferencias",
+            text = stringResource(R.string.profile_preferences_title),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold
@@ -312,13 +312,13 @@ private fun AppearanceSection(modifier: Modifier = Modifier) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Modo oscuro",
+                    text = stringResource(R.string.profile_dark_mode_title),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Cambia entre el tema claro y el oscuro.",
+                    text = stringResource(R.string.profile_dark_mode_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -382,14 +382,14 @@ private fun LanguageSection(modifier: Modifier = Modifier) {
 private fun InfoSection(modifier: Modifier = Modifier) {
     GlassCard(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = "Sobre tu impacto",
+            text = stringResource(R.string.profile_about_impact_title),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(AppSpacing.small))
         Text(
-            text = "Cada pedido rescatado ayuda a aprovechar alimentos que aún están en buen estado y reduce el desperdicio.",
+            text = stringResource(R.string.profile_about_impact_body),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             lineHeight = MaterialTheme.typography.bodyMedium.lineHeight
