@@ -13,6 +13,7 @@
         <item quantity="other">Quedan %1$d</item>
     </plurals>
     <string name="offer_discount_off">%1$d%% menos</string>
+    <string name="offer_card_summary_cd">%1$s, %2$s, %3$s, %4$d%% de descuento</string>
 
     <string name="profile_language_title">Idioma</string>
     <string name="profile_language_subtitle">Elige el idioma de la aplicación.</string>
@@ -65,12 +66,29 @@
     <string name="explore_sort_distance">Cercanía</string>
     <string name="explore_sort_price">Precio</string>
     <string name="explore_sort_discount">Descuento</string>
-    <string name="explore_results_title">Ofertas encontradas</string>
+    <string name="explore_view_mode_cd">Modo de vista</string>
+    <string name="explore_view_mode_list">Lista</string>
+    <string name="explore_view_mode_grid">Cuadrícula</string>
+    <string name="explore_view_mode_map">Mapa</string>
+    <string name="explore_map_empty_title">No hay ofertas para mostrar en el mapa</string>
+    <string name="explore_empty_clear">Quitar filtros</string>
     <plurals name="explore_offers_count">
         <item quantity="one">%1$d oferta</item>
         <item quantity="many">%1$d ofertas</item>
         <item quantity="other">%1$d ofertas</item>
     </plurals>
+    <string name="filter_sheet_title">Filtros</string>
+    <string name="filter_sheet_category">Categoría</string>
+    <string name="filter_sheet_apply">Aplicar</string>
+    <string name="filter_sheet_clear">Limpiar</string>
+    <string name="filter_button_cd">Filtros</string>
+    <plurals name="filter_button_active_cd">
+        <item quantity="one">Filtros, %1$d activo</item>
+        <item quantity="many">Filtros, %1$d activos</item>
+        <item quantity="other">Filtros, %1$d activos</item>
+    </plurals>
+    <string name="filter_chip_sort">Orden: %1$s</string>
+    <string name="filter_chip_remove_cd">Quitar filtro %1$s</string>
     <string name="explore_empty_title">No encontramos resultados</string>
     <string name="explore_empty_subtitle">Prueba con otra búsqueda o cambia los filtros.</string>
 

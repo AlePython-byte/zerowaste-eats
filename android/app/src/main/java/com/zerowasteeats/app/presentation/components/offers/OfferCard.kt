@@ -3,7 +3,6 @@ package com.zerowasteeats.app.presentation.components.offers
 import com.zerowasteeats.app.R
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -22,26 +21,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -54,10 +47,9 @@ import com.zerowasteeats.app.presentation.navigation.sharedOfferImage
 import com.zerowasteeats.app.presentation.theme.RescateButter
 import com.zerowasteeats.app.presentation.theme.RescateCarbon
 import com.zerowasteeats.app.presentation.theme.RescateCarbonElevated
-import com.zerowasteeats.app.presentation.theme.RescateCoral
 import com.zerowasteeats.app.presentation.theme.RescateCream
+import com.zerowasteeats.app.presentation.theme.RescateDiscountBadge
 import com.zerowasteeats.app.presentation.theme.RescateCreamMuted
-import kotlinx.coroutines.launch
 
 /**
  * Immersive offer card: the photo fills the card, and the information floats
@@ -72,9 +64,6 @@ fun OfferCard(
     modifier: Modifier = Modifier,
 ) {
     val photo = offerPhotoRes(offer)
-    val heartScale = remember { Animatable(1f) }
-    val scope = rememberCoroutineScope()
-    val haptics = LocalHapticFeedback.current
 
     val fallbackBrush = Brush.linearGradient(listOf(RescateCarbonElevated, RescateCarbon))
     val cardShape = RoundedCornerShape(28.dp)
@@ -140,38 +129,11 @@ fun OfferCard(
         ) {
             InfoPill(text = pluralStringResource(R.plurals.offer_remaining_count, offer.remainingQuantity, offer.remainingQuantity))
 
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(RescateCarbon.copy(alpha = 0.55f))
-                    .clickable {
-                        haptics.performHapticFeedback(
-                            if (offer.isFavorite) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn
-                        )
-                        scope.launch {
-                            heartScale.animateTo(
-                                1.35f,
-                                spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium)
-                            )
-                            heartScale.animateTo(1f, spring())
-                        }
-                        onFavoriteClick()
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = if (offer.isFavorite) "♥" else "♡",
-                    fontSize = 22.sp,
-                    color = if (offer.isFavorite) RescateCoral else RescateCream,
-                    modifier = Modifier
-                        .graphicsLayer {
-                            scaleX = heartScale.value
-                            scaleY = heartScale.value
-                        }
-                        .semantics { contentDescription = favoriteContentDescription }
-                )
-            }
+            FavoriteButton(
+                isFavorite = offer.isFavorite,
+                contentDescription = favoriteContentDescription,
+                onClick = onFavoriteClick
+            )
         }
 
         // Bottom block: merchant, title, price
@@ -234,7 +196,7 @@ fun OfferCard(
                 Spacer(modifier = Modifier.weight(1f))
                 InfoPill(
                     text = stringResource(R.string.offer_discount_off, offer.discountPercent),
-                    background = RescateCoral,
+                    background = RescateDiscountBadge,
                     textColor = RescateCream
                 )
             }

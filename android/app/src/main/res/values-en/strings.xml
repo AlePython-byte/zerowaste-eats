@@ -12,6 +12,7 @@
         <item quantity="other">%1$d left</item>
     </plurals>
     <string name="offer_discount_off">%1$d%% off</string>
+    <string name="offer_card_summary_cd">%1$s, %2$s, %3$s, %4$d%% off</string>
 
     <string name="profile_language_title">Language</string>
     <string name="profile_language_subtitle">Choose the app language.</string>
@@ -62,11 +63,27 @@
     <string name="explore_sort_distance">Distance</string>
     <string name="explore_sort_price">Price</string>
     <string name="explore_sort_discount">Discount</string>
-    <string name="explore_results_title">Offers found</string>
+    <string name="explore_view_mode_cd">View mode</string>
+    <string name="explore_view_mode_list">List</string>
+    <string name="explore_view_mode_grid">Grid</string>
+    <string name="explore_view_mode_map">Map</string>
+    <string name="explore_map_empty_title">No offers to show on the map</string>
+    <string name="explore_empty_clear">Clear filters</string>
     <plurals name="explore_offers_count">
         <item quantity="one">%1$d offer</item>
         <item quantity="other">%1$d offers</item>
     </plurals>
+    <string name="filter_sheet_title">Filters</string>
+    <string name="filter_sheet_category">Category</string>
+    <string name="filter_sheet_apply">Apply</string>
+    <string name="filter_sheet_clear">Clear</string>
+    <string name="filter_button_cd">Filters</string>
+    <plurals name="filter_button_active_cd">
+        <item quantity="one">Filters, %1$d active</item>
+        <item quantity="other">Filters, %1$d active</item>
+    </plurals>
+    <string name="filter_chip_sort">Sort: %1$s</string>
+    <string name="filter_chip_remove_cd">Remove %1$s filter</string>
     <string name="explore_empty_title">No results found</string>
     <string name="explore_empty_subtitle">Try another search or change the filters.</string>
 
