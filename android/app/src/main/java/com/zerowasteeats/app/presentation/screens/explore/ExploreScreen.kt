@@ -1,5 +1,8 @@
 package com.zerowasteeats.app.presentation.screens.explore
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,8 +12,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -30,15 +38,21 @@ import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppButtonStyle
 import com.zerowasteeats.app.presentation.components.common.AppSearchBar
 import com.zerowasteeats.app.presentation.components.common.offerGridItem
+import com.zerowasteeats.app.presentation.components.common.offerListItem
+import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.components.filters.ActiveFilterChips
 import com.zerowasteeats.app.presentation.components.filters.ExploreFilterSheet
 import com.zerowasteeats.app.presentation.components.filters.FilterButton
 import com.zerowasteeats.app.presentation.components.offers.CompactOfferCard
+import com.zerowasteeats.app.presentation.components.offers.OfferCard
 import com.zerowasteeats.app.presentation.data.MockOffers
+import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 
 // Flip to bring back the large "Explorar" title above the search bar
 private const val SHOW_EXPLORE_TITLE = false
+
+private const val VIEW_MODE_CROSSFADE_MILLIS = 150
 
 private val GridSpacing = 12.dp
 
@@ -52,7 +66,10 @@ fun ExploreScreen(
     val filteredOffers = state.filteredOffers
     // Cards already shown once; they skip the entrance animation when they reappear
     val seenOfferIds = remember { mutableSetOf<String>() }
+    // One scroll state per mode, so each keeps its position while the other is shown
+    val listState = rememberLazyListState()
     val gridState = rememberLazyGridState()
+    val animationsEnabled = rememberAnimationsEnabled()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
@@ -64,6 +81,7 @@ fun ExploreScreen(
         ) {
             ExploreSearchHeader(
                 state = state,
+                resultCount = filteredOffers.size,
                 modifier = Modifier.padding(
                     start = AppSpacing.regular,
                     end = AppSpacing.regular,
@@ -71,41 +89,29 @@ fun ExploreScreen(
                 )
             )
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                state = gridState,
+            Crossfade(
+                targetState = state.viewMode,
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(
-                    start = AppSpacing.regular,
-                    end = AppSpacing.regular,
-                    top = AppSpacing.small,
-                    bottom = AppSpacing.large // Trailing gap; the bottom bar inset comes from the app scaffold
-                ),
-                horizontalArrangement = Arrangement.spacedBy(GridSpacing),
-                verticalArrangement = Arrangement.spacedBy(GridSpacing)
-            ) {
-                if (filteredOffers.isEmpty()) {
-                    item(key = "empty", span = { GridItemSpan(maxLineSpan) }) {
-                        EmptyState(onClearFilters = state::clearAll)
-                    }
-                } else {
-                    item(key = "count", span = { GridItemSpan(maxLineSpan) }) {
-                        ResultsCount(count = filteredOffers.size)
-                    }
-                    items(
-                        items = filteredOffers,
-                        key = { it.id }
-                    ) { offer ->
-                        CompactOfferCard(
-                            modifier = offerGridItem(seenOfferIds, offer.id),
-                            offer = offer,
-                            onClick = { onOfferClick(offer.id) },
-                            onFavoriteClick = { onFavoriteClick(offer.id) },
-                            favoriteContentDescription = stringResource(
-                                if (offer.isFavorite) R.string.common_favorite_remove_cd else R.string.common_favorite_add_cd
-                            )
-                        )
-                    }
+                animationSpec = if (animationsEnabled) tween(VIEW_MODE_CROSSFADE_MILLIS) else snap(),
+                label = "exploreViewMode"
+            ) { mode ->
+                when (mode) {
+                    ExploreViewMode.LIST -> OfferList(
+                        offers = filteredOffers,
+                        listState = listState,
+                        seenOfferIds = seenOfferIds,
+                        onOfferClick = onOfferClick,
+                        onFavoriteClick = onFavoriteClick,
+                        onClearFilters = state::clearAll
+                    )
+                    ExploreViewMode.GRID -> OfferGrid(
+                        offers = filteredOffers,
+                        gridState = gridState,
+                        seenOfferIds = seenOfferIds,
+                        onOfferClick = onOfferClick,
+                        onFavoriteClick = onFavoriteClick,
+                        onClearFilters = state::clearAll
+                    )
                 }
             }
         }
@@ -123,7 +129,99 @@ fun ExploreScreen(
 }
 
 @Composable
-private fun ExploreSearchHeader(state: ExploreState, modifier: Modifier = Modifier) {
+private fun OfferGrid(
+    offers: List<OfferUiModel>,
+    gridState: LazyGridState,
+    seenOfferIds: MutableSet<String>,
+    onOfferClick: (String) -> Unit,
+    onFavoriteClick: (String) -> Unit,
+    onClearFilters: () -> Unit
+) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        state = gridState,
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = AppSpacing.regular,
+            end = AppSpacing.regular,
+            top = AppSpacing.small,
+            bottom = AppSpacing.large // Trailing gap; the bottom bar inset comes from the app scaffold
+        ),
+        horizontalArrangement = Arrangement.spacedBy(GridSpacing),
+        verticalArrangement = Arrangement.spacedBy(GridSpacing)
+    ) {
+        if (offers.isEmpty()) {
+            item(key = "empty", span = { GridItemSpan(maxLineSpan) }) {
+                EmptyState(onClearFilters = onClearFilters)
+            }
+        } else {
+            items(
+                items = offers,
+                key = { it.id }
+            ) { offer ->
+                CompactOfferCard(
+                    modifier = offerGridItem(seenOfferIds, offer.id),
+                    offer = offer,
+                    onClick = { onOfferClick(offer.id) },
+                    onFavoriteClick = { onFavoriteClick(offer.id) },
+                    favoriteContentDescription = stringResource(
+                        if (offer.isFavorite) R.string.common_favorite_remove_cd else R.string.common_favorite_add_cd
+                    )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun OfferList(
+    offers: List<OfferUiModel>,
+    listState: LazyListState,
+    seenOfferIds: MutableSet<String>,
+    onOfferClick: (String) -> Unit,
+    onFavoriteClick: (String) -> Unit,
+    onClearFilters: () -> Unit
+) {
+    LazyColumn(
+        state = listState,
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = AppSpacing.regular,
+            end = AppSpacing.regular,
+            top = AppSpacing.small,
+            bottom = AppSpacing.large // Trailing gap; the bottom bar inset comes from the app scaffold
+        ),
+        verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
+    ) {
+        if (offers.isEmpty()) {
+            item(key = "empty") {
+                EmptyState(onClearFilters = onClearFilters)
+            }
+        } else {
+            items(
+                items = offers,
+                key = { it.id }
+            ) { offer ->
+                OfferCard(
+                    modifier = offerListItem(seenOfferIds, offer.id),
+                    offer = offer,
+                    onClick = { onOfferClick(offer.id) },
+                    onFavoriteClick = { onFavoriteClick(offer.id) },
+                    favoriteContentDescription = stringResource(
+                        if (offer.isFavorite) R.string.common_favorite_remove_cd else R.string.common_favorite_add_cd
+                    )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ExploreSearchHeader(
+    state: ExploreState,
+    resultCount: Int,
+    modifier: Modifier = Modifier
+) {
     Column(modifier = modifier.fillMaxWidth()) {
         if (SHOW_EXPLORE_TITLE) {
             ExploreTitle()
@@ -153,6 +251,20 @@ private fun ExploreSearchHeader(state: ExploreState, modifier: Modifier = Modifi
             onRemoveCategory = state::removeCategoryFilter,
             onRemoveSort = state::removeSortFilter
         )
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = AppSpacing.extraSmall),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ResultsCount(count = resultCount)
+            ViewModeSelector(
+                selected = state.viewMode,
+                onSelect = { state.viewMode = it }
+            )
+        }
     }
 }
 

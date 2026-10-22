@@ -66,6 +66,9 @@
     <string name="explore_sort_distance">Cercanía</string>
     <string name="explore_sort_price">Precio</string>
     <string name="explore_sort_discount">Descuento</string>
+    <string name="explore_view_mode_cd">Modo de vista</string>
+    <string name="explore_view_mode_list">Lista</string>
+    <string name="explore_view_mode_grid">Cuadrícula</string>
     <string name="explore_empty_clear">Quitar filtros</string>
     <plurals name="explore_offers_count">
         <item quantity="one">%1$d oferta</item>

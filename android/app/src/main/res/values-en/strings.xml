@@ -63,6 +63,9 @@
     <string name="explore_sort_distance">Distance</string>
     <string name="explore_sort_price">Price</string>
     <string name="explore_sort_discount">Discount</string>
+    <string name="explore_view_mode_cd">View mode</string>
+    <string name="explore_view_mode_list">List</string>
+    <string name="explore_view_mode_grid">Grid</string>
     <string name="explore_empty_clear">Clear filters</string>
     <plurals name="explore_offers_count">
         <item quantity="one">%1$d offer</item>
