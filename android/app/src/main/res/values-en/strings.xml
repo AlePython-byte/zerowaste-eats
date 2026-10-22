@@ -53,4 +53,19 @@
 
     <string name="order_card_quantity">Quantity: %1$d</string>
     <string name="order_card_code">Code: %1$s</string>
+
+    <string name="explore_title">Explore</string>
+    <string name="explore_subtitle">Find offers that suit you</string>
+    <string name="explore_search_placeholder">Search offers or merchants</string>
+    <string name="explore_sort_by">Sort by</string>
+    <string name="explore_sort_distance">Distance</string>
+    <string name="explore_sort_price">Price</string>
+    <string name="explore_sort_discount">Discount</string>
+    <string name="explore_results_title">Offers found</string>
+    <plurals name="explore_offers_count">
+        <item quantity="one">%1$d offer</item>
+        <item quantity="other">%1$d offers</item>
+    </plurals>
+    <string name="explore_empty_title">No results found</string>
+    <string name="explore_empty_subtitle">Try another search or change the filters.</string>
 </resources>

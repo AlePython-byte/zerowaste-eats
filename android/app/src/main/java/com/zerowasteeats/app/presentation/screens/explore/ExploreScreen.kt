@@ -1,7 +1,10 @@
 package com.zerowasteeats.app.presentation.screens.explore
 
 import com.zerowasteeats.app.presentation.model.OfferCategory
+import androidx.annotation.StringRes
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import com.zerowasteeats.app.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,10 +39,10 @@ import com.zerowasteeats.app.presentation.components.offers.OfferCard
 import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 
-enum class ExploreSortOption(val label: String) {
-    DISTANCE("Cercanía"),
-    PRICE("Precio"),
-    DISCOUNT("Descuento")
+enum class ExploreSortOption(@StringRes val labelRes: Int) {
+    DISTANCE(R.string.explore_sort_distance),
+    PRICE(R.string.explore_sort_price),
+    DISCOUNT(R.string.explore_sort_discount)
 }
 
 @Composable
@@ -109,8 +112,8 @@ fun ExploreScreen(
                     GlassSearchBar(
                         query = searchQuery,
                         onQueryChange = { searchQuery = it },
-                        placeholder = "Buscar ofertas o establecimientos",
-                        clearContentDescription = "Limpiar búsqueda",
+                        placeholder = stringResource(R.string.explore_search_placeholder),
+                        clearContentDescription = stringResource(R.string.common_clear_search_cd),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -135,7 +138,7 @@ fun ExploreScreen(
                 // Sorting
                 item {
                     Text(
-                        text = "Ordenar por",
+                        text = stringResource(R.string.explore_sort_by),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.Bold,
@@ -148,7 +151,7 @@ fun ExploreScreen(
                     ) {
                         items(sortOptions) { option ->
                             CategoryChip(
-                                text = option.label,
+                                text = stringResource(option.labelRes),
                                 isSelected = sortOption == option,
                                 onClick = { sortOption = option }
                             )
@@ -165,7 +168,7 @@ fun ExploreScreen(
                         contentAlignment = Alignment.CenterEnd
                     ) {
                         GlassButton(
-                            text = "Ver mapa",
+                            text = stringResource(R.string.common_view_map),
                             onClick = onMapClick,
                             style = GlassButtonStyle.SECONDARY
                         )
@@ -192,7 +195,9 @@ fun ExploreScreen(
                             offer = offer,
                             onClick = { onOfferClick(offer.id) },
                             onFavoriteClick = { onFavoriteClick(offer.id) },
-                            favoriteContentDescription = if (offer.isFavorite) "Quitar de favoritos" else "Marcar como favorito"
+                            favoriteContentDescription = stringResource(
+                                if (offer.isFavorite) R.string.common_favorite_remove_cd else R.string.common_favorite_add_cd
+                            )
                         )
                     }
                 }
@@ -205,13 +210,13 @@ fun ExploreScreen(
 private fun ExploreHeader(modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = "Explorar",
+            text = stringResource(R.string.explore_title),
             style = MaterialTheme.typography.displayLarge,
             color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
         Text(
-            text = "Encuentra ofertas que se adapten a ti",
+            text = stringResource(R.string.explore_subtitle),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
         )
@@ -226,13 +231,13 @@ private fun ResultsHeader(count: Int, modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.Bottom
     ) {
         Text(
-            text = "Ofertas encontradas",
+            text = stringResource(R.string.explore_results_title),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold
         )
         
-        val countText = if (count == 1) "1 oferta" else "$count ofertas"
+        val countText = pluralStringResource(R.plurals.explore_offers_count, count, count)
         Text(
             text = countText,
             style = MaterialTheme.typography.labelLarge,
@@ -251,14 +256,14 @@ private fun EmptyState(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "No encontramos resultados",
+            text = stringResource(R.string.explore_empty_title),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(AppSpacing.small))
         Text(
-            text = "Prueba con otra búsqueda o cambia los filtros.",
+            text = stringResource(R.string.explore_empty_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
             textAlign = TextAlign.Center

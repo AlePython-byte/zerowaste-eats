@@ -56,4 +56,20 @@
 
     <string name="order_card_quantity">Cantidad: %1$d</string>
     <string name="order_card_code">Código: %1$s</string>
+
+    <string name="explore_title">Explorar</string>
+    <string name="explore_subtitle">Encuentra ofertas que se adapten a ti</string>
+    <string name="explore_search_placeholder">Buscar ofertas o establecimientos</string>
+    <string name="explore_sort_by">Ordenar por</string>
+    <string name="explore_sort_distance">Cercanía</string>
+    <string name="explore_sort_price">Precio</string>
+    <string name="explore_sort_discount">Descuento</string>
+    <string name="explore_results_title">Ofertas encontradas</string>
+    <plurals name="explore_offers_count">
+        <item quantity="one">%1$d oferta</item>
+        <item quantity="many">%1$d ofertas</item>
+        <item quantity="other">%1$d ofertas</item>
+    </plurals>
+    <string name="explore_empty_title">No encontramos resultados</string>
+    <string name="explore_empty_subtitle">Prueba con otra búsqueda o cambia los filtros.</string>
 </resources>
