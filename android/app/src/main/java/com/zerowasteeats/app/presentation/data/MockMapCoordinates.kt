@@ -16,6 +16,8 @@ object MockMapCoordinates {
             "1" -> LatLng(1.2150, -77.2800) // Croissants del día
             "2" -> LatLng(1.2120, -77.2830) // Bowl saludable de salmón
             "3" -> LatLng(1.2170, -77.2780) // Caja de postres surtidos
+            "4" -> LatLng(1.2105, -77.2790) // Hamburguesa artesanal con papas
+            "5" -> LatLng(1.2185, -77.2840) // Canasta de verduras frescas
             else -> pastoCenter
         }
     }

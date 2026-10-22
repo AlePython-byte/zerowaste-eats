@@ -12,5 +12,7 @@ fun offerPhotoRes(offer: OfferUiModel): Int? = when (offer.id) {
     "1" -> R.drawable.offer_croissant
     "2" -> R.drawable.offer_bowl_salmon
     "3" -> R.drawable.offer_postres
+    "4" -> R.drawable.offer_burger
+    "5" -> R.drawable.offer_verduras
     else -> null
 }
