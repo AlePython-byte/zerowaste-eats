@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">ZeroWaste Eats</string>
+
+    <string name="profile_language_title">Idioma</string>
+    <string name="profile_language_subtitle">Elige el idioma de la aplicación.</string>
+    <string name="language_name_es" translatable="false">Español</string>
+    <string name="language_name_en" translatable="false">English</string>
 </resources>

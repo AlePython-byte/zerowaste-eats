@@ -21,11 +21,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.core.os.LocaleListCompat
+import com.zerowasteeats.app.R
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -76,6 +83,10 @@ fun ProfileScreen() {
 
             item {
                 AppearanceSection()
+            }
+
+            item {
+                LanguageSection()
             }
 
             item {
@@ -320,6 +331,48 @@ private fun AppearanceSection(modifier: Modifier = Modifier) {
                     )
                 }
             )
+        }
+    }
+}
+
+@Composable
+private fun LanguageSection(modifier: Modifier = Modifier) {
+    val languages = listOf(
+        "es" to R.string.language_name_es,
+        "en" to R.string.language_name_en
+    )
+    // Spanish is the default, so an empty list means "es".
+    val current = AppCompatDelegate.getApplicationLocales()[0]?.language ?: "es"
+
+    GlassCard(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(R.string.profile_language_title),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = stringResource(R.string.profile_language_subtitle),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(AppSpacing.medium))
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+            languages.forEachIndexed { index, (tag, nameRes) ->
+                SegmentedButton(
+                    selected = current == tag,
+                    onClick = {
+                        if (current != tag) {
+                            AppCompatDelegate.setApplicationLocales(
+                                LocaleListCompat.forLanguageTags(tag)
+                            )
+                        }
+                    },
+                    shape = SegmentedButtonDefaults.itemShape(index, languages.size)
+                ) {
+                    Text(text = stringResource(nameRes))
+                }
+            }
         }
     }
 }
