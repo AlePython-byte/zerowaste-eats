@@ -42,7 +42,7 @@ import kotlinx.coroutines.launch
  * Map of [offers] with the selected offer's card and a "my location" button.
  * Owns the location permission flow; errors are reported through [onLocationMessage]
  * so the host decides how to show them. [contentPadding] keeps the map controls and
- * the card clear of system bars.
+ * the card clear of system bars. [onMapLoaded] fires once the map tiles have loaded.
  */
 @Composable
 fun OffersMap(
@@ -55,7 +55,8 @@ fun OffersMap(
     cameraPositionState: CameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(MockMapCoordinates.pastoCenter, 14f)
     },
-    contentPadding: PaddingValues = PaddingValues()
+    contentPadding: PaddingValues = PaddingValues(),
+    onMapLoaded: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
     // Resolved here because messages are sent from callbacks, outside composition
@@ -81,6 +82,7 @@ fun OffersMap(
             properties = MapProperties(isMyLocationEnabled = userLocation.hasPermission),
             uiSettings = MapUiSettings(myLocationButtonEnabled = false), // We use custom UI
             contentPadding = contentPadding,
+            onMapLoaded = onMapLoaded,
             onMapClick = { onSelectOffer(null) }
         ) {
             offers.forEach { offer ->

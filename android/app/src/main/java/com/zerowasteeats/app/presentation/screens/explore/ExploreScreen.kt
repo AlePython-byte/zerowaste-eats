@@ -1,9 +1,15 @@
 package com.zerowasteeats.app.presentation.screens.explore
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -24,18 +30,30 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.maps.android.compose.CameraPositionState
+import com.google.maps.android.compose.rememberCameraPositionState
 import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppButtonStyle
+import com.zerowasteeats.app.presentation.components.common.AppCard
 import com.zerowasteeats.app.presentation.components.common.AppSearchBar
 import com.zerowasteeats.app.presentation.components.common.offerGridItem
 import com.zerowasteeats.app.presentation.components.common.offerListItem
@@ -43,16 +61,22 @@ import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEn
 import com.zerowasteeats.app.presentation.components.filters.ActiveFilterChips
 import com.zerowasteeats.app.presentation.components.filters.ExploreFilterSheet
 import com.zerowasteeats.app.presentation.components.filters.FilterButton
+import com.zerowasteeats.app.presentation.components.map.OffersMap
 import com.zerowasteeats.app.presentation.components.offers.CompactOfferCard
 import com.zerowasteeats.app.presentation.components.offers.OfferCard
+import com.zerowasteeats.app.presentation.data.MockMapCoordinates
 import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.theme.AppSpacing
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 // Flip to bring back the large "Explorar" title above the search bar
 private const val SHOW_EXPLORE_TITLE = false
 
 private const val VIEW_MODE_CROSSFADE_MILLIS = 150
+private const val MAP_VEIL_FADE_MILLIS = 200
+private const val MAP_VEIL_TIMEOUT_MILLIS = 1500L
 
 private val GridSpacing = 12.dp
 
@@ -69,10 +93,17 @@ fun ExploreScreen(
     // One scroll state per mode, so each keeps its position while the other is shown
     val listState = rememberLazyListState()
     val gridState = rememberLazyGridState()
+    // Lives here, not in the map, so the map reopens where the user left it
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(MockMapCoordinates.pastoCenter, 14f)
+    }
     val animationsEnabled = rememberAnimationsEnabled()
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -89,28 +120,51 @@ fun ExploreScreen(
                 )
             )
 
-            Crossfade(
-                targetState = state.viewMode,
-                modifier = Modifier.fillMaxSize(),
-                animationSpec = if (animationsEnabled) tween(VIEW_MODE_CROSSFADE_MILLIS) else snap(),
-                label = "exploreViewMode"
-            ) { mode ->
-                when (mode) {
-                    ExploreViewMode.LIST -> OfferList(
-                        offers = filteredOffers,
-                        listState = listState,
-                        seenOfferIds = seenOfferIds,
+            Box(modifier = Modifier.fillMaxSize()) {
+                // List and grid leave at once when the map opens, so the two never overlap
+                // Qualified: the ColumnScope overload would otherwise be picked from the outer Column
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = state.viewMode != ExploreViewMode.MAP,
+                    enter = if (animationsEnabled) fadeIn(tween(VIEW_MODE_CROSSFADE_MILLIS)) else EnterTransition.None,
+                    exit = ExitTransition.None
+                ) {
+                    Crossfade(
+                        targetState = state.viewMode,
+                        modifier = Modifier.fillMaxSize(),
+                        animationSpec = if (animationsEnabled) tween(VIEW_MODE_CROSSFADE_MILLIS) else snap(),
+                        label = "exploreViewMode"
+                    ) { mode ->
+                        when (mode) {
+                            ExploreViewMode.LIST -> OfferList(
+                                offers = filteredOffers,
+                                listState = listState,
+                                seenOfferIds = seenOfferIds,
+                                onOfferClick = onOfferClick,
+                                onFavoriteClick = onFavoriteClick,
+                                onClearFilters = state::clearAll
+                            )
+                            ExploreViewMode.GRID -> OfferGrid(
+                                offers = filteredOffers,
+                                gridState = gridState,
+                                seenOfferIds = seenOfferIds,
+                                onOfferClick = onOfferClick,
+                                onFavoriteClick = onFavoriteClick,
+                                onClearFilters = state::clearAll
+                            )
+                            ExploreViewMode.MAP -> Unit // shown below, outside the crossfade
+                        }
+                    }
+                }
+
+                if (state.viewMode == ExploreViewMode.MAP) {
+                    ExploreMap(
+                        state = state,
+                        cameraPositionState = cameraPositionState,
+                        animationsEnabled = animationsEnabled,
                         onOfferClick = onOfferClick,
-                        onFavoriteClick = onFavoriteClick,
-                        onClearFilters = state::clearAll
-                    )
-                    ExploreViewMode.GRID -> OfferGrid(
-                        offers = filteredOffers,
-                        gridState = gridState,
-                        seenOfferIds = seenOfferIds,
-                        onOfferClick = onOfferClick,
-                        onFavoriteClick = onFavoriteClick,
-                        onClearFilters = state::clearAll
+                        onLocationMessage = { message ->
+                            scope.launch { snackbarHostState.showSnackbar(message) }
+                        }
                     )
                 }
             }
@@ -125,6 +179,96 @@ fun ExploreScreen(
             onClear = state::clearDraft,
             onDismiss = state::discardDraft
         )
+    }
+}
+
+/**
+ * The map view. A GoogleMap draws on its own surface and does not fade with its parent,
+ * so instead of fading the map, a veil in the background color covers it and fades out
+ * once the tiles have loaded (or after a timeout, if they never report it).
+ */
+@Composable
+private fun ExploreMap(
+    state: ExploreState,
+    cameraPositionState: CameraPositionState,
+    animationsEnabled: Boolean,
+    onOfferClick: (String) -> Unit,
+    onLocationMessage: (String) -> Unit
+) {
+    var isMapReady by remember { mutableStateOf(!animationsEnabled) }
+    LaunchedEffect(Unit) {
+        delay(MAP_VEIL_TIMEOUT_MILLIS)
+        isMapReady = true
+    }
+    val veilAlpha by animateFloatAsState(
+        targetValue = if (isMapReady) 0f else 1f,
+        animationSpec = if (animationsEnabled) tween(MAP_VEIL_FADE_MILLIS) else snap(),
+        label = "exploreMapVeil"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = AppSpacing.small)
+    ) {
+        OffersMap(
+            offers = state.filteredOffers,
+            selectedOfferId = state.selectedMapOfferId,
+            onSelectOffer = state::selectMapOffer,
+            onOfferClick = onOfferClick,
+            onLocationMessage = onLocationMessage,
+            modifier = Modifier.fillMaxSize(),
+            cameraPositionState = cameraPositionState,
+            onMapLoaded = { isMapReady = true }
+        )
+
+        if (state.filteredOffers.isEmpty()) {
+            MapEmptyMessage(
+                onClearFilters = state::clearAll,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(AppSpacing.regular)
+            )
+        }
+
+        if (veilAlpha > 0f) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .graphicsLayer { alpha = veilAlpha }
+                    .background(MaterialTheme.colorScheme.background)
+            )
+        }
+    }
+}
+
+@Composable
+private fun MapEmptyMessage(onClearFilters: () -> Unit, modifier: Modifier = Modifier) {
+    AppCard(modifier = modifier) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(R.string.explore_map_empty_title),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
+            Text(
+                text = stringResource(R.string.explore_empty_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(AppSpacing.medium))
+            AppButton(
+                text = stringResource(R.string.explore_empty_clear),
+                onClick = onClearFilters,
+                style = AppButtonStyle.SECONDARY
+            )
+        }
     }
 }
 
@@ -259,7 +403,12 @@ private fun ExploreSearchHeader(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            ResultsCount(count = resultCount)
+            ResultsCount(
+                count = resultCount,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = AppSpacing.small)
+            )
             ViewModeSelector(
                 selected = state.viewMode,
                 onSelect = { state.viewMode = it }

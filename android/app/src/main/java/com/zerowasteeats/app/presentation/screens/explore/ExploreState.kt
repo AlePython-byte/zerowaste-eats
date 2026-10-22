@@ -14,13 +14,17 @@ import com.zerowasteeats.app.presentation.model.OfferSort
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.model.filterAndSort
 
-enum class ExploreViewMode { LIST, GRID }
+enum class ExploreViewMode { LIST, GRID, MAP }
 
 /**
- * Everything Explore remembers: the search text, the applied filters and the view mode.
+ * Everything Explore remembers: the search text, the applied filters, the view mode and
+ * the offer selected on the map.
  *
  * The filter sheet edits [draftFilters], a copy that only becomes [appliedFilters] on
  * [applyDraft]. Closing the sheet any other way calls [discardDraft].
+ *
+ * The map selection always points at a visible offer: whenever the search or the filters
+ * hide it, it is cleared.
  */
 @Stable
 class ExploreState(
@@ -29,9 +33,17 @@ class ExploreState(
     appliedFilters: OfferFilters = OfferFilters(),
     viewMode: ExploreViewMode = ExploreViewMode.GRID,
     draftFilters: OfferFilters = appliedFilters,
-    isFilterSheetOpen: Boolean = false
+    isFilterSheetOpen: Boolean = false,
+    selectedMapOfferId: String? = null
 ) {
-    var query by mutableStateOf(query)
+    private var queryState by mutableStateOf(query)
+
+    var query: String
+        get() = queryState
+        set(value) {
+            queryState = value
+            dropHiddenMapSelection()
+        }
 
     var viewMode by mutableStateOf(viewMode)
 
@@ -44,10 +56,18 @@ class ExploreState(
     var isFilterSheetOpen by mutableStateOf(isFilterSheetOpen)
         private set
 
+    var selectedMapOfferId by mutableStateOf(selectedMapOfferId)
+        private set
+
     val activeFilterCount: Int get() = appliedFilters.activeCount
 
     val filteredOffers: List<OfferUiModel> by derivedStateOf {
         offers.filterAndSort(this.query, this.appliedFilters)
+    }
+
+    /** Selects an offer on the map; ids that are not among the results are ignored. */
+    fun selectMapOffer(offerId: String?) {
+        selectedMapOfferId = offerId?.takeIf { id -> filteredOffers.any { it.id == id } }
     }
 
     fun openFilterSheet() {
@@ -73,12 +93,14 @@ class ExploreState(
     fun applyDraft() {
         appliedFilters = draftFilters
         isFilterSheetOpen = false
+        dropHiddenMapSelection()
     }
 
     /** Sets the applied filters directly, without going through the sheet. */
     fun applyFilters(filters: OfferFilters) {
         appliedFilters = filters
         draftFilters = filters
+        dropHiddenMapSelection()
     }
 
     fun removeCategoryFilter() = applyFilters(appliedFilters.copy(category = OfferCategory.ALL))
@@ -93,6 +115,11 @@ class ExploreState(
         clearAppliedFilters()
     }
 
+    private fun dropHiddenMapSelection() {
+        val selected = selectedMapOfferId ?: return
+        if (filteredOffers.none { it.id == selected }) selectedMapOfferId = null
+    }
+
     companion object {
         fun saver(offers: List<OfferUiModel>) = listSaver<ExploreState, Any>(
             save = {
@@ -103,7 +130,8 @@ class ExploreState(
                     it.appliedFilters.sort.name,
                     it.draftFilters.category.name,
                     it.draftFilters.sort.name,
-                    it.isFilterSheetOpen
+                    it.isFilterSheetOpen,
+                    it.selectedMapOfferId.orEmpty()
                 )
             },
             restore = {
@@ -119,7 +147,8 @@ class ExploreState(
                         OfferCategory.valueOf(it[4] as String),
                         OfferSort.valueOf(it[5] as String)
                     ),
-                    isFilterSheetOpen = it[6] as Boolean
+                    isFilterSheetOpen = it[6] as Boolean,
+                    selectedMapOfferId = (it[7] as String).ifEmpty { null }
                 )
             }
         )

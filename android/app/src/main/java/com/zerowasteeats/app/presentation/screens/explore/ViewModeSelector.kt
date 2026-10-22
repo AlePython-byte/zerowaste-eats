@@ -32,7 +32,7 @@ import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 
-/** Two-option segmented control (list or grid). */
+/** Segmented control for the Explore view: list, grid or map. */
 @Composable
 fun ViewModeSelector(
     selected: ExploreViewMode,
@@ -60,6 +60,7 @@ fun ViewModeSelector(
                         when (mode) {
                             ExploreViewMode.LIST -> R.string.explore_view_mode_list
                             ExploreViewMode.GRID -> R.string.explore_view_mode_grid
+                            ExploreViewMode.MAP -> R.string.explore_view_mode_map
                         }
                     ),
                     isSelected = mode == selected,

@@ -1,11 +1,13 @@
 package com.zerowasteeats.app.presentation.screens.explore
 
+import androidx.compose.runtime.saveable.SaverScope
 import com.zerowasteeats.app.presentation.model.OfferCategory
 import com.zerowasteeats.app.presentation.model.OfferFilters
 import com.zerowasteeats.app.presentation.model.OfferSort
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -156,5 +158,108 @@ class ExploreStateTest {
 
         assertEquals("oferta 1", state.query)
         assertEquals(listOf("1"), state.filteredOffers.map { it.id })
+    }
+
+    @Test
+    fun mapSelection_isClearedWhenAFilterHidesIt() {
+        val state = state()
+        state.selectMapOffer("2") // DESSERTS
+
+        state.applyFilters(OfferFilters(OfferCategory.BAKERY))
+
+        assertNull(state.selectedMapOfferId)
+    }
+
+    @Test
+    fun mapSelection_isClearedWhenTheSheetAppliesAFilterThatHidesIt() {
+        val state = state()
+        state.selectMapOffer("2")
+        state.openFilterSheet()
+        state.updateDraft(OfferFilters(OfferCategory.BAKERY))
+
+        state.applyDraft()
+
+        assertNull(state.selectedMapOfferId)
+    }
+
+    @Test
+    fun mapSelection_isClearedWhenTheSearchHidesIt() {
+        val state = state()
+        state.selectMapOffer("2")
+
+        state.query = "oferta 1"
+
+        assertNull(state.selectedMapOfferId)
+    }
+
+    @Test
+    fun mapSelection_staysWhenTheOfferIsStillVisible() {
+        val state = state()
+        state.selectMapOffer("1") // BAKERY
+
+        state.applyFilters(OfferFilters(OfferCategory.BAKERY, OfferSort.PRICE))
+        state.query = "oferta"
+
+        assertEquals("1", state.selectedMapOfferId)
+    }
+
+    @Test
+    fun mapSelection_doesNotComeBackWhenTheFilterIsRemoved() {
+        val state = state()
+        state.selectMapOffer("2")
+        state.applyFilters(OfferFilters(OfferCategory.BAKERY))
+
+        state.clearAppliedFilters()
+
+        assertNull(state.selectedMapOfferId)
+    }
+
+    @Test
+    fun selectMapOffer_ignoresOffersThatAreNotVisible() {
+        val state = state()
+        state.applyFilters(OfferFilters(OfferCategory.BAKERY))
+
+        state.selectMapOffer("2")
+
+        assertNull(state.selectedMapOfferId)
+    }
+
+    @Test
+    fun switchingToMap_keepsSearchFiltersAndResults() {
+        val state = state()
+        state.query = "oferta"
+        state.applyFilters(OfferFilters(OfferCategory.BAKERY, OfferSort.PRICE))
+        val resultsBefore = state.filteredOffers
+
+        state.viewMode = ExploreViewMode.MAP
+
+        assertEquals("oferta", state.query)
+        assertEquals(OfferFilters(OfferCategory.BAKERY, OfferSort.PRICE), state.appliedFilters)
+        assertEquals(resultsBefore, state.filteredOffers)
+    }
+
+    @Test
+    fun saver_restoresMapModeAndSelection() {
+        val state = state()
+        state.viewMode = ExploreViewMode.MAP
+        state.applyFilters(OfferFilters(OfferCategory.BAKERY))
+        state.selectMapOffer("3")
+        val saver = ExploreState.saver(offers)
+
+        val saved = with(saver) { SaverScope { true }.save(state) }!!
+        val restored = saver.restore(saved)!!
+
+        assertEquals(ExploreViewMode.MAP, restored.viewMode)
+        assertEquals("3", restored.selectedMapOfferId)
+        assertEquals(OfferFilters(OfferCategory.BAKERY), restored.appliedFilters)
+    }
+
+    @Test
+    fun saver_restoresNoSelectionAsNull() {
+        val saver = ExploreState.saver(offers)
+
+        val saved = with(saver) { SaverScope { true }.save(state()) }!!
+
+        assertNull(saver.restore(saved)!!.selectedMapOfferId)
     }
 }

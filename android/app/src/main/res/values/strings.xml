@@ -69,6 +69,8 @@
     <string name="explore_view_mode_cd">Modo de vista</string>
     <string name="explore_view_mode_list">Lista</string>
     <string name="explore_view_mode_grid">Cuadrícula</string>
+    <string name="explore_view_mode_map">Mapa</string>
+    <string name="explore_map_empty_title">No hay ofertas para mostrar en el mapa</string>
     <string name="explore_empty_clear">Quitar filtros</string>
     <plurals name="explore_offers_count">
         <item quantity="one">%1$d oferta</item>
