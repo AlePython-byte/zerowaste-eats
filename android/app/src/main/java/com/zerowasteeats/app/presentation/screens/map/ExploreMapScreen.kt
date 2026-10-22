@@ -1,10 +1,5 @@
 package com.zerowasteeats.app.presentation.screens.map
 
-import android.Manifest
-import android.annotation.SuppressLint
-import android.content.pm.PackageManager
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -38,17 +33,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
@@ -58,6 +49,8 @@ import com.google.maps.android.compose.rememberMarkerState
 import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppCard
+import com.zerowasteeats.app.presentation.components.map.LocationResult
+import com.zerowasteeats.app.presentation.components.map.rememberUserLocationState
 import com.zerowasteeats.app.presentation.data.MockMapCoordinates
 import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.model.OfferUiModel
@@ -65,62 +58,32 @@ import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 import kotlinx.coroutines.launch
 
-@SuppressLint("MissingPermission")
 @Composable
 fun ExploreMapScreen(
     onBackClick: () -> Unit,
     onOfferClick: (String) -> Unit
 ) {
-var selectedOfferId by rememberSaveable { mutableStateOf<String?>(null) }
-    
-    val context = LocalContext.current
-    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+    var selectedOfferId by rememberSaveable { mutableStateOf<String?>(null) }
+
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     // Resolved here because snackbars are shown from callbacks, outside composition
     val locationUnavailableMessage = stringResource(R.string.map_location_unavailable)
     val locationPermissionMessage = stringResource(R.string.map_location_permission_required)
-    
-    var isLocationPermissionGranted by rememberSaveable { 
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        )
-    }
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(MockMapCoordinates.pastoCenter, 14f)
     }
 
-    val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
-                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
-        
-        isLocationPermissionGranted = granted
-
-        if (granted) {
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    val latLng = LatLng(location.latitude, location.longitude)
-                    scope.launch {
-                        cameraPositionState.animate(
-                            update = CameraUpdateFactory.newLatLngZoom(latLng, 15f)
-                        )
-                    }
-                } else {
-                    scope.launch {
-                        snackbarHostState.showSnackbar(locationUnavailableMessage)
-                    }
-                }
-            }.addOnFailureListener {
-                scope.launch {
-                    snackbarHostState.showSnackbar(locationUnavailableMessage)
-                }
+    val userLocation = rememberUserLocationState { result ->
+        when (result) {
+            is LocationResult.Found -> scope.launch {
+                cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(result.latLng, 15f))
             }
-        } else {
-            scope.launch {
+            LocationResult.Unavailable -> scope.launch {
+                snackbarHostState.showSnackbar(locationUnavailableMessage)
+            }
+            LocationResult.PermissionDenied -> scope.launch {
                 snackbarHostState.showSnackbar(locationPermissionMessage)
             }
         }
@@ -137,7 +100,7 @@ var selectedOfferId by rememberSaveable { mutableStateOf<String?>(null) }
             GoogleMap(
                 modifier = Modifier.fillMaxSize(),
                 cameraPositionState = cameraPositionState,
-                properties = MapProperties(isMyLocationEnabled = isLocationPermissionGranted),
+                properties = MapProperties(isMyLocationEnabled = userLocation.hasPermission),
                 uiSettings = MapUiSettings(myLocationButtonEnabled = false), // We use custom UI
                 contentPadding = innerPadding,
                 onMapClick = { selectedOfferId = null }
@@ -203,31 +166,7 @@ var selectedOfferId by rememberSaveable { mutableStateOf<String?>(null) }
                     CircleTextButton(
                         text = "◎", // Location symbol placeholder
                         contentDescription = stringResource(R.string.map_my_location_cd),
-                        onClick = {
-                            if (isLocationPermissionGranted) {
-                                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                                    if (location != null) {
-                                        val latLng = LatLng(location.latitude, location.longitude)
-                                        scope.launch {
-                                            cameraPositionState.animate(
-                                                update = CameraUpdateFactory.newLatLngZoom(latLng, 15f)
-                                            )
-                                        }
-                                    } else {
-                                        scope.launch {
-                                            snackbarHostState.showSnackbar(locationUnavailableMessage)
-                                        }
-                                    }
-                                }
-                            } else {
-                                permissionLauncher.launch(
-                                    arrayOf(
-                                        Manifest.permission.ACCESS_FINE_LOCATION,
-                                        Manifest.permission.ACCESS_COARSE_LOCATION
-                                    )
-                                )
-                            }
-                        },
+                        onClick = userLocation::locate,
                         surfaceColor = surfaceColor,
                         borderColor = borderColor
                     )
