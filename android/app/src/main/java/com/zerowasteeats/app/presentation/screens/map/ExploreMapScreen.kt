@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -142,17 +143,20 @@ var selectedOfferId by rememberSaveable { mutableStateOf<String?>(null) }
                 onMapClick = { selectedOfferId = null }
             ) {
                 offers.forEach { offer ->
-                    val position = MockMapCoordinates.getCoordinatesForOffer(offer.id)
-                    val markerState = rememberMarkerState(position = position)
-                    Marker(
-                        state = markerState,
-                        title = offer.merchantName,
-                        snippet = offer.title,
-                        onClick = {
-                            selectedOfferId = offer.id
-                            true // consume the event to show custom UI
-                        }
-                    )
+                    // Keyed so a marker's state stays with its offer when the list changes
+                    key(offer.id) {
+                        val position = MockMapCoordinates.getCoordinatesForOffer(offer.id)
+                        val markerState = rememberMarkerState(position = position)
+                        Marker(
+                            state = markerState,
+                            title = offer.merchantName,
+                            snippet = offer.title,
+                            onClick = {
+                                selectedOfferId = offer.id
+                                true // consume the event to show custom UI
+                            }
+                        )
+                    }
                 }
             }
 
