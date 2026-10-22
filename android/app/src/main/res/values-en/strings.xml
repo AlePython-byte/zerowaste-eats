@@ -68,6 +68,10 @@
         <item quantity="one">%1$d offer</item>
         <item quantity="other">%1$d offers</item>
     </plurals>
+    <string name="filter_sheet_title">Filters</string>
+    <string name="filter_sheet_category">Category</string>
+    <string name="filter_sheet_apply">Apply</string>
+    <string name="filter_sheet_clear">Clear</string>
     <string name="explore_empty_title">No results found</string>
     <string name="explore_empty_subtitle">Try another search or change the filters.</string>
 

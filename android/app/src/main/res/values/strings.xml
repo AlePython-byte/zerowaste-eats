@@ -72,6 +72,10 @@
         <item quantity="many">%1$d ofertas</item>
         <item quantity="other">%1$d ofertas</item>
     </plurals>
+    <string name="filter_sheet_title">Filtros</string>
+    <string name="filter_sheet_category">Categoría</string>
+    <string name="filter_sheet_apply">Aplicar</string>
+    <string name="filter_sheet_clear">Limpiar</string>
     <string name="explore_empty_title">No encontramos resultados</string>
     <string name="explore_empty_subtitle">Prueba con otra búsqueda o cambia los filtros.</string>
 
