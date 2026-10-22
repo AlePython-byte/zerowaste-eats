@@ -4,9 +4,7 @@ import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.model.OfferCategory
 import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,8 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -78,29 +74,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Subtle tonal depth in the background header area
-            val isDark = isAppInDarkTheme()
-            val gradientColor = if (isDark) {
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
-            } else {
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
-            }
-            
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(300.dp)
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                gradientColor,
-                                Color.Transparent
-                            )
-                        )
-                    )
-            )
-
-            LazyColumn(
+LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
                     start = AppSpacing.regular,
