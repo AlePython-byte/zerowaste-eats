@@ -29,7 +29,7 @@ import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.GlassTokens
 
 @Composable
-fun GlassSearchBar(
+fun AppSearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
     placeholder: String,

@@ -37,7 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.zerowasteeats.app.presentation.components.glass.GlassSearchBar
+import com.zerowasteeats.app.presentation.components.glass.AppSearchBar
 import com.zerowasteeats.app.presentation.components.filters.CategoryChip
 import com.zerowasteeats.app.presentation.components.offers.OfferCard
 import com.zerowasteeats.app.presentation.data.MockOffers
@@ -90,7 +90,7 @@ LazyColumn(
 
                 item {
                     Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
-                    GlassSearchBar(
+                    AppSearchBar(
                         query = searchQuery,
                         onQueryChange = { searchQuery = it },
                         placeholder = stringResource(R.string.home_search_placeholder),

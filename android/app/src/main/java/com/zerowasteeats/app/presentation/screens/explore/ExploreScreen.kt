@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.presentation.components.filters.CategoryChip
 import com.zerowasteeats.app.presentation.components.glass.AppButton
 import com.zerowasteeats.app.presentation.components.glass.AppButtonStyle
-import com.zerowasteeats.app.presentation.components.glass.GlassSearchBar
+import com.zerowasteeats.app.presentation.components.glass.AppSearchBar
 import com.zerowasteeats.app.presentation.components.offers.OfferCard
 import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.theme.AppSpacing
@@ -109,7 +109,7 @@ fun ExploreScreen(
                 // Search Bar
                 item {
                     Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
-                    GlassSearchBar(
+                    AppSearchBar(
                         query = searchQuery,
                         onQueryChange = { searchQuery = it },
                         placeholder = stringResource(R.string.explore_search_placeholder),
