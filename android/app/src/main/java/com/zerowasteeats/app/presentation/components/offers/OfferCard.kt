@@ -1,5 +1,8 @@
 package com.zerowasteeats.app.presentation.components.offers
 
+import com.zerowasteeats.app.R
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -105,7 +108,7 @@ fun OfferCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            GlassPill(text = offer.remainingQuantityText)
+            GlassPill(text = pluralStringResource(R.plurals.offer_remaining_count, offer.remainingQuantity, offer.remainingQuantity))
 
             Box(
                 modifier = Modifier
@@ -197,7 +200,7 @@ fun OfferCard(
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 GlassPill(
-                    text = offer.discountPercentage,
+                    text = stringResource(R.string.offer_discount_off, offer.discountPercent),
                     background = RescateCoral,
                     textColor = RescateCream
                 )

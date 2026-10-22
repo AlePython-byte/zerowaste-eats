@@ -6,6 +6,12 @@
     <string name="category_prepared_food">Prepared food</string>
     <string name="category_desserts">Desserts</string>
 
+    <plurals name="offer_remaining_count">
+        <item quantity="one">%1$d left</item>
+        <item quantity="other">%1$d left</item>
+    </plurals>
+    <string name="offer_discount_off">%1$d%% off</string>
+
     <string name="profile_language_title">Language</string>
     <string name="profile_language_subtitle">Choose the app language.</string>
 </resources>

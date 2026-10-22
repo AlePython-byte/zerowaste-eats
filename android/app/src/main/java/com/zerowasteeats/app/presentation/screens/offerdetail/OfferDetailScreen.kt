@@ -1,5 +1,8 @@
 package com.zerowasteeats.app.presentation.screens.offerdetail
 
+import com.zerowasteeats.app.R
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -61,6 +64,8 @@ fun OfferDetailScreen(
     onReserveClick: () -> Unit,
 ) {
     val photo = offerPhotoRes(offer)
+    val discountText = stringResource(R.string.offer_discount_off, offer.discountPercent)
+    val remainingText = pluralStringResource(R.plurals.offer_remaining_count, offer.remainingQuantity, offer.remainingQuantity)
     val heartScale = remember { Animatable(1f) }
     val scope = rememberCoroutineScope()
 
@@ -183,7 +188,7 @@ fun OfferDetailScreen(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "${offer.discountPercentage} · ${offer.remainingQuantityText}",
+                    text = "$discountText · $remainingText",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = MaterialTheme.colorScheme.secondary
                 )
@@ -285,6 +290,7 @@ private fun ReservationPanel(
     offer: OfferUiModel,
     onReserveClick: () -> Unit
 ) {
+    val remainingText = pluralStringResource(R.plurals.offer_remaining_count, offer.remainingQuantity, offer.remainingQuantity)
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -308,7 +314,7 @@ private fun ReservationPanel(
                     color = MaterialTheme.colorScheme.tertiary
                 )
                 Text(
-                    text = offer.remainingQuantityText,
+                    text = remainingText,
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = MaterialTheme.colorScheme.secondary
                 )

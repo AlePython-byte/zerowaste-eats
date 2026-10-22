@@ -75,9 +75,7 @@ fun ExploreScreen(
                 priceA.compareTo(priceB)
             }
             ExploreSortOption.DISCOUNT -> {
-                val discA = a.discountPercentage.replace("[^0-9]".toRegex(), "").toIntOrNull() ?: 0
-                val discB = b.discountPercentage.replace("[^0-9]".toRegex(), "").toIntOrNull() ?: 0
-                discB.compareTo(discA) // Descending
+                b.discountPercent.compareTo(a.discountPercent) // Descending
             }
         }
     })
