@@ -21,31 +21,23 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.core.os.LocaleListCompat
 import com.zerowasteeats.app.R
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.presentation.components.common.AppCard
+import com.zerowasteeats.app.presentation.components.settings.AppearanceSettingCard
+import com.zerowasteeats.app.presentation.components.settings.LanguageSettingCard
 import com.zerowasteeats.app.presentation.data.MockProfile
 import com.zerowasteeats.app.presentation.model.ProfileUiModel
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.SurfaceTokens
-import com.zerowasteeats.app.presentation.theme.ThemeMode
-import com.zerowasteeats.app.presentation.theme.ThemePreferences
 
 @Composable
 fun ProfileScreen() {
@@ -83,11 +75,11 @@ fun ProfileScreen() {
             }
 
             item {
-                AppearanceSection()
+                AppearanceSettingCard()
             }
 
             item {
-                LanguageSection()
+                LanguageSettingCard()
             }
 
             item {
@@ -281,84 +273,6 @@ private fun ProfilePreferenceChip(text: String, modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
-        }
-    }
-}
-
-@Composable
-private fun AppearanceSection(modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    val isDark = ThemePreferences.mode == ThemeMode.DARK
-
-    AppCard(modifier = modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.profile_dark_mode_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = stringResource(R.string.profile_dark_mode_subtitle),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Switch(
-                checked = isDark,
-                onCheckedChange = { checked ->
-                    ThemePreferences.setMode(
-                        context,
-                        if (checked) ThemeMode.DARK else ThemeMode.LIGHT
-                    )
-                }
-            )
-        }
-    }
-}
-
-@Composable
-private fun LanguageSection(modifier: Modifier = Modifier) {
-    val languages = listOf(
-        "es" to R.string.language_name_es,
-        "en" to R.string.language_name_en
-    )
-    // Read from the configuration so the selector updates without an activity recreation.
-    val current = LocalConfiguration.current.locales[0]?.language ?: "es"
-
-    AppCard(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = stringResource(R.string.profile_language_title),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = stringResource(R.string.profile_language_subtitle),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.height(AppSpacing.medium))
-        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-            languages.forEachIndexed { index, (tag, nameRes) ->
-                SegmentedButton(
-                    selected = current == tag,
-                    onClick = {
-                        if (current != tag) {
-                            AppCompatDelegate.setApplicationLocales(
-                                LocaleListCompat.forLanguageTags(tag)
-                            )
-                        }
-                    },
-                    shape = SegmentedButtonDefaults.itemShape(index, languages.size)
-                ) {
-                    Text(text = stringResource(nameRes))
-                }
-            }
         }
     }
 }
