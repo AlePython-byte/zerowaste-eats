@@ -1,5 +1,10 @@
 package com.zerowasteeats.app.presentation.components.navigation
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,13 +23,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.navigation.AppDestination
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
@@ -85,11 +93,25 @@ private fun AppBottomBarItem(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            val contentColor = if (isSelected) {
-                MaterialTheme.colorScheme.tertiary
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            }
+            val animationsEnabled = rememberAnimationsEnabled()
+            val colorSpec: AnimationSpec<Color> = if (animationsEnabled) tween(200) else snap()
+            val dotSpec: AnimationSpec<Float> = if (animationsEnabled) tween(200) else snap()
+
+            val contentColor by animateColorAsState(
+                targetValue = if (isSelected) {
+                    MaterialTheme.colorScheme.tertiary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+                animationSpec = colorSpec,
+                label = "bottomBarLabelColor"
+            )
+            // 0 -> 1 grows and fades the dot in; the dot always occupies its 4dp slot
+            val dotProgress by animateFloatAsState(
+                targetValue = if (isSelected) 1f else 0f,
+                animationSpec = dotSpec,
+                label = "bottomBarDot"
+            )
 
             Text(
                 text = stringResource(destination.labelRes),
@@ -103,9 +125,15 @@ private fun AppBottomBarItem(
             
             // Subtle selected indicator (small dot)
             Surface(
-                modifier = Modifier.size(4.dp),
+                modifier = Modifier
+                    .size(4.dp)
+                    .graphicsLayer {
+                        alpha = dotProgress
+                        scaleX = dotProgress
+                        scaleY = dotProgress
+                    },
                 shape = CircleShape,
-                color = if (isSelected) MaterialTheme.colorScheme.tertiary else Color.Transparent
+                color = MaterialTheme.colorScheme.tertiary
             ) {}
         }
     }
