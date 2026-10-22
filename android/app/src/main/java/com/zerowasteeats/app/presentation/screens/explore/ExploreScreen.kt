@@ -1,5 +1,7 @@
 package com.zerowasteeats.app.presentation.screens.explore
 
+import com.zerowasteeats.app.presentation.model.OfferCategory
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,10 +49,10 @@ fun ExploreScreen(
     onMapClick: () -> Unit = {}
 ) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
-    var selectedCategory by rememberSaveable { mutableStateOf("Todo") }
+    var selectedCategory by rememberSaveable { mutableStateOf(OfferCategory.ALL) }
     var sortOption by rememberSaveable { mutableStateOf(ExploreSortOption.DISTANCE) }
 
-    val categories = listOf("Todo", "Panadería", "Comida preparada", "Postres")
+    val categories = OfferCategory.entries
     val sortOptions = ExploreSortOption.entries
 
     val mockOffers = MockOffers.getList()
@@ -58,7 +60,7 @@ fun ExploreScreen(
     val filteredOffers = mockOffers.filter { offer ->
         val matchesSearch = offer.title.contains(searchQuery, ignoreCase = true) ||
                 offer.merchantName.contains(searchQuery, ignoreCase = true)
-        val matchesCategory = selectedCategory == "Todo" || offer.category == selectedCategory
+        val matchesCategory = selectedCategory == OfferCategory.ALL || offer.category == selectedCategory
         matchesSearch && matchesCategory
     }.sortedWith(Comparator { a, b ->
         when (sortOption) {
@@ -124,7 +126,7 @@ fun ExploreScreen(
                     ) {
                         items(categories) { category ->
                             CategoryChip(
-                                text = category,
+                                text = stringResource(category.labelRes),
                                 isSelected = selectedCategory == category,
                                 onClick = { selectedCategory = category }
                             )

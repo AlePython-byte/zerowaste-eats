@@ -1,5 +1,6 @@
 package com.zerowasteeats.app.presentation.data
 
+import com.zerowasteeats.app.presentation.model.OfferCategory
 import com.zerowasteeats.app.presentation.model.ProfileUiModel
 
 object MockProfile {
@@ -12,9 +13,9 @@ object MockProfile {
         rescuedFoodKg = 4.2,
         estimatedSavings = "$86.400",
         favoriteCategories = listOf(
-            "Panadería",
-            "Comida preparada",
-            "Postres"
+            OfferCategory.BAKERY,
+            OfferCategory.PREPARED_FOOD,
+            OfferCategory.DESSERTS
         )
     )
 }

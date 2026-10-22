@@ -12,5 +12,5 @@ data class OfferUiModel(
     val remainingQuantityText: String,
     val pickupTime: String,
     val isFavorite: Boolean,
-    val category: String
+    val category: OfferCategory
 )

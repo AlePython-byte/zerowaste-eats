@@ -1,5 +1,6 @@
 package com.zerowasteeats.app.presentation.screens.profile
 
+import com.zerowasteeats.app.presentation.model.OfferCategory
 import androidx.compose.foundation.BorderStroke
 import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -247,7 +248,7 @@ private fun MetricCard(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun PreferencesSection(categories: List<String>, modifier: Modifier = Modifier) {
+private fun PreferencesSection(categories: List<OfferCategory>, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = "Preferencias",
@@ -263,7 +264,7 @@ private fun PreferencesSection(categories: List<String>, modifier: Modifier = Mo
             modifier = Modifier.fillMaxWidth()
         ) {
             categories.forEach { category ->
-                ProfilePreferenceChip(text = category)
+                ProfilePreferenceChip(text = stringResource(category.labelRes))
             }
         }
     }

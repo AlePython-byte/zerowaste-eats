@@ -1,6 +1,11 @@
 <resources>
     <string name="app_name">ZeroWaste Eats</string>
 
+    <string name="category_all">All</string>
+    <string name="category_bakery">Bakery</string>
+    <string name="category_prepared_food">Prepared food</string>
+    <string name="category_desserts">Desserts</string>
+
     <string name="profile_language_title">Language</string>
     <string name="profile_language_subtitle">Choose the app language.</string>
 </resources>

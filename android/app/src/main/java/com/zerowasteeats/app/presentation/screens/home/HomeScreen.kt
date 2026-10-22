@@ -1,5 +1,7 @@
 package com.zerowasteeats.app.presentation.screens.home
 
+import com.zerowasteeats.app.presentation.model.OfferCategory
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -55,15 +57,15 @@ fun HomeScreen(
     onFavoriteClick: (String) -> Unit = {}
 ) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
-    var selectedCategory by rememberSaveable { mutableStateOf("Todo") }
+    var selectedCategory by rememberSaveable { mutableStateOf(OfferCategory.ALL) }
 
-    val categories = listOf("Todo", "Panadería", "Comida preparada", "Postres")
+    val categories = OfferCategory.entries
     val mockOffers = MockOffers.getList()
 
     val filteredOffers = mockOffers.filter { offer ->
         val matchesSearch = offer.title.contains(searchQuery, ignoreCase = true) ||
                 offer.merchantName.contains(searchQuery, ignoreCase = true)
-        val matchesCategory = selectedCategory == "Todo" || offer.category == selectedCategory
+        val matchesCategory = selectedCategory == OfferCategory.ALL || offer.category == selectedCategory
         matchesSearch && matchesCategory
     }
 
@@ -134,7 +136,7 @@ fun HomeScreen(
                     ) {
                         items(categories) { category ->
                             CategoryChip(
-                                text = category,
+                                text = stringResource(category.labelRes),
                                 isSelected = selectedCategory == category,
                                 onClick = { selectedCategory = category }
                             )

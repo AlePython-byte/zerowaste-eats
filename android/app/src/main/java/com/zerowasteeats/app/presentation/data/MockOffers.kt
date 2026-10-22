@@ -1,5 +1,6 @@
 package com.zerowasteeats.app.presentation.data
 
+import com.zerowasteeats.app.presentation.model.OfferCategory
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 
 object MockOffers {
@@ -16,7 +17,7 @@ object MockOffers {
             remainingQuantityText = "Quedan 2",
             pickupTime = "Recoge hoy, 6:00 p. m. - 7:30 p. m.",
             isFavorite = false,
-            category = "Panadería"
+            category = OfferCategory.BAKERY
         ),
         OfferUiModel(
             id = "2",
@@ -30,7 +31,7 @@ object MockOffers {
             remainingQuantityText = "Queda 1",
             pickupTime = "Recoge hoy, 8:00 p. m. - 9:00 p. m.",
             isFavorite = true,
-            category = "Comida preparada"
+            category = OfferCategory.PREPARED_FOOD
         ),
         OfferUiModel(
             id = "3",
@@ -44,7 +45,7 @@ object MockOffers {
             remainingQuantityText = "Quedan 3",
             pickupTime = "Recoge mañana, 10:00 a. m. - 12:00 p. m.",
             isFavorite = false,
-            category = "Postres"
+            category = OfferCategory.DESSERTS
         )
     )
 }
