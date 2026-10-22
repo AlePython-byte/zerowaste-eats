@@ -21,6 +21,8 @@ val RescateCreamBackground = Color(0xFFF7F1E8)
 val RescateSurfaceLight = Color(0xFFFFFCF7)
 val RescateTextMutedLight = Color(0xFF6B6258)
 val RescateCoralOnLight = Color(0xFFC23B26)
+// Discount badge background in both modes: Cream text on it is 4.7:1 (plain Coral is 3.2).
+val RescateDiscountBadge = RescateCoralOnLight
 // Amber for prices/accent text on light surfaces (5.9 on Cream; plain Butter is 1.6).
 val RescateButterOnLight = Color(0xFF805400)
 

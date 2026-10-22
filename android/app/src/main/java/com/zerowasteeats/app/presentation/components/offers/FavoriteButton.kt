@@ -28,7 +28,10 @@ import com.zerowasteeats.app.presentation.theme.RescateCoral
 import com.zerowasteeats.app.presentation.theme.RescateCream
 import kotlinx.coroutines.launch
 
-/** Heart toggle for offer cards that sit over a photo: bounces and vibrates when pressed. */
+/**
+ * Heart toggle for offer cards that sit over a photo: bounces and vibrates when pressed.
+ * The visible circle is 44dp; the touch area is 48dp.
+ */
 @Composable
 fun FavoriteButton(
     isFavorite: Boolean,
@@ -42,9 +45,8 @@ fun FavoriteButton(
 
     Box(
         modifier = modifier
-            .size(44.dp)
+            .size(48.dp)
             .clip(CircleShape)
-            .background(RescateCarbon.copy(alpha = 0.55f))
             .semantics { this.contentDescription = contentDescription }
             .clickable(role = Role.Button) {
                 haptics.performHapticFeedback(
@@ -61,14 +63,22 @@ fun FavoriteButton(
             },
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = if (isFavorite) "♥" else "♡",
-            fontSize = 22.sp,
-            color = if (isFavorite) RescateCoral else RescateCream,
-            modifier = Modifier.graphicsLayer {
-                scaleX = heartScale.value
-                scaleY = heartScale.value
-            }
-        )
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(CircleShape)
+                .background(RescateCarbon.copy(alpha = 0.55f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = if (isFavorite) "♥" else "♡",
+                fontSize = 22.sp,
+                color = if (isFavorite) RescateCoral else RescateCream,
+                modifier = Modifier.graphicsLayer {
+                    scaleX = heartScale.value
+                    scaleY = heartScale.value
+                }
+            )
+        }
     }
 }

@@ -53,7 +53,7 @@ import com.zerowasteeats.app.presentation.navigation.sharedOfferImage
 import com.zerowasteeats.app.presentation.theme.RescateButter
 import com.zerowasteeats.app.presentation.theme.RescateCarbon
 import com.zerowasteeats.app.presentation.theme.RescateCarbonElevated
-import com.zerowasteeats.app.presentation.theme.RescateCoral
+import com.zerowasteeats.app.presentation.theme.RescateDiscountBadge
 import com.zerowasteeats.app.presentation.theme.RescateCream
 import com.zerowasteeats.app.presentation.theme.ThemeMode
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
@@ -148,7 +148,7 @@ fun CompactOfferCard(
                 modifier = Modifier
                     .padding(top = 6.dp)
                     .clip(RoundedCornerShape(50))
-                    .background(RescateCoral)
+                    .background(RescateDiscountBadge)
                     .padding(horizontal = 10.dp, vertical = 4.dp)
                     .clearAndSetSemantics {}
             ) {
