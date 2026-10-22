@@ -238,6 +238,26 @@ fun OfferDetailScreen(
             }
         }
 
+        // Soft backdrop that fades in once the content scrolls past the photo, so text
+        // does not collide with the clock or the pinned buttons.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer {
+                    val start = 240.dp.toPx() // hero is 380dp tall; begin fading near its end
+                    alpha = ((scrollState.value - start) / 100.dp.toPx()).coerceIn(0f, 1f)
+                }
+                .background(
+                    Brush.verticalGradient(
+                        0f to MaterialTheme.colorScheme.background,
+                        0.75f to MaterialTheme.colorScheme.background.copy(alpha = 0.9f),
+                        1f to Color.Transparent
+                    )
+                )
+                .statusBarsPadding()
+                .height(88.dp)
+        )
+
         // Pinned controls: outside the scrolling column so they stay visible over photo and content
         Row(
             modifier = Modifier
