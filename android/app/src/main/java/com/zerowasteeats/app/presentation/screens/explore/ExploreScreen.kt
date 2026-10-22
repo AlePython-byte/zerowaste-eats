@@ -1,7 +1,9 @@
 package com.zerowasteeats.app.presentation.screens.explore
 
 import com.zerowasteeats.app.presentation.model.OfferCategory
-import androidx.annotation.StringRes
+import com.zerowasteeats.app.presentation.model.OfferFilters
+import com.zerowasteeats.app.presentation.model.OfferSort
+import com.zerowasteeats.app.presentation.model.filterAndSort
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.zerowasteeats.app.R
@@ -41,12 +43,6 @@ import com.zerowasteeats.app.presentation.components.offers.OfferCard
 import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 
-enum class ExploreSortOption(@StringRes val labelRes: Int) {
-    DISTANCE(R.string.explore_sort_distance),
-    PRICE(R.string.explore_sort_price),
-    DISCOUNT(R.string.explore_sort_discount)
-}
-
 @Composable
 fun ExploreScreen(
     onOfferClick: (String) -> Unit = {},
@@ -55,37 +51,16 @@ fun ExploreScreen(
 ) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var selectedCategory by rememberSaveable { mutableStateOf(OfferCategory.ALL) }
-    var sortOption by rememberSaveable { mutableStateOf(ExploreSortOption.DISTANCE) }
+    var sortOption by rememberSaveable { mutableStateOf(OfferSort.DISTANCE) }
 
     val categories = OfferCategory.entries
     // Cards already shown once; they skip the entrance animation when they reappear
     val seenOfferIds = remember { mutableSetOf<String>() }
-    val sortOptions = ExploreSortOption.entries
+    val sortOptions = OfferSort.entries
 
     val mockOffers = MockOffers.getList()
 
-    val filteredOffers = mockOffers.filter { offer ->
-        val matchesSearch = offer.title.contains(searchQuery, ignoreCase = true) ||
-                offer.merchantName.contains(searchQuery, ignoreCase = true)
-        val matchesCategory = selectedCategory == OfferCategory.ALL || offer.category == selectedCategory
-        matchesSearch && matchesCategory
-    }.sortedWith(Comparator { a, b ->
-        when (sortOption) {
-            ExploreSortOption.DISTANCE -> {
-                val distA = a.distance.replace("[^0-9.]".toRegex(), "").toFloatOrNull() ?: 0f
-                val distB = b.distance.replace("[^0-9.]".toRegex(), "").toFloatOrNull() ?: 0f
-                distA.compareTo(distB)
-            }
-            ExploreSortOption.PRICE -> {
-                val priceA = a.discountedPrice.replace("[^0-9]".toRegex(), "").toIntOrNull() ?: 0
-                val priceB = b.discountedPrice.replace("[^0-9]".toRegex(), "").toIntOrNull() ?: 0
-                priceA.compareTo(priceB)
-            }
-            ExploreSortOption.DISCOUNT -> {
-                b.discountPercent.compareTo(a.discountPercent) // Descending
-            }
-        }
-    })
+    val filteredOffers = mockOffers.filterAndSort(searchQuery, OfferFilters(selectedCategory, sortOption))
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
