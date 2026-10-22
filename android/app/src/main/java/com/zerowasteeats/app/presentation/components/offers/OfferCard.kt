@@ -36,6 +36,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
@@ -71,6 +73,7 @@ fun OfferCard(
     val photo = offerPhotoRes(offer)
     val heartScale = remember { Animatable(1f) }
     val scope = rememberCoroutineScope()
+    val haptics = LocalHapticFeedback.current
 
     val fallbackBrush = Brush.linearGradient(listOf(RescateCarbonElevated, RescateCarbon))
     val cardShape = RoundedCornerShape(28.dp)
@@ -140,6 +143,9 @@ fun OfferCard(
                     .clip(CircleShape)
                     .background(RescateCarbon.copy(alpha = 0.55f))
                     .clickable {
+                        haptics.performHapticFeedback(
+                            if (offer.isFavorite) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn
+                        )
                         scope.launch {
                             heartScale.animateTo(
                                 1.35f,

@@ -35,6 +35,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
@@ -68,6 +70,7 @@ fun OfferDetailScreen(
     val remainingText = pluralStringResource(R.plurals.offer_remaining_count, offer.remainingQuantity, offer.remainingQuantity)
     val heartScale = remember { Animatable(1f) }
     val scope = rememberCoroutineScope()
+    val haptics = LocalHapticFeedback.current
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -133,6 +136,9 @@ fun OfferDetailScreen(
                         ),
                         tint = if (offer.isFavorite) RescateCoral else RescateCream,
                         onClick = {
+                            haptics.performHapticFeedback(
+                                if (offer.isFavorite) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn
+                            )
                             scope.launch {
                                 heartScale.animateTo(
                                     1.35f,
