@@ -109,7 +109,7 @@ fun OfferCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            GlassPill(text = pluralStringResource(R.plurals.offer_remaining_count, offer.remainingQuantity, offer.remainingQuantity))
+            InfoPill(text = pluralStringResource(R.plurals.offer_remaining_count, offer.remainingQuantity, offer.remainingQuantity))
 
             Box(
                 modifier = Modifier
@@ -200,7 +200,7 @@ fun OfferCard(
                     modifier = Modifier.padding(bottom = 3.dp)
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                GlassPill(
+                InfoPill(
                     text = stringResource(R.string.offer_discount_off, offer.discountPercent),
                     background = RescateCoral,
                     textColor = RescateCream
@@ -221,7 +221,7 @@ fun OfferCard(
 }
 
 @Composable
-private fun GlassPill(
+private fun InfoPill(
     text: String,
     background: Color = RescateCarbon.copy(alpha = 0.6f),
     textColor: Color = RescateCream,

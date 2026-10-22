@@ -157,8 +157,8 @@ var selectedOfferId by rememberSaveable { mutableStateOf<String?>(null) }
             }
 
             // Top controls
-            val glassSurfaceColor = SurfaceTokens.surface
-            val glassBorderColor = SurfaceTokens.border
+            val surfaceColor = SurfaceTokens.surface
+            val borderColor = SurfaceTokens.border
 
             Box(
                 modifier = Modifier
@@ -166,12 +166,12 @@ var selectedOfferId by rememberSaveable { mutableStateOf<String?>(null) }
                     .statusBarsPadding()
                     .padding(AppSpacing.regular)
             ) {
-                GlassTextButton(
+                CircleTextButton(
                     text = "←",
                     contentDescription = stringResource(R.string.common_back_cd),
                     onClick = onBackClick,
-                    surfaceColor = glassSurfaceColor,
-                    borderColor = glassBorderColor
+                    surfaceColor = surfaceColor,
+                    borderColor = borderColor
                 )
             }
 
@@ -196,7 +196,7 @@ var selectedOfferId by rememberSaveable { mutableStateOf<String?>(null) }
                         .padding(innerPadding)
                         .padding(AppSpacing.regular)
                 ) {
-                    GlassTextButton(
+                    CircleTextButton(
                         text = "◎", // Location symbol placeholder
                         contentDescription = stringResource(R.string.map_my_location_cd),
                         onClick = {
@@ -224,8 +224,8 @@ var selectedOfferId by rememberSaveable { mutableStateOf<String?>(null) }
                                 )
                             }
                         },
-                        surfaceColor = glassSurfaceColor,
-                        borderColor = glassBorderColor
+                        surfaceColor = surfaceColor,
+                        borderColor = borderColor
                     )
                 }
             }
@@ -289,7 +289,7 @@ private fun MapOfferCard(
 }
 
 @Composable
-private fun GlassTextButton(
+private fun CircleTextButton(
     text: String,
     contentDescription: String,
     onClick: () -> Unit,

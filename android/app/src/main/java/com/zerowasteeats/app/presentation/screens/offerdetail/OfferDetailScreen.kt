@@ -221,7 +221,7 @@ fun OfferDetailScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Pickup card: flat carbon surface, no glass
+                // Pickup card: flat surface card
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
