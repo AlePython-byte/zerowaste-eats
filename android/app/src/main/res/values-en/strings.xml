@@ -12,6 +12,7 @@
         <item quantity="other">%1$d left</item>
     </plurals>
     <string name="offer_discount_off">%1$d%% off</string>
+    <string name="offer_card_summary_cd">%1$s, %2$s, %3$s, %4$d%% off</string>
 
     <string name="profile_language_title">Language</string>
     <string name="profile_language_subtitle">Choose the app language.</string>
