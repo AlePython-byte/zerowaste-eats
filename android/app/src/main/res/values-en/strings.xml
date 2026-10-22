@@ -104,4 +104,7 @@
     <string name="profile_dark_mode_subtitle">Switch between the light and dark themes.</string>
     <string name="profile_about_impact_title">About your impact</string>
     <string name="profile_about_impact_body">Every rescued order helps make use of food that is still in good condition and reduces waste.</string>
+
+    <string name="field_show_password">Show password</string>
+    <string name="field_hide_password">Hide password</string>
 </resources>

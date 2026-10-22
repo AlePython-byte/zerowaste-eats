@@ -109,4 +109,7 @@
     <string name="profile_dark_mode_subtitle">Cambia entre el tema claro y el oscuro.</string>
     <string name="profile_about_impact_title">Sobre tu impacto</string>
     <string name="profile_about_impact_body">Cada pedido rescatado ayuda a aprovechar alimentos que aún están en buen estado y reduce el desperdicio.</string>
+
+    <string name="field_show_password">Mostrar contraseña</string>
+    <string name="field_hide_password">Ocultar contraseña</string>
 </resources>
