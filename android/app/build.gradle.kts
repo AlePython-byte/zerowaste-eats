@@ -37,11 +37,16 @@ android {
     buildFeatures {
         compose = true
     }
+
+    androidResources {
+        generateLocaleConfig = true
+    }
 }
 
 dependencies {
     implementation(libs.androidx.core.ktx)
 
+    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity.compose)
 
     val composeBom = platform(libs.androidx.compose.bom)

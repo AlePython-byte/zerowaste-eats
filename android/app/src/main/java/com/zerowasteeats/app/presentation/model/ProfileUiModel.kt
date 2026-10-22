@@ -8,5 +8,5 @@ data class ProfileUiModel(
     val completedOrders: Int,
     val rescuedFoodKg: Double,
     val estimatedSavings: String,
-    val favoriteCategories: List<String>
+    val favoriteCategories: List<OfferCategory>
 )

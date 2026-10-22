@@ -17,8 +17,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.components.glass.GlassCard
 import com.zerowasteeats.app.presentation.model.OrderStatus
 import com.zerowasteeats.app.presentation.model.OrderUiModel
@@ -78,14 +80,14 @@ fun OrderCard(
         ) {
             Column {
                 Text(
-                    text = "Cantidad: ${order.quantity}",
+                    text = stringResource(R.string.order_card_quantity, order.quantity),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 if (isActive) {
                     Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
                     Text(
-                        text = "Código: ${order.reservationCode}",
+                        text = stringResource(R.string.order_card_code, order.reservationCode),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold
@@ -133,7 +135,7 @@ private fun OrderStatusBadge(status: OrderStatus) {
         border = if (status == OrderStatus.COMPLETED) BorderStroke(GlassTokens.borderWidth, borderColor) else null
     ) {
         Text(
-            text = status.label,
+            text = stringResource(status.labelRes),
             style = MaterialTheme.typography.labelSmall,
             color = contentColor,
             fontWeight = FontWeight.Bold,

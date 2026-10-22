@@ -1,5 +1,6 @@
 package com.zerowasteeats.app.presentation.screens.orders
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
@@ -28,9 +29,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.components.orders.OrderCard
 import com.zerowasteeats.app.presentation.data.MockOrders
 import com.zerowasteeats.app.presentation.model.OrderStatus
@@ -38,9 +41,9 @@ import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.GlassTokens
 
-enum class OrdersTab(val label: String) {
-    ACTIVE("Activos"),
-    HISTORY("Historial")
+enum class OrdersTab(@StringRes val labelRes: Int) {
+    ACTIVE(R.string.orders_tab_active),
+    HISTORY(R.string.orders_tab_history)
 }
 
 @Composable
@@ -75,13 +78,13 @@ fun OrdersScreen() {
                     )
             ) {
                 Text(
-                    text = "Pedidos",
+                    text = stringResource(R.string.orders_title),
                     style = MaterialTheme.typography.displayLarge,
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
                 Text(
-                    text = "Gestiona tus reservas y recogidas.",
+                    text = stringResource(R.string.orders_subtitle),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                 )
@@ -166,7 +169,7 @@ private fun OrdersSegmentedSelector(
                     }
                     
                     Text(
-                        text = tab.label,
+                        text = stringResource(tab.labelRes),
                         style = MaterialTheme.typography.labelLarge,
                         color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
@@ -187,8 +190,8 @@ private fun EmptyOrdersState(selectedTab: OrdersTab, modifier: Modifier = Modifi
         contentAlignment = Alignment.Center
     ) {
         val text = when (selectedTab) {
-            OrdersTab.ACTIVE -> "No tienes pedidos activos."
-            OrdersTab.HISTORY -> "Aún no tienes pedidos anteriores."
+            OrdersTab.ACTIVE -> stringResource(R.string.orders_empty_active)
+            OrdersTab.HISTORY -> stringResource(R.string.orders_empty_history)
         }
         
         Text(

@@ -1,5 +1,8 @@
 package com.zerowasteeats.app.presentation.screens.offerdetail
 
+import com.zerowasteeats.app.R
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -61,6 +64,8 @@ fun OfferDetailScreen(
     onReserveClick: () -> Unit,
 ) {
     val photo = offerPhotoRes(offer)
+    val discountText = stringResource(R.string.offer_discount_off, offer.discountPercent)
+    val remainingText = pluralStringResource(R.plurals.offer_remaining_count, offer.remainingQuantity, offer.remainingQuantity)
     val heartScale = remember { Animatable(1f) }
     val scope = rememberCoroutineScope()
 
@@ -118,12 +123,14 @@ fun OfferDetailScreen(
                 ) {
                     CircleControl(
                         text = "←",
-                        contentDescription = "Volver",
+                        contentDescription = stringResource(R.string.common_back_cd),
                         onClick = onBackClick
                     )
                     CircleControl(
                         text = if (offer.isFavorite) "♥" else "♡",
-                        contentDescription = if (offer.isFavorite) "Quitar de favoritos" else "Marcar como favorito",
+                        contentDescription = stringResource(
+                            if (offer.isFavorite) R.string.common_favorite_remove_cd else R.string.common_favorite_add_cd
+                        ),
                         tint = if (offer.isFavorite) RescateCoral else RescateCream,
                         onClick = {
                             scope.launch {
@@ -183,7 +190,7 @@ fun OfferDetailScreen(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "${offer.discountPercentage} · ${offer.remainingQuantityText}",
+                    text = "$discountText · $remainingText",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = MaterialTheme.colorScheme.secondary
                 )
@@ -191,7 +198,7 @@ fun OfferDetailScreen(
                 Spacer(modifier = Modifier.height(28.dp))
 
                 Text(
-                    text = "Acerca de esta oferta",
+                    text = stringResource(R.string.offer_detail_about_title),
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -199,7 +206,7 @@ fun OfferDetailScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Disfruta de nuestros productos frescos del día, empacados para que no se desperdicien. Ideal para sorprenderte o compartir.",
+                    text = stringResource(R.string.offer_detail_about_body),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
                 )
@@ -207,7 +214,7 @@ fun OfferDetailScreen(
                 Spacer(modifier = Modifier.height(28.dp))
 
                 Text(
-                    text = "Recogida",
+                    text = stringResource(R.string.offer_detail_pickup_title),
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -285,6 +292,7 @@ private fun ReservationPanel(
     offer: OfferUiModel,
     onReserveClick: () -> Unit
 ) {
+    val remainingText = pluralStringResource(R.plurals.offer_remaining_count, offer.remainingQuantity, offer.remainingQuantity)
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -308,14 +316,14 @@ private fun ReservationPanel(
                     color = MaterialTheme.colorScheme.tertiary
                 )
                 Text(
-                    text = offer.remainingQuantityText,
+                    text = remainingText,
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
                     color = MaterialTheme.colorScheme.secondary
                 )
             }
 
             GlassButton(
-                text = "Reservar",
+                text = stringResource(R.string.offer_detail_reserve),
                 onClick = onReserveClick
             )
         }

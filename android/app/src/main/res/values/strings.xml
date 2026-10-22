@@ -1,3 +1,93 @@
 <resources>
     <string name="app_name">ZeroWaste Eats</string>
+
+    <string name="category_all">Todo</string>
+    <string name="category_bakery">Panadería</string>
+    <string name="category_prepared_food">Comida preparada</string>
+    <string name="category_desserts">Postres</string>
+
+    <plurals name="offer_remaining_count">
+        <item quantity="one">Queda %1$d</item>
+        <item quantity="many">Quedan %1$d</item>
+        <item quantity="other">Quedan %1$d</item>
+    </plurals>
+    <string name="offer_discount_off">%1$d%% menos</string>
+
+    <string name="profile_language_title">Idioma</string>
+    <string name="profile_language_subtitle">Elige el idioma de la aplicación.</string>
+    <string name="language_name_es" translatable="false">Español</string>
+    <string name="language_name_en" translatable="false">English</string>
+
+    <string name="nav_home">Inicio</string>
+    <string name="nav_explore">Explorar</string>
+    <string name="nav_orders">Pedidos</string>
+    <string name="nav_profile">Perfil</string>
+    <string name="navigation_offer_not_found">Oferta no encontrada</string>
+
+    <string name="common_back_cd">Volver</string>
+    <string name="common_view_map">Ver mapa</string>
+    <string name="common_clear_search_cd">Limpiar búsqueda</string>
+    <string name="common_favorite_add_cd">Marcar como favorito</string>
+    <string name="common_favorite_remove_cd">Quitar de favoritos</string>
+
+    <string name="home_greeting">Buenos días</string>
+    <string name="home_subtitle">Encuentra algo bueno cerca de ti</string>
+    <string name="home_search_placeholder">Buscar comida cerca de ti</string>
+    <string name="home_section_nearby">Cerca de ti</string>
+    <string name="home_empty_title">No encontramos ofertas con esos filtros.</string>
+    <string name="home_empty_subtitle">Intenta buscar otra cosa o cambia de categoría.</string>
+
+    <string name="offer_detail_about_title">Acerca de esta oferta</string>
+    <string name="offer_detail_about_body">Disfruta de nuestros productos frescos del día, empacados para que no se desperdicien. Ideal para sorprenderte o compartir.</string>
+    <string name="offer_detail_pickup_title">Recogida</string>
+    <string name="offer_detail_reserve">Reservar</string>
+
+    <string name="orders_title">Pedidos</string>
+    <string name="orders_subtitle">Gestiona tus reservas y recogidas.</string>
+    <string name="orders_tab_active">Activos</string>
+    <string name="orders_tab_history">Historial</string>
+    <string name="orders_empty_active">No tienes pedidos activos.</string>
+    <string name="orders_empty_history">Aún no tienes pedidos anteriores.</string>
+
+    <string name="order_status_reserved">Reservado</string>
+    <string name="order_status_ready_for_pickup">Listo para recoger</string>
+    <string name="order_status_completed">Recogido</string>
+    <string name="order_status_cancelled">Cancelado</string>
+
+    <string name="order_card_quantity">Cantidad: %1$d</string>
+    <string name="order_card_code">Código: %1$s</string>
+
+    <string name="explore_title">Explorar</string>
+    <string name="explore_subtitle">Encuentra ofertas que se adapten a ti</string>
+    <string name="explore_search_placeholder">Buscar ofertas o establecimientos</string>
+    <string name="explore_sort_by">Ordenar por</string>
+    <string name="explore_sort_distance">Cercanía</string>
+    <string name="explore_sort_price">Precio</string>
+    <string name="explore_sort_discount">Descuento</string>
+    <string name="explore_results_title">Ofertas encontradas</string>
+    <plurals name="explore_offers_count">
+        <item quantity="one">%1$d oferta</item>
+        <item quantity="many">%1$d ofertas</item>
+        <item quantity="other">%1$d ofertas</item>
+    </plurals>
+    <string name="explore_empty_title">No encontramos resultados</string>
+    <string name="explore_empty_subtitle">Prueba con otra búsqueda o cambia los filtros.</string>
+
+    <string name="map_my_location_cd">Mi ubicación</string>
+    <string name="map_view_offer">Ver oferta</string>
+    <string name="map_location_unavailable">No pudimos obtener tu ubicación.</string>
+    <string name="map_location_permission_required">Activa el permiso de ubicación para usar esta función.</string>
+
+    <string name="profile_title">Perfil</string>
+    <string name="profile_subtitle">Tu cuenta e impacto en ZeroWaste Eats.</string>
+    <string name="profile_impact_title">Tu impacto</string>
+    <string name="profile_metric_rescued_orders">Pedidos rescatados</string>
+    <string name="profile_metric_rescued_food">Comida rescatada</string>
+    <string name="profile_metric_estimated_savings">Ahorro estimado</string>
+    <string name="profile_rescued_food_value">%1$.1f kg</string>
+    <string name="profile_preferences_title">Preferencias</string>
+    <string name="profile_dark_mode_title">Modo oscuro</string>
+    <string name="profile_dark_mode_subtitle">Cambia entre el tema claro y el oscuro.</string>
+    <string name="profile_about_impact_title">Sobre tu impacto</string>
+    <string name="profile_about_impact_body">Cada pedido rescatado ayuda a aprovechar alimentos que aún están en buen estado y reduce el desperdicio.</string>
 </resources>

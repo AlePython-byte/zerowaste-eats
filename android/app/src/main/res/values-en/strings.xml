@@ -1,0 +1,89 @@
+<resources>
+    <string name="app_name">ZeroWaste Eats</string>
+
+    <string name="category_all">All</string>
+    <string name="category_bakery">Bakery</string>
+    <string name="category_prepared_food">Prepared food</string>
+    <string name="category_desserts">Desserts</string>
+
+    <plurals name="offer_remaining_count">
+        <item quantity="one">%1$d left</item>
+        <item quantity="other">%1$d left</item>
+    </plurals>
+    <string name="offer_discount_off">%1$d%% off</string>
+
+    <string name="profile_language_title">Language</string>
+    <string name="profile_language_subtitle">Choose the app language.</string>
+
+    <string name="nav_home">Home</string>
+    <string name="nav_explore">Explore</string>
+    <string name="nav_orders">Orders</string>
+    <string name="nav_profile">Profile</string>
+    <string name="navigation_offer_not_found">Offer not found</string>
+
+    <string name="common_back_cd">Back</string>
+    <string name="common_view_map">View map</string>
+    <string name="common_clear_search_cd">Clear search</string>
+    <string name="common_favorite_add_cd">Mark as favorite</string>
+    <string name="common_favorite_remove_cd">Remove from favorites</string>
+
+    <string name="home_greeting">Good morning</string>
+    <string name="home_subtitle">Find something good near you</string>
+    <string name="home_search_placeholder">Search for food near you</string>
+    <string name="home_section_nearby">Near you</string>
+    <string name="home_empty_title">We couldn\'t find offers with those filters.</string>
+    <string name="home_empty_subtitle">Try searching for something else or change the category.</string>
+
+    <string name="offer_detail_about_title">About this offer</string>
+    <string name="offer_detail_about_body">Enjoy our fresh products of the day, packed so they don\'t go to waste. Perfect for a surprise or to share.</string>
+    <string name="offer_detail_pickup_title">Pickup</string>
+    <string name="offer_detail_reserve">Reserve</string>
+
+    <string name="orders_title">Orders</string>
+    <string name="orders_subtitle">Manage your reservations and pickups.</string>
+    <string name="orders_tab_active">Active</string>
+    <string name="orders_tab_history">History</string>
+    <string name="orders_empty_active">You have no active orders.</string>
+    <string name="orders_empty_history">You have no past orders yet.</string>
+
+    <string name="order_status_reserved">Reserved</string>
+    <string name="order_status_ready_for_pickup">Ready for pickup</string>
+    <string name="order_status_completed">Picked up</string>
+    <string name="order_status_cancelled">Cancelled</string>
+
+    <string name="order_card_quantity">Quantity: %1$d</string>
+    <string name="order_card_code">Code: %1$s</string>
+
+    <string name="explore_title">Explore</string>
+    <string name="explore_subtitle">Find offers that suit you</string>
+    <string name="explore_search_placeholder">Search offers or merchants</string>
+    <string name="explore_sort_by">Sort by</string>
+    <string name="explore_sort_distance">Distance</string>
+    <string name="explore_sort_price">Price</string>
+    <string name="explore_sort_discount">Discount</string>
+    <string name="explore_results_title">Offers found</string>
+    <plurals name="explore_offers_count">
+        <item quantity="one">%1$d offer</item>
+        <item quantity="other">%1$d offers</item>
+    </plurals>
+    <string name="explore_empty_title">No results found</string>
+    <string name="explore_empty_subtitle">Try another search or change the filters.</string>
+
+    <string name="map_my_location_cd">My location</string>
+    <string name="map_view_offer">View offer</string>
+    <string name="map_location_unavailable">We couldn\'t get your location.</string>
+    <string name="map_location_permission_required">Turn on location permission to use this feature.</string>
+
+    <string name="profile_title">Profile</string>
+    <string name="profile_subtitle">Your account and impact on ZeroWaste Eats.</string>
+    <string name="profile_impact_title">Your impact</string>
+    <string name="profile_metric_rescued_orders">Rescued orders</string>
+    <string name="profile_metric_rescued_food">Food rescued</string>
+    <string name="profile_metric_estimated_savings">Estimated savings</string>
+    <string name="profile_rescued_food_value">%1$.1f kg</string>
+    <string name="profile_preferences_title">Preferences</string>
+    <string name="profile_dark_mode_title">Dark mode</string>
+    <string name="profile_dark_mode_subtitle">Switch between the light and dark themes.</string>
+    <string name="profile_about_impact_title">About your impact</string>
+    <string name="profile_about_impact_body">Every rescued order helps make use of food that is still in good condition and reduces waste.</string>
+</resources>

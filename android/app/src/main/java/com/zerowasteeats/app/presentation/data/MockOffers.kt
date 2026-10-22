@@ -1,5 +1,6 @@
 package com.zerowasteeats.app.presentation.data
 
+import com.zerowasteeats.app.presentation.model.OfferCategory
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 
 object MockOffers {
@@ -11,12 +12,12 @@ object MockOffers {
             imageUrl = "",
             originalPrice = "$15.000",
             discountedPrice = "$8.900",
-            discountPercentage = "40% menos",
+            discountPercent = 40,
             distance = "0.5 km",
-            remainingQuantityText = "Quedan 2",
+            remainingQuantity = 2,
             pickupTime = "Recoge hoy, 6:00 p. m. - 7:30 p. m.",
             isFavorite = false,
-            category = "Panadería"
+            category = OfferCategory.BAKERY
         ),
         OfferUiModel(
             id = "2",
@@ -25,12 +26,12 @@ object MockOffers {
             imageUrl = "",
             originalPrice = "$32.000",
             discountedPrice = "$19.000",
-            discountPercentage = "40% menos",
+            discountPercent = 40,
             distance = "1.2 km",
-            remainingQuantityText = "Queda 1",
+            remainingQuantity = 1,
             pickupTime = "Recoge hoy, 8:00 p. m. - 9:00 p. m.",
             isFavorite = true,
-            category = "Comida preparada"
+            category = OfferCategory.PREPARED_FOOD
         ),
         OfferUiModel(
             id = "3",
@@ -39,12 +40,12 @@ object MockOffers {
             imageUrl = "",
             originalPrice = "$20.000",
             discountedPrice = "$9.900",
-            discountPercentage = "50% menos",
+            discountPercent = 50,
             distance = "2.5 km",
-            remainingQuantityText = "Quedan 3",
+            remainingQuantity = 3,
             pickupTime = "Recoge mañana, 10:00 a. m. - 12:00 p. m.",
             isFavorite = false,
-            category = "Postres"
+            category = OfferCategory.DESSERTS
         )
     )
 }
