@@ -4,7 +4,7 @@ import androidx.annotation.StringRes
 import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.components.navigation.TabItem
 
-enum class AppDestination(
+enum class CustomerDestination(
     val route: String,
     @StringRes val labelRes: Int
 ) {
@@ -27,4 +27,4 @@ enum class AppDestination(
 }
 
 /** The customer's bottom bar tabs, in display order. */
-val customerTabs: List<TabItem> = AppDestination.entries.map { TabItem(it.route, it.labelRes) }
+val customerTabs: List<TabItem> = CustomerDestination.entries.map { TabItem(it.route, it.labelRes) }

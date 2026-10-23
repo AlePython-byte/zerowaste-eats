@@ -1,19 +1,34 @@
 package com.zerowasteeats.app.presentation.navigation
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.zerowasteeats.app.R
+import com.zerowasteeats.app.presentation.components.navigation.AppBottomBar
 import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.screens.explore.ExploreScreen
 import com.zerowasteeats.app.presentation.screens.explore.ExploreViewMode
@@ -23,8 +38,60 @@ import com.zerowasteeats.app.presentation.screens.offerdetail.OfferDetailScreen
 import com.zerowasteeats.app.presentation.screens.orders.OrdersScreen
 import com.zerowasteeats.app.presentation.screens.profile.ProfileScreen
 
+/**
+ * The customer space: its own nav controller, bottom bar and graph. Everything here is
+ * remembered inside this composable, so dropping it (for example on sign out) discards
+ * the whole customer back stack.
+ */
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun AppNavigation(
+fun CustomerNavigation() {
+    val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    // Next to the nav controller: outlives Explore, but not the activity, so a consumed
+    // request cannot come back after rotation or a language change
+    val exploreViewRequest = remember { ExploreViewRequest() }
+
+    val isBottomBarVisible = customerTabs.any { it.route == currentRoute }
+
+    Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0), // Handle edge-to-edge manually if needed
+        containerColor = Color.Transparent, // Let screens draw their own background
+        bottomBar = {
+            if (isBottomBarVisible) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        // Opaque backdrop so no scrolled content shows around the bar
+                        .background(MaterialTheme.colorScheme.background)
+                        .navigationBarsPadding(), // Keep above system nav bar
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    AppBottomBar(
+                        tabs = customerTabs,
+                        selectedRoute = currentRoute,
+                        onTabClick = { tab -> navController.navigateToTab(tab.route) }
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
+        // innerPadding reserves the bottom bar's height, so content ends above it
+        // instead of flowing underneath. Screens only add a small trailing gap.
+        CustomerNavHost(
+            navController = navController,
+            exploreViewRequest = exploreViewRequest,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+        )
+    }
+}
+
+@Composable
+private fun CustomerNavHost(
     navController: NavHostController,
     exploreViewRequest: ExploreViewRequest,
     modifier: Modifier = Modifier
@@ -34,21 +101,21 @@ fun AppNavigation(
         CompositionLocalProvider(LocalSharedTransitionScope provides this) {
             NavHost(
                 navController = navController,
-                startDestination = AppDestination.HOME.route,
+                startDestination = CustomerDestination.HOME.route,
                 modifier = Modifier.fillMaxSize()
             ) {
-                sharedComposable(AppDestination.HOME.route) {
+                sharedComposable(CustomerDestination.HOME.route) {
                     HomeScreen(
                         onOfferClick = { offerId ->
                             navController.navigate("offer/$offerId")
                         },
                         onMapClick = {
                             exploreViewRequest.request(ExploreViewMode.MAP)
-                            navController.navigateToTab(AppDestination.EXPLORE)
+                            navController.navigateToTab(CustomerDestination.EXPLORE)
                         }
                     )
                 }
-                sharedComposable(AppDestination.EXPLORE.route) {
+                sharedComposable(CustomerDestination.EXPLORE.route) {
                     ExploreScreen(
                         viewRequest = exploreViewRequest,
                         onOfferClick = { offerId ->
@@ -57,10 +124,10 @@ fun AppNavigation(
                         onFavoriteClick = { /* Handle favorite click temporarily */ }
                     )
                 }
-                composable(AppDestination.ORDERS.route) {
+                composable(CustomerDestination.ORDERS.route) {
                     OrdersScreen()
                 }
-                composable(AppDestination.PROFILE.route) {
+                composable(CustomerDestination.PROFILE.route) {
                     ProfileScreen()
                 }
                 sharedComposable("offer/{offerId}") { backStackEntry ->

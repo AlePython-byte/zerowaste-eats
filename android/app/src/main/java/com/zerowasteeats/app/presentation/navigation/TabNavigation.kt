@@ -19,4 +19,4 @@ fun NavController.navigateToTab(route: String) {
     }
 }
 
-fun NavController.navigateToTab(destination: AppDestination) = navigateToTab(destination.route)
+fun NavController.navigateToTab(destination: CustomerDestination) = navigateToTab(destination.route)
