@@ -11,7 +11,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 
-/** Provided by [AppNavigation]; null outside of it (previews, tests). */
+/** Provided by [CustomerNavigation]; null outside of it (previews, tests). */
 val LocalSharedTransitionScope = staticCompositionLocalOf<SharedTransitionScope?> { null }
 
 /**

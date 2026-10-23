@@ -30,19 +30,23 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
-import com.zerowasteeats.app.presentation.navigation.AppDestination
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 
 @Composable
 fun AppBottomBar(
-    currentRoute: String?,
-    onNavigateTo: (AppDestination) -> Unit,
-    modifier: Modifier = Modifier
+    tabs: List<TabItem>,
+    selectedRoute: String?,
+    onTabClick: (TabItem) -> Unit,
+    modifier: Modifier = Modifier,
+    // Colour of the selected label and its dot
+    accent: Color = MaterialTheme.colorScheme.tertiary
 ) {
     Surface(
         modifier = modifier
@@ -60,15 +64,12 @@ fun AppBottomBar(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val destinations = AppDestination.entries
-            
-            destinations.forEach { destination ->
-                val isSelected = currentRoute == destination.route
-                
+            tabs.forEach { tab ->
                 AppBottomBarItem(
-                    destination = destination,
-                    isSelected = isSelected,
-                    onClick = { onNavigateTo(destination) }
+                    tab = tab,
+                    isSelected = selectedRoute == tab.route,
+                    accent = accent,
+                    onClick = { onTabClick(tab) }
                 )
             }
         }
@@ -77,12 +78,19 @@ fun AppBottomBar(
 
 @Composable
 private fun AppBottomBarItem(
-    destination: AppDestination,
+    tab: TabItem,
     isSelected: Boolean,
+    accent: Color,
     onClick: () -> Unit
 ) {
+    val description = tab.contentDescriptionRes?.let { stringResource(it) }
+
     Box(
         modifier = Modifier
+            .then(
+                if (description != null) Modifier.semantics { contentDescription = description }
+                else Modifier
+            )
             .clip(RoundedCornerShape(AppRadius.large))
             .clickable(onClick = onClick)
             .defaultMinSize(minHeight = 48.dp, minWidth = 64.dp)
@@ -99,7 +107,7 @@ private fun AppBottomBarItem(
 
             val contentColor by animateColorAsState(
                 targetValue = if (isSelected) {
-                    MaterialTheme.colorScheme.tertiary
+                    accent
                 } else {
                     MaterialTheme.colorScheme.onSurfaceVariant
                 },
@@ -114,7 +122,7 @@ private fun AppBottomBarItem(
             )
 
             Text(
-                text = stringResource(destination.labelRes),
+                text = stringResource(tab.labelRes),
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                 ),
@@ -133,7 +141,7 @@ private fun AppBottomBarItem(
                         scaleY = dotProgress
                     },
                 shape = CircleShape,
-                color = MaterialTheme.colorScheme.tertiary
+                color = accent
             ) {}
         }
     }
