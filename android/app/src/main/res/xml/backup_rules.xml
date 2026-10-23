@@ -1,13 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample backup rules file; uncomment and customize as necessary.
-   See https://developer.android.com/guide/topics/data/autobackup
-   for details.
-   Note: This file is ignored for devices older than API 31
-   See https://developer.android.com/about/versions/12/backup-restore
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Rules for Auto Backup on Android 11 and below (Android 12+ uses data_extraction_rules.xml).
+   Everything is backed up by default; only what is listed here is left out.
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <!-- Who is signed in belongs to this device: a restored copy must not log anyone in -->
+    <exclude domain="sharedpref" path="session_prefs.xml" />
 </full-backup-content>
