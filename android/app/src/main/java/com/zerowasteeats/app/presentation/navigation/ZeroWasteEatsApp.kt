@@ -32,12 +32,7 @@ fun ZeroWasteEatsApp() {
     // request cannot come back after rotation or a language change
     val exploreViewRequest = remember { ExploreViewRequest() }
 
-    val isBottomBarVisible = currentRoute in listOf(
-        AppDestination.HOME.route,
-        AppDestination.EXPLORE.route,
-        AppDestination.ORDERS.route,
-        AppDestination.PROFILE.route
-    )
+    val isBottomBarVisible = customerTabs.any { it.route == currentRoute }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0), // Handle edge-to-edge manually if needed
@@ -53,8 +48,9 @@ fun ZeroWasteEatsApp() {
                     contentAlignment = Alignment.BottomCenter
                 ) {
                     AppBottomBar(
-                        currentRoute = currentRoute,
-                        onNavigateTo = { destination -> navController.navigateToTab(destination) }
+                        tabs = customerTabs,
+                        selectedRoute = currentRoute,
+                        onTabClick = { tab -> navController.navigateToTab(tab.route) }
                     )
                 }
             }
