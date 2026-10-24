@@ -27,6 +27,7 @@ import com.zerowasteeats.app.presentation.screens.merchant.dashboard.MerchantDas
 import com.zerowasteeats.app.presentation.screens.merchant.editor.OfferEditorScreen
 import com.zerowasteeats.app.presentation.screens.merchant.offers.MerchantOffersScreen
 import com.zerowasteeats.app.presentation.screens.merchant.offers.OfferSavedNotice
+import com.zerowasteeats.app.presentation.screens.merchant.reservations.MerchantReservationsScreen
 
 enum class MerchantDestination(
     val route: String,
@@ -125,11 +126,7 @@ fun MerchantNavigation(
                 )
             }
             composable(MerchantDestination.RESERVATIONS.route) {
-                MerchantTabPlaceholder(
-                    title = stringResource(R.string.merchant_tab_reservations),
-                    emptyTitle = stringResource(R.string.merchant_reservations_empty_title),
-                    emptyMessage = stringResource(R.string.merchant_reservations_empty_message)
-                )
+                MerchantReservationsScreen(session = session)
             }
             composable(MerchantDestination.BUSINESS.route) {
                 MerchantTabPlaceholder(

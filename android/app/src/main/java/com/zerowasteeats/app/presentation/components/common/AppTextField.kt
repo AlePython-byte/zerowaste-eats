@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -27,7 +28,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentType
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -57,7 +60,9 @@ fun AppTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     contentType: ContentType? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    trailingIcon: (@Composable () -> Unit)? = null
+    trailingIcon: (@Composable () -> Unit)? = null,
+    textStyle: TextStyle = LocalTextStyle.current,
+    capitalization: KeyboardCapitalization = KeyboardCapitalization.None
 ) {
     OutlinedTextField(
         value = value,
@@ -76,7 +81,12 @@ fun AppTextField(
         singleLine = true,
         shape = RoundedCornerShape(AppRadius.large),
         visualTransformation = visualTransformation,
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType, imeAction = imeAction),
+        keyboardOptions = KeyboardOptions(
+            capitalization = capitalization,
+            keyboardType = keyboardType,
+            imeAction = imeAction
+        ),
+        textStyle = textStyle,
         keyboardActions = keyboardActions,
         trailingIcon = trailingIcon,
         colors = OutlinedTextFieldDefaults.colors(

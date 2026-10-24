@@ -52,6 +52,39 @@ class FakeMerchantReservationRepositoryTest {
     }
 
     @Test
+    fun redeemById_withThatReservationsCode_completesIt() = runBlocking {
+        val repo = repository()
+
+        val result = repo.redeem("r-1", "pan-4821")
+
+        assertTrue(result is RedeemResult.Success)
+        assertEquals(MerchantReservationStatus.COMPLETED, repo.reservations.value.single().status)
+    }
+
+    @Test
+    fun redeemById_withAnotherReservationsCode_isInvalid() = runBlocking {
+        val other = reservation.copy(id = "r-2", code = "PAN-7305")
+        val repo = FakeMerchantReservationRepository(listOf(reservation, other), latencyMillis = 0)
+
+        assertEquals(RedeemResult.InvalidCode, repo.redeem("r-1", "PAN-7305"))
+        assertTrue(repo.reservations.value.all { it.status == MerchantReservationStatus.PENDING })
+    }
+
+    @Test
+    fun redeemById_ofAnUnknownReservation_isInvalid() = runBlocking {
+        assertEquals(RedeemResult.InvalidCode, repository().redeem("r-9", "PAN-4821"))
+    }
+
+    @Test
+    fun redeemById_twice_failsTheSecondTime() = runBlocking {
+        val repo = repository()
+
+        repo.redeem("r-1", "PAN-4821")
+
+        assertEquals(RedeemResult.AlreadyRedeemed, repo.redeem("r-1", "PAN-4821"))
+    }
+
+    @Test
     fun redeem_theSameCodeTwice_failsTheSecondTime() = runBlocking {
         val repo = repository()
 

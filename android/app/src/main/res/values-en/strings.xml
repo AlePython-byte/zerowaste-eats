@@ -176,8 +176,6 @@
     <string name="merchant_tab_offers">My offers</string>
     <string name="merchant_tab_reservations">Reservations</string>
     <string name="merchant_tab_business">Business</string>
-    <string name="merchant_reservations_empty_title">You have no reservations yet</string>
-    <string name="merchant_reservations_empty_message">When someone reserves one of your offers, it will show up here.</string>
     <string name="merchant_business_empty_title">Your business</string>
     <string name="merchant_business_empty_message">Soon you will be able to edit your business details.</string>
     <string name="merchant_dashboard_greeting">Hello, %1$s</string>
@@ -249,4 +247,26 @@
     <string name="offer_error_quantity_range" tools:ignore="PluralsCandidate">Enter a quantity between %1$d and %2$d.</string>
     <string name="offer_error_end_not_after_start">It must be after the start time.</string>
     <string name="offer_error_end_in_past">That time has passed. Pickup is for today.</string>
+    <string name="merchant_reservations_tab_pending">Pending</string>
+    <string name="merchant_reservations_tab_completed">Completed</string>
+    <string name="merchant_confirm_pickup">Confirm pickup</string>
+    <string name="merchant_reservation_delivered">Delivered</string>
+    <string name="merchant_pickup_confirmed">Pickup confirmed</string>
+    <string name="merchant_code_instructions">Ask the customer for their pickup code and type it here.</string>
+    <string name="merchant_code_label">Pickup code</string>
+    <string name="merchant_code_confirm">Confirm</string>
+    <string name="merchant_code_debug_hint">Test code: %1$s</string>
+    <string name="merchant_code_already_completed">This reservation was already handed over.</string>
+    <plurals name="merchant_code_wrong">
+        <item quantity="one">Wrong code. %1$d attempt left.</item>
+        <item quantity="other">Wrong code. %1$d attempts left.</item>
+    </plurals>
+    <plurals name="merchant_code_locked">
+        <item quantity="one">Too many attempts. Try again in %1$d second.</item>
+        <item quantity="other">Too many attempts. Try again in %1$d seconds.</item>
+    </plurals>
+    <string name="merchant_reservations_empty_pending_title">Nothing pending for now</string>
+    <string name="merchant_reservations_empty_pending_message">When someone reserves one of your offers, it will show up here.</string>
+    <string name="merchant_reservations_empty_completed_title">No pickups handed over yet</string>
+    <string name="merchant_reservations_empty_completed_message">Pickups you confirm will show up here.</string>
 </resources>

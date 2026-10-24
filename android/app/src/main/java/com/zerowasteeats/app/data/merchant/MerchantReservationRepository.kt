@@ -14,6 +14,13 @@ interface MerchantReservationRepository {
      * works once: the second time it is [RedeemResult.AlreadyRedeemed].
      */
     suspend fun redeem(code: String): RedeemResult
+
+    /**
+     * Hands over the reservation [reservationId] if [code] is that reservation's own code,
+     * compared the same way as [redeem]. A valid code of another reservation is
+     * [RedeemResult.InvalidCode] here, and so is an unknown id.
+     */
+    suspend fun redeem(reservationId: String, code: String): RedeemResult
 }
 
 /** In-memory reservations. Every call waits [latencyMillis] to look like a real request. */
@@ -26,7 +33,19 @@ class FakeMerchantReservationRepository(
 
     override val reservations: StateFlow<List<MerchantReservation>> = state
 
-    override suspend fun redeem(code: String): RedeemResult {
+    override suspend fun redeem(code: String): RedeemResult =
+        redeemMatching(code) { reservation, wanted -> normalize(reservation.code) == wanted }
+
+    override suspend fun redeem(reservationId: String, code: String): RedeemResult =
+        redeemMatching(code) { reservation, wanted ->
+            reservation.id == reservationId && normalize(reservation.code) == wanted
+        }
+
+    /** Hands over the first reservation that [matches] the typed code, normalized. */
+    private suspend fun redeemMatching(
+        code: String,
+        matches: (MerchantReservation, String) -> Boolean
+    ): RedeemResult {
         delay(latencyMillis)
         val wanted = normalize(code)
         var result: RedeemResult = RedeemResult.InvalidCode
@@ -35,7 +54,7 @@ class FakeMerchantReservationRepository(
             val match = if (wanted.isEmpty()) {
                 null
             } else {
-                list.firstOrNull { normalize(it.code) == wanted }
+                list.firstOrNull { matches(it, wanted) }
             }
             when {
                 match == null -> {

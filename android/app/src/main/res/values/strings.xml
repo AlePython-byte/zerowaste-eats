@@ -187,8 +187,6 @@
     <string name="merchant_tab_offers">Mis ofertas</string>
     <string name="merchant_tab_reservations">Reservas</string>
     <string name="merchant_tab_business">Negocio</string>
-    <string name="merchant_reservations_empty_title">Aún no tienes reservas</string>
-    <string name="merchant_reservations_empty_message">Cuando alguien reserve una de tus ofertas, aparecerá aquí.</string>
     <string name="merchant_business_empty_title">Tu negocio</string>
     <string name="merchant_business_empty_message">Pronto podrás editar los datos de tu negocio.</string>
     <string name="merchant_dashboard_greeting">Hola, %1$s</string>
@@ -261,4 +259,28 @@
     <string name="offer_error_quantity_range" tools:ignore="PluralsCandidate">Escribe una cantidad entre %1$d y %2$d.</string>
     <string name="offer_error_end_not_after_start">Debe ser después de la hora de inicio.</string>
     <string name="offer_error_end_in_past">Esa hora ya pasó. La recogida es para hoy.</string>
+    <string name="merchant_reservations_tab_pending">Pendientes</string>
+    <string name="merchant_reservations_tab_completed">Completadas</string>
+    <string name="merchant_confirm_pickup">Confirmar recogida</string>
+    <string name="merchant_reservation_delivered">Entregada</string>
+    <string name="merchant_pickup_confirmed">Recogida confirmada</string>
+    <string name="merchant_code_instructions">Pide al cliente su código de recogida y escríbelo aquí.</string>
+    <string name="merchant_code_label">Código de recogida</string>
+    <string name="merchant_code_confirm">Confirmar</string>
+    <string name="merchant_code_debug_hint">Código de prueba: %1$s</string>
+    <string name="merchant_code_already_completed">Esta reserva ya se entregó.</string>
+    <plurals name="merchant_code_wrong">
+        <item quantity="one">Código incorrecto. Te queda %1$d intento.</item>
+        <item quantity="many">Código incorrecto. Te quedan %1$d intentos.</item>
+        <item quantity="other">Código incorrecto. Te quedan %1$d intentos.</item>
+    </plurals>
+    <plurals name="merchant_code_locked">
+        <item quantity="one">Demasiados intentos. Vuelve a intentarlo en %1$d segundo.</item>
+        <item quantity="many">Demasiados intentos. Vuelve a intentarlo en %1$d segundos.</item>
+        <item quantity="other">Demasiados intentos. Vuelve a intentarlo en %1$d segundos.</item>
+    </plurals>
+    <string name="merchant_reservations_empty_pending_title">Nada pendiente por ahora</string>
+    <string name="merchant_reservations_empty_pending_message">Cuando alguien reserve una de tus ofertas, aparecerá aquí.</string>
+    <string name="merchant_reservations_empty_completed_title">Aún no has entregado pedidos</string>
+    <string name="merchant_reservations_empty_completed_message">Las recogidas que confirmes aparecerán aquí.</string>
 </resources>
