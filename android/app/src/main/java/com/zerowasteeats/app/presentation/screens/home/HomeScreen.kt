@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.presentation.components.common.AppSearchBar
+import com.zerowasteeats.app.presentation.components.common.EmptyStateIcon
 import com.zerowasteeats.app.presentation.components.filters.CategoryChip
 import com.zerowasteeats.app.presentation.components.offers.OfferCard
 import com.zerowasteeats.app.presentation.data.MockOffers
@@ -207,6 +208,8 @@ private fun EmptyState(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        EmptyStateIcon(R.drawable.ic_empty_bag)
+        Spacer(modifier = Modifier.height(AppSpacing.regular))
         Text(
             text = stringResource(R.string.home_empty_title),
             style = MaterialTheme.typography.titleLarge,

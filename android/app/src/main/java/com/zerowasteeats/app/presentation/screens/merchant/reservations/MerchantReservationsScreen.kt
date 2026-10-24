@@ -179,10 +179,12 @@ fun MerchantReservationsContent(
 private fun EmptyReservations(tab: ReservationTab) {
     when (tab) {
         ReservationTab.PENDING -> EmptyState(
+            icon = R.drawable.ic_empty_calendar,
             title = stringResource(R.string.merchant_reservations_empty_pending_title),
             message = stringResource(R.string.merchant_reservations_empty_pending_message)
         )
         ReservationTab.COMPLETED -> EmptyState(
+            icon = R.drawable.ic_empty_receipt,
             title = stringResource(R.string.merchant_reservations_empty_completed_title),
             message = stringResource(R.string.merchant_reservations_empty_completed_message)
         )

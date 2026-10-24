@@ -115,6 +115,7 @@ fun MerchantDashboardContent(
 
             if (!state.hasData) {
                 EmptyState(
+                    icon = R.drawable.ic_empty_bag,
                     title = stringResource(R.string.merchant_dashboard_empty_title),
                     message = stringResource(R.string.merchant_dashboard_empty_message),
                     modifier = Modifier.staggeredEntrance(2, animateEntrance),

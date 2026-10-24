@@ -215,16 +215,19 @@ fun MerchantOffersContent(
 private fun EmptyOffers(filter: OfferFilter, onNewOffer: () -> Unit) {
     when (filter) {
         OfferFilter.ACTIVE -> EmptyState(
+            icon = R.drawable.ic_empty_tag,
             title = stringResource(R.string.merchant_offers_empty_active_title),
             message = stringResource(R.string.merchant_offers_empty_active_message),
             actionText = stringResource(R.string.merchant_publish_offer),
             onActionClick = onNewOffer
         )
         OfferFilter.PAUSED -> EmptyState(
+            icon = R.drawable.ic_empty_tag,
             title = stringResource(R.string.merchant_offers_empty_paused_title),
             message = stringResource(R.string.merchant_offers_empty_paused_message)
         )
         OfferFilter.SOLD_OUT -> EmptyState(
+            icon = R.drawable.ic_empty_bag,
             title = stringResource(R.string.merchant_offers_empty_sold_out_title),
             message = stringResource(R.string.merchant_offers_empty_sold_out_message)
         )

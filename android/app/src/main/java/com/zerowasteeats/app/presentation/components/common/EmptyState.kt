@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.ThemeMode
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
@@ -36,7 +37,7 @@ fun EmptyState(
     title: String,
     message: String,
     modifier: Modifier = Modifier,
-    @DrawableRes icon: Int = android.R.drawable.ic_menu_info_details,
+    @DrawableRes icon: Int = R.drawable.ic_empty_bag,
     actionText: String? = null,
     onActionClick: (() -> Unit)? = null
 ) {
@@ -47,12 +48,7 @@ fun EmptyState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = null,
-            modifier = Modifier.size(48.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        EmptyStateIcon(icon)
         Spacer(modifier = Modifier.height(AppSpacing.regular))
         Text(
             text = title,
@@ -74,6 +70,17 @@ fun EmptyState(
             AppButton(text = actionText, onClick = onActionClick)
         }
     }
+}
+
+/** The drawing at the top of an empty state: decorative, in the theme's secondary text color. */
+@Composable
+fun EmptyStateIcon(@DrawableRes icon: Int, modifier: Modifier = Modifier) {
+    Icon(
+        painter = painterResource(icon),
+        contentDescription = null,
+        modifier = modifier.size(48.dp),
+        tint = MaterialTheme.colorScheme.onSurfaceVariant
+    )
 }
 
 @Composable
