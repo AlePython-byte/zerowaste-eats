@@ -168,8 +168,20 @@
     <string name="forgot_password_back_to_sign_in">Back to sign in</string>
 
     <string name="common_sign_out">Sign out</string>
-    <string name="merchant_placeholder_message">Business space, coming soon</string>
     <string name="common_cancel">Cancel</string>
     <string name="profile_sign_out_title">Sign out?</string>
     <string name="profile_sign_out_message">You will need to sign in again to see your orders.</string>
+    <string name="mode_badge_merchant">Business</string>
+    <string name="merchant_tab_dashboard">Dashboard</string>
+    <string name="merchant_tab_offers">My offers</string>
+    <string name="merchant_tab_reservations">Reservations</string>
+    <string name="merchant_tab_business">Business</string>
+    <string name="merchant_dashboard_empty_title">Your dashboard is on its way</string>
+    <string name="merchant_dashboard_empty_message">You will see a summary of your business here.</string>
+    <string name="merchant_offers_empty_title">You have no offers yet</string>
+    <string name="merchant_offers_empty_message">Publish your first offer so others can rescue it.</string>
+    <string name="merchant_reservations_empty_title">You have no reservations yet</string>
+    <string name="merchant_reservations_empty_message">When someone reserves one of your offers, it will show up here.</string>
+    <string name="merchant_business_empty_title">Your business</string>
+    <string name="merchant_business_empty_message">Soon you will be able to edit your business details.</string>
 </resources>

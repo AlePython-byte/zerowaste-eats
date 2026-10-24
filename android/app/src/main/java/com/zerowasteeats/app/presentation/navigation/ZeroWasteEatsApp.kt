@@ -17,7 +17,6 @@ import androidx.compose.ui.platform.LocalContext
 import com.zerowasteeats.app.ZeroWasteEatsApplication
 import com.zerowasteeats.app.presentation.components.common.ENTRANCE_MILLIS
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
-import com.zerowasteeats.app.presentation.screens.merchant.MerchantPlaceholder
 
 /**
  * Root of the app's UI: shows the space that matches the current session, and switches by
@@ -54,8 +53,8 @@ fun ZeroWasteEatsApp() {
                     session = space.session,
                     onSignOut = sessionManager::signOut
                 )
-                is AppSpace.Merchant -> MerchantPlaceholder(
-                    businessName = space.session.businessName,
+                is AppSpace.Merchant -> MerchantNavigation(
+                    session = space.session,
                     onSignOut = sessionManager::signOut
                 )
             }

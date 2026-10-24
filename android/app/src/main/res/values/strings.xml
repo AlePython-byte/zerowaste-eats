@@ -179,8 +179,20 @@
     <string name="forgot_password_back_to_sign_in">Volver a ingresar</string>
 
     <string name="common_sign_out">Cerrar sesión</string>
-    <string name="merchant_placeholder_message">Espacio de negocio, próximamente</string>
     <string name="common_cancel">Cancelar</string>
     <string name="profile_sign_out_title">¿Cerrar sesión?</string>
     <string name="profile_sign_out_message">Tendrás que ingresar de nuevo para ver tus pedidos.</string>
+    <string name="mode_badge_merchant">Negocio</string>
+    <string name="merchant_tab_dashboard">Panel</string>
+    <string name="merchant_tab_offers">Mis ofertas</string>
+    <string name="merchant_tab_reservations">Reservas</string>
+    <string name="merchant_tab_business">Negocio</string>
+    <string name="merchant_dashboard_empty_title">Tu panel está en construcción</string>
+    <string name="merchant_dashboard_empty_message">Aquí verás el resumen de tu negocio.</string>
+    <string name="merchant_offers_empty_title">Aún no tienes ofertas</string>
+    <string name="merchant_offers_empty_message">Publica tu primera oferta para que otros puedan rescatarla.</string>
+    <string name="merchant_reservations_empty_title">Aún no tienes reservas</string>
+    <string name="merchant_reservations_empty_message">Cuando alguien reserve una de tus ofertas, aparecerá aquí.</string>
+    <string name="merchant_business_empty_title">Tu negocio</string>
+    <string name="merchant_business_empty_message">Pronto podrás editar los datos de tu negocio.</string>
 </resources>
