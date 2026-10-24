@@ -66,4 +66,24 @@ class AuthValidatorsTest {
         assertEquals(ValidationError.REQUIRED, AuthValidators.validateRequired("   "))
         assertNull(AuthValidators.validateRequired("Pasto"))
     }
+
+    @Test
+    fun collapseSpaces_trimsAndJoinsRepeatedSpaces() {
+        assertEquals("Ana Pérez", AuthValidators.collapseSpaces("  Ana    Pérez  "))
+        assertEquals("Ana Pérez", AuthValidators.collapseSpaces("Ana\t \nPérez"))
+        assertEquals("", AuthValidators.collapseSpaces("   "))
+    }
+
+    @Test
+    fun capitalizeWords_capitalizesEachWordAndTidiesSpaces() {
+        assertEquals("San Juan De Pasto", AuthValidators.capitalizeWords("  san   juan de pasto "))
+        assertEquals("Medellín", AuthValidators.capitalizeWords("medellín"))
+        assertEquals("Ángela María", AuthValidators.capitalizeWords("ángela maría"))
+    }
+
+    @Test
+    fun capitalizeWords_leavesTheRestOfEachWordAsTyped() {
+        assertEquals("McDonald NY", AuthValidators.capitalizeWords("mcDonald NY"))
+        assertEquals("", AuthValidators.capitalizeWords("  "))
+    }
 }

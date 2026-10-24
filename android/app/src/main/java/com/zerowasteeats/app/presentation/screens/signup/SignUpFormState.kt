@@ -116,12 +116,13 @@ class SignUpFormState(
 
     /** Call only after [validateDetails] returned null. */
     fun toRequest(): SignUpRequest = SignUpRequest(
-        displayName = displayName.trim(),
+        displayName = AuthValidators.capitalizeWords(displayName),
         email = email.trim(),
         password = password,
         role = role,
-        businessName = businessName.trim().takeIf { isMerchant },
-        city = city.trim().takeIf { isMerchant }
+        // A brand keeps its own casing ("La Casa de doña Rosa"), so only the spaces are tidied
+        businessName = AuthValidators.collapseSpaces(businessName).takeIf { isMerchant },
+        city = AuthValidators.capitalizeWords(city).takeIf { isMerchant }
     )
 
     private fun validate(field: SignUpField): ValidationError? = when (field) {

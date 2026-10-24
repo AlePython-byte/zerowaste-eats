@@ -51,6 +51,20 @@ object AuthValidators {
         else -> null
     }
 
+    private val repeatedSpaces = Regex("\\s+")
+
+    /** Trims the ends and collapses every run of whitespace into one space. */
+    fun collapseSpaces(value: String): String = value.trim().replace(repeatedSpaces, " ")
+
+    /**
+     * For people's names and cities: [collapseSpaces], then the first letter of each word in
+     * capitals. The rest of each word is left as typed, so "McDonald" or "NY" survive.
+     */
+    fun capitalizeWords(value: String): String =
+        collapseSpaces(value).split(' ').joinToString(" ") { word ->
+            word.replaceFirstChar { it.uppercase() }
+        }
+
     /** Business name, city, or the password on sign in: it only has to be filled in. */
     fun validateRequired(value: String): ValidationError? =
         if (value.isBlank()) ValidationError.REQUIRED else null

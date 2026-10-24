@@ -33,6 +33,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -229,7 +230,8 @@ private fun DetailsStep(
             enabled = !isLoading,
             imeAction = imeAction(SignUpField.NAME),
             keyboardActions = submitOnDone,
-            contentType = ContentType.PersonFullName
+            contentType = ContentType.PersonFullName,
+            capitalization = KeyboardCapitalization.Words
         )
         AppTextField(
             value = form.email,
@@ -263,7 +265,8 @@ private fun DetailsStep(
                 error = form.errorOf(SignUpField.BUSINESS_NAME)?.message(),
                 enabled = !isLoading,
                 imeAction = imeAction(SignUpField.BUSINESS_NAME),
-                keyboardActions = submitOnDone
+                keyboardActions = submitOnDone,
+                capitalization = KeyboardCapitalization.Words
             )
             AppTextField(
                 value = form.city,
@@ -273,7 +276,8 @@ private fun DetailsStep(
                 error = form.errorOf(SignUpField.CITY)?.message(),
                 enabled = !isLoading,
                 imeAction = imeAction(SignUpField.CITY),
-                keyboardActions = submitOnDone
+                keyboardActions = submitOnDone,
+                capitalization = KeyboardCapitalization.Words
             )
         }
     }

@@ -157,6 +157,21 @@ class SignUpFormStateTest {
     }
 
     @Test
+    fun request_normalizesNameAndCity_andOnlyTidiesTheBusinessName() {
+        val form = filledMerchant().apply {
+            onDisplayNameChange("  ana   maría  pérez ")
+            onBusinessNameChange("  La Casa de   doña Rosa ")
+            onCityChange(" san  juan de pasto ")
+        }
+
+        val request = form.toRequest()
+
+        assertEquals("Ana María Pérez", request.displayName)
+        assertEquals("La Casa de doña Rosa", request.businessName)
+        assertEquals("San Juan De Pasto", request.city)
+    }
+
+    @Test
     fun merchantRequest_carriesBusinessNameAndCity() {
         val request = filledMerchant().toRequest()
 
