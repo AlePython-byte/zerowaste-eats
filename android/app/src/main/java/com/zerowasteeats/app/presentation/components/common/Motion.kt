@@ -104,6 +104,9 @@ internal const val LOGO_HEART_START_MILLIS = LOGO_LEAF_START_MILLIS + LOGO_LEAF_
 internal const val LOGO_HEART_MILLIS = ENTRANCE_MILLIS - 50
 internal const val LOGO_TOTAL_MILLIS = LOGO_HEART_START_MILLIS + LOGO_HEART_MILLIS
 
+/** One slow breath of the halo behind the logo: out and back. */
+internal const val HALO_BREATH_MILLIS = 4000
+
 /** Pause between one section's entrance and the next in [staggeredEntrance]. */
 internal const val STAGGER_MILLIS = 60
 
