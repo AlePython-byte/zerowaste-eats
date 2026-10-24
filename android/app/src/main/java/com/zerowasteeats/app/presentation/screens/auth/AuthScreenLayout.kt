@@ -28,6 +28,8 @@ fun AuthScreenLayout(
     title: String,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
+    /** Small line above the title, such as the step of a flow. */
+    eyebrow: String? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -40,6 +42,14 @@ fun AuthScreenLayout(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = AppSpacing.extraLarge, vertical = AppSpacing.section)
         ) {
+            if (eyebrow != null) {
+                Text(
+                    text = eyebrow,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+                Spacer(modifier = Modifier.height(AppSpacing.small))
+            }
             Text(
                 text = title,
                 style = MaterialTheme.typography.headlineLarge,

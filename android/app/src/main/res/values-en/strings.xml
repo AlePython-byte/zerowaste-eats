@@ -137,4 +137,18 @@
     <string name="signin_debug_as_customer">Sign in as buyer</string>
     <string name="signin_debug_as_merchant">Sign in as business</string>
     <string name="signin_debug_simulate_network_error">Simulate network error</string>
+
+    <string name="signup_step_format">Step %1$d of %2$d</string>
+    <string name="signup_role_title">How do you want to use ZeroWaste Eats?</string>
+    <string name="signup_role_customer_title">I want to rescue food</string>
+    <string name="signup_role_customer_description">Find great deals near you.</string>
+    <string name="signup_role_merchant_title">I have a business</string>
+    <string name="signup_role_merchant_description">List your surplus and reach more customers.</string>
+    <string name="signup_details_title">Create your account</string>
+    <string name="signup_field_name">Name</string>
+    <string name="signup_field_business_name">Business name</string>
+    <string name="signup_field_city">City</string>
+    <string name="signup_continue">Continue</string>
+    <string name="signup_submit">Create account</string>
+    <string name="signup_to_sign_in">Already have an account? Sign in</string>
 </resources>

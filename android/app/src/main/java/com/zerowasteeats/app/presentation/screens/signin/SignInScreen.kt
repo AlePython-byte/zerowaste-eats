@@ -11,13 +11,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,8 +40,9 @@ import com.zerowasteeats.app.data.auth.AuthError
 import com.zerowasteeats.app.data.auth.FakeAuthRepository
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppTextField
-import com.zerowasteeats.app.presentation.components.common.FormErrorBanner
 import com.zerowasteeats.app.presentation.components.common.PasswordField
+import com.zerowasteeats.app.presentation.screens.auth.AuthErrorBanner
+import com.zerowasteeats.app.presentation.screens.auth.AuthLinkButton
 import com.zerowasteeats.app.presentation.screens.auth.AuthScreenLayout
 import com.zerowasteeats.app.presentation.screens.auth.message
 import com.zerowasteeats.app.presentation.screens.auth.onFieldBlur
@@ -167,37 +166,13 @@ fun SignInContent(
             )
         }
 
-        TextButton(
+        AuthLinkButton(
+            text = stringResource(R.string.signin_forgot_password),
             onClick = onForgotPassword,
-            modifier = Modifier
-                .align(Alignment.End)
-                .defaultMinSize(minHeight = 48.dp),
-            colors = ButtonDefaults.textButtonColors(
-                contentColor = MaterialTheme.colorScheme.tertiary
-            )
-        ) {
-            Text(
-                text = stringResource(R.string.signin_forgot_password),
-                style = MaterialTheme.typography.labelLarge
-            )
-        }
+            modifier = Modifier.align(Alignment.End)
+        )
 
-        FormErrorBanner(message = error?.message())
-        if (error == AuthError.NETWORK) {
-            TextButton(
-                onClick = { submit() },
-                enabled = !isLoading,
-                modifier = Modifier.defaultMinSize(minHeight = 48.dp),
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = MaterialTheme.colorScheme.tertiary
-                )
-            ) {
-                Text(
-                    text = stringResource(R.string.auth_retry),
-                    style = MaterialTheme.typography.labelLarge
-                )
-            }
-        }
+        AuthErrorBanner(error = error, onRetry = { submit() }, isLoading = isLoading)
 
         Spacer(modifier = Modifier.height(AppSpacing.regular))
         AppButton(
@@ -207,20 +182,11 @@ fun SignInContent(
             isLoading = isLoading
         )
 
-        TextButton(
+        AuthLinkButton(
+            text = stringResource(R.string.signin_to_sign_up),
             onClick = onSignUp,
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .defaultMinSize(minHeight = 48.dp),
-            colors = ButtonDefaults.textButtonColors(
-                contentColor = MaterialTheme.colorScheme.tertiary
-            )
-        ) {
-            Text(
-                text = stringResource(R.string.signin_to_sign_up),
-                style = MaterialTheme.typography.labelLarge
-            )
-        }
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
 
         if (debugTools != null) {
             Spacer(modifier = Modifier.height(AppSpacing.large))
