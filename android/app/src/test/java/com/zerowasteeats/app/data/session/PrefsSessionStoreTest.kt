@@ -8,7 +8,7 @@ import org.junit.Test
 class PrefsSessionStoreTest {
 
     private val customer = Session.Customer("u1", "Ana Pérez", "ana@correo.co")
-    private val merchant = Session.Merchant("u2", "Luis", "luis@tienda.co", "Tienda Luis")
+    private val merchant = Session.Merchant("u2", "Luis", "luis@tienda.co", "Tienda Luis", "Pasto")
 
     @Test
     fun load_emptyStoreIsSignedOut() {
@@ -38,10 +38,29 @@ class PrefsSessionStoreTest {
         PrefsSessionStore(data).save(merchant)
 
         assertEquals(
-            setOf("user_id", "role", "display_name", "email", "business_name"),
+            setOf("user_id", "role", "display_name", "email", "business_name", "city"),
             data.contents.keys
         )
         assertFalse(data.contents.keys.any { it.contains("password", ignoreCase = true) || it.contains("token", ignoreCase = true) })
+    }
+
+    @Test
+    fun load_aMerchantSessionSavedBeforeTheCityWasKept_hasAnEmptyCity() {
+        val data = InMemoryKeyValueStore()
+        data.replaceAll(
+            mapOf(
+                "user_id" to "u2",
+                "role" to "MERCHANT",
+                "display_name" to "Luis",
+                "email" to "luis@tienda.co",
+                "business_name" to "Tienda Luis"
+            )
+        )
+
+        assertEquals(
+            Session.Merchant("u2", "Luis", "luis@tienda.co", "Tienda Luis", city = ""),
+            PrefsSessionStore(data).load()
+        )
     }
 
     @Test
@@ -53,6 +72,7 @@ class PrefsSessionStoreTest {
         store.save(customer)
 
         assertFalse(data.contents.containsKey("business_name"))
+        assertFalse(data.contents.containsKey("city"))
         assertEquals(customer, store.load())
     }
 

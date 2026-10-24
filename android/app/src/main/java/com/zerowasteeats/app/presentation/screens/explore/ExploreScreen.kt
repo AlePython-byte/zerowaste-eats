@@ -55,6 +55,7 @@ import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppButtonStyle
 import com.zerowasteeats.app.presentation.components.common.AppCard
 import com.zerowasteeats.app.presentation.components.common.AppSearchBar
+import com.zerowasteeats.app.presentation.components.common.EmptyStateIcon
 import com.zerowasteeats.app.presentation.components.common.offerGridItem
 import com.zerowasteeats.app.presentation.components.common.offerListItem
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
@@ -458,6 +459,8 @@ private fun EmptyState(onClearFilters: () -> Unit, modifier: Modifier = Modifier
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        EmptyStateIcon(R.drawable.ic_empty_tag)
+        Spacer(modifier = Modifier.height(AppSpacing.regular))
         Text(
             text = stringResource(R.string.explore_empty_title),
             style = MaterialTheme.typography.titleLarge,

@@ -49,7 +49,8 @@ class SessionManager(
             userId = userId,
             displayName = displayName,
             email = email,
-            businessName = businessName.orEmpty()
+            businessName = businessName.orEmpty(),
+            city = city.orEmpty()
         )
     }
 }

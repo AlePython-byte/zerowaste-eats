@@ -1,6 +1,7 @@
 package com.zerowasteeats.app.presentation.screens.offerdetail
 
 import com.zerowasteeats.app.R
+import com.zerowasteeats.app.presentation.format.formatted
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.foundation.Image
@@ -221,7 +222,7 @@ fun OfferDetailScreen(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = offer.pickupTime,
+                        text = offer.pickupWindow.formatted(withPickupPrefix = true),
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = MaterialTheme.colorScheme.tertiary
                     )

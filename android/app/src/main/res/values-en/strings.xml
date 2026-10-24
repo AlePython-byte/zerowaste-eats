@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">ZeroWaste Eats</string>
 
     <string name="category_all">All</string>
@@ -29,7 +29,9 @@
     <string name="common_favorite_add_cd">Mark as favorite</string>
     <string name="common_favorite_remove_cd">Remove from favorites</string>
 
-    <string name="home_greeting">Good morning</string>
+    <string name="home_greeting_morning">Good morning</string>
+    <string name="home_greeting_afternoon">Good afternoon</string>
+    <string name="home_greeting_evening">Good evening</string>
     <string name="home_subtitle">Find something good near you</string>
     <string name="home_search_placeholder">Search for food near you</string>
     <string name="home_section_nearby">Near you</string>
@@ -38,6 +40,15 @@
 
     <string name="offer_detail_about_title">About this offer</string>
     <string name="offer_detail_about_body">Enjoy our fresh products of the day, packed so they don\'t go to waste. Perfect for a surprise or to share.</string>
+    <string name="pickup_offer_format">Pickup %1$s, %2$s</string>
+    <string name="pickup_order_format">%1$s, %2$s</string>
+    <string name="pickup_day_today">today</string>
+    <string name="pickup_day_tomorrow">tomorrow</string>
+    <string name="pickup_day_yesterday">yesterday</string>
+    <string name="pickup_day_date">on %1$s</string>
+    <string name="order_day_today">Today</string>
+    <string name="order_day_tomorrow">Tomorrow</string>
+    <string name="order_day_yesterday">Yesterday</string>
     <string name="offer_detail_pickup_title">Pickup</string>
     <string name="offer_detail_reserve">Reserve</string>
 
@@ -108,4 +119,170 @@
     <string name="field_show_password">Show password</string>
     <string name="field_hide_password">Hide password</string>
     <string name="button_loading">Loading</string>
+
+    <string name="welcome_headline">Rescue tasty food before it goes to waste</string>
+    <string name="welcome_create_account">Create account</string>
+    <string name="welcome_sign_in">I already have an account</string>
+    <string name="welcome_switch_to_dark_cd">Switch to dark mode</string>
+    <string name="welcome_switch_to_light_cd">Switch to light mode</string>
+
+    <string name="auth_field_email">Email</string>
+    <string name="auth_field_password">Password</string>
+    <string name="auth_retry">Retry</string>
+    <string name="auth_error_invalid_credentials">Incorrect email or password.</string>
+    <string name="auth_error_email_registered">That email is already registered. Try signing in.</string>
+    <string name="auth_error_network">We couldn\'t connect. Check your connection and try again.</string>
+
+    <string name="validation_required">This field is required.</string>
+    <plurals name="validation_name_too_short">
+        <item quantity="one">Use at least %1$d character.</item>
+        <item quantity="other">Use at least %1$d characters.</item>
+    </plurals>
+    <plurals name="validation_name_too_long">
+        <item quantity="one">Use %1$d character or fewer.</item>
+        <item quantity="other">Use %1$d characters or fewer.</item>
+    </plurals>
+    <string name="validation_email_invalid">Enter a valid email.</string>
+    <plurals name="validation_password_too_short">
+        <item quantity="one">Use at least %1$d character.</item>
+        <item quantity="other">Use at least %1$d characters.</item>
+    </plurals>
+
+    <string name="signin_title">Sign in to your account</string>
+    <string name="signin_subtitle">Good to see you again.</string>
+    <string name="signin_submit">Sign in</string>
+    <string name="signin_forgot_password">Forgot your password?</string>
+    <string name="signin_to_sign_up">No account yet? Create one</string>
+    <string name="signin_debug_title">Debug only</string>
+    <string name="signin_debug_as_customer">Sign in as buyer</string>
+    <string name="signin_debug_as_merchant">Sign in as business</string>
+    <string name="signin_debug_simulate_network_error">Simulate network error</string>
+
+    <string name="signup_step_format">Step %1$d of %2$d</string>
+    <string name="signup_role_title">How do you want to use ZeroWaste Eats?</string>
+    <string name="signup_role_customer_title">I want to rescue food</string>
+    <string name="signup_role_customer_description">Find great deals near you.</string>
+    <string name="signup_role_merchant_title">I have a business</string>
+    <string name="signup_role_merchant_description">List your surplus and reach more customers.</string>
+    <string name="signup_details_title">Create your account</string>
+    <string name="signup_field_name">Name</string>
+    <string name="signup_field_business_name">Business name</string>
+    <string name="signup_field_city">City</string>
+    <string name="signup_continue">Continue</string>
+    <string name="signup_submit">Create account</string>
+    <string name="signup_to_sign_in">Already have an account? Sign in</string>
+
+    <string name="forgot_password_title">Reset your password</string>
+    <string name="forgot_password_subtitle">Enter your email and we will help you create a new one.</string>
+    <string name="forgot_password_submit">Send link</string>
+    <string name="forgot_password_sent">If an account exists for that email, we sent you a link</string>
+    <string name="forgot_password_back_to_sign_in">Back to sign in</string>
+
+    <string name="common_sign_out">Sign out</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="profile_sign_out_title">Sign out?</string>
+    <string name="profile_sign_out_message">You will need to sign in again to see your orders.</string>
+    <string name="mode_badge_merchant">Business</string>
+    <string name="merchant_nav_dashboard">Overview</string>
+    <string name="merchant_nav_offers">Offers</string>
+    <string name="merchant_nav_reservations">Bookings</string>
+    <string name="merchant_nav_business">Business</string>
+    <string name="merchant_tab_offers">My offers</string>
+    <string name="merchant_tab_reservations">Reservations</string>
+    <string name="merchant_dashboard_greeting">Hello, %1$s</string>
+    <string name="merchant_dashboard_empty_title">No activity yet</string>
+    <string name="merchant_dashboard_empty_message">Publish your first offer and you will see how you rescue food here.</string>
+    <string name="merchant_metric_active_offers">Active offers</string>
+    <string name="merchant_metric_pending_reservations">Pending reservations</string>
+    <string name="merchant_metric_rescued_meals">Meals rescued</string>
+    <string name="merchant_upcoming_pickups">Upcoming pickups</string>
+    <string name="merchant_upcoming_empty">You have no pending pickups.</string>
+    <string name="merchant_publish_offer">Publish offer</string>
+    <string name="merchant_review_title">Under review</string>
+    <string name="merchant_review_message">We are reviewing your business. You can publish offers in the meantime.</string>
+    <plurals name="merchant_pickup_quantity">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
+    <string name="common_undo">Undo</string>
+    <string name="merchant_new_offer">New offer</string>
+    <string name="merchant_filter_active">Active</string>
+    <string name="merchant_filter_paused">Paused</string>
+    <string name="merchant_filter_sold_out">Sold out</string>
+    <string name="merchant_offer_status_active">Active</string>
+    <string name="merchant_offer_status_paused">Paused</string>
+    <string name="merchant_offer_status_sold_out">Sold out</string>
+    <string name="merchant_offer_status_expired">Expired</string>
+    <string name="merchant_offer_menu_cd">More options for %1$s</string>
+    <string name="merchant_offer_edit">Edit</string>
+    <string name="merchant_offer_pause">Pause</string>
+    <string name="merchant_offer_resume">Resume</string>
+    <string name="merchant_offer_paused_message">Offer paused</string>
+    <string name="merchant_offer_resumed_message">Offer resumed</string>
+    <string name="merchant_offers_empty_active_title">You have no active offers</string>
+    <string name="merchant_offers_empty_active_message">Publish an offer so others can rescue it.</string>
+    <string name="merchant_offers_empty_paused_title">You have no paused offers</string>
+    <string name="merchant_offers_empty_paused_message">Offers you pause will show up here, ready to resume.</string>
+    <string name="merchant_offers_empty_sold_out_title">Nothing sold out or expired</string>
+    <string name="merchant_offers_empty_sold_out_message">Offers that sell out or expire will show up here.</string>
+    <string name="common_ok">OK</string>
+    <string name="offer_editor_title_edit">Edit offer</string>
+    <string name="offer_editor_save_changes">Save changes</string>
+    <string name="offer_editor_discard_title">Discard changes?</string>
+    <string name="offer_editor_keep_editing">Keep editing</string>
+    <string name="offer_editor_discard">Discard</string>
+    <string name="offer_editor_not_found_message">It may no longer exist. Go back to My offers and try again.</string>
+    <string name="offer_published_message">Offer published</string>
+    <string name="offer_saved_message">Changes saved</string>
+    <string name="offer_field_title">Title</string>
+    <string name="offer_field_category">Category</string>
+    <string name="offer_field_photo">Photo</string>
+    <string name="offer_field_original_price">Original price</string>
+    <string name="offer_field_discounted_price">Discounted price</string>
+    <string name="offer_field_quantity">Quantity available</string>
+    <string name="offer_quantity_decrease_cd">One less</string>
+    <string name="offer_quantity_increase_cd">One more</string>
+    <string name="offer_field_pickup">Pickup window (today)</string>
+    <string name="offer_field_pickup_start">From</string>
+    <string name="offer_field_pickup_end">Until</string>
+    <string name="offer_pickup_choose_time">Choose time</string>
+    <string name="offer_photo_croissant">Croissants</string>
+    <string name="offer_photo_salmon_bowl">Salmon bowl</string>
+    <string name="offer_photo_desserts">Desserts</string>
+    <string name="offer_photo_burger">Burger</string>
+    <string name="offer_photo_vegetables">Vegetables</string>
+    <string name="offer_error_choose">Choose an option.</string>
+    <string name="offer_error_price_not_positive">Enter a price above zero.</string>
+    <string name="offer_error_discount_not_lower">It must be lower than the original price.</string>
+    <!-- Not a plural: the two numbers are the limits of the range, not a count -->
+    <string name="offer_error_quantity_range" tools:ignore="PluralsCandidate">Enter a quantity between %1$d and %2$d.</string>
+    <string name="offer_error_end_not_after_start">It must be after the start time.</string>
+    <string name="offer_error_end_in_past">That time has passed. Pickup is for today.</string>
+    <string name="merchant_reservations_tab_pending">Pending</string>
+    <string name="merchant_reservations_tab_completed">Completed</string>
+    <string name="merchant_confirm_pickup">Confirm pickup</string>
+    <string name="merchant_reservation_delivered">Delivered</string>
+    <string name="merchant_pickup_confirmed">Pickup confirmed</string>
+    <string name="merchant_code_instructions">Ask the customer for their pickup code and type it here.</string>
+    <string name="merchant_code_label">Pickup code</string>
+    <string name="merchant_code_confirm">Confirm</string>
+    <string name="merchant_code_debug_hint">Test code: %1$s</string>
+    <string name="merchant_code_already_completed">This reservation was already handed over.</string>
+    <plurals name="merchant_code_wrong">
+        <item quantity="one">Wrong code. %1$d attempt left.</item>
+        <item quantity="other">Wrong code. %1$d attempts left.</item>
+    </plurals>
+    <plurals name="merchant_code_locked">
+        <item quantity="one">Too many attempts. Try again in %1$d second.</item>
+        <item quantity="other">Too many attempts. Try again in %1$d seconds.</item>
+    </plurals>
+    <string name="merchant_reservations_empty_pending_title">Nothing pending for now</string>
+    <string name="merchant_reservations_empty_pending_message">When someone reserves one of your offers, it will show up here.</string>
+    <string name="merchant_reservations_empty_completed_title">No pickups handed over yet</string>
+    <string name="merchant_reservations_empty_completed_message">Pickups you confirm will show up here.</string>
+    <string name="merchant_verified">Verified</string>
+    <string name="merchant_business_details_title">Business details</string>
+    <string name="merchant_business_description">Description</string>
+    <string name="merchant_business_address">Address</string>
+    <string name="merchant_business_missing">Not filled in</string>
 </resources>

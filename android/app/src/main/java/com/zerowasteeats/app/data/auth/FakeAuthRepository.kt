@@ -43,7 +43,8 @@ class FakeAuthRepository(
                     role = UserRole.MERCHANT,
                     displayName = "Negocio Demo",
                     email = DEMO_MERCHANT_EMAIL,
-                    businessName = "Panadería Demo"
+                    businessName = "Panadería Demo",
+                    city = "Pasto"
                 ),
                 DEMO_PASSWORD
             )
@@ -73,7 +74,8 @@ class FakeAuthRepository(
             role = request.role,
             displayName = request.displayName.trim(),
             email = email,
-            businessName = request.businessName?.trim()?.takeIf { request.role == UserRole.MERCHANT }
+            businessName = request.businessName?.trim()?.takeIf { request.role == UserRole.MERCHANT },
+            city = request.city?.trim()?.takeIf { request.role == UserRole.MERCHANT }
         )
         // Check and insert together, so two sign ups with one email cannot both win
         val added = synchronized(lock) {

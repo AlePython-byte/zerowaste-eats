@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.R
+import com.zerowasteeats.app.presentation.format.formatted
 import com.zerowasteeats.app.presentation.components.common.AppCard
 import com.zerowasteeats.app.presentation.model.OrderStatus
 import com.zerowasteeats.app.presentation.model.OrderUiModel
@@ -63,7 +64,7 @@ fun OrderCard(
 
         // Pickup Info
         Text(
-            text = order.pickupTime,
+            text = order.pickupWindow.formatted(withPickupPrefix = false),
             style = MaterialTheme.typography.bodyMedium,
             color = if (isActive) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = if (isActive) FontWeight.SemiBold else FontWeight.Normal

@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.presentation.components.common.AppSearchBar
+import com.zerowasteeats.app.presentation.components.common.EmptyStateIcon
 import com.zerowasteeats.app.presentation.components.filters.CategoryChip
 import com.zerowasteeats.app.presentation.components.offers.OfferCard
 import com.zerowasteeats.app.presentation.data.MockOffers
@@ -48,13 +49,17 @@ import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
+import java.time.Clock
 
 @Composable
 fun HomeScreen(
     onMapClick: () -> Unit = {},
     onOfferClick: (String) -> Unit = {},
-    onFavoriteClick: (String) -> Unit = {}
+    onFavoriteClick: (String) -> Unit = {},
+    clock: Clock = Clock.systemDefaultZone()
 ) {
+    // Worked out when the screen opens; it does not tick while the screen stays open
+    val greeting = remember(clock) { Greeting.now(clock) }
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var selectedCategory by rememberSaveable { mutableStateOf(OfferCategory.ALL) }
 
@@ -89,7 +94,7 @@ LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(AppSpacing.medium) // Improved info density
             ) {
                 item {
-                    HomeHeader()
+                    HomeHeader(greeting = greeting)
                 }
 
                 item {
@@ -149,10 +154,10 @@ LazyColumn(
 }
 
 @Composable
-private fun HomeHeader(modifier: Modifier = Modifier) {
+private fun HomeHeader(greeting: Greeting, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = stringResource(R.string.home_greeting),
+            text = stringResource(greeting.textRes),
             style = MaterialTheme.typography.displayLarge,
             color = MaterialTheme.colorScheme.onBackground
         )
@@ -203,6 +208,8 @@ private fun EmptyState(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        EmptyStateIcon(R.drawable.ic_empty_bag)
+        Spacer(modifier = Modifier.height(AppSpacing.regular))
         Text(
             text = stringResource(R.string.home_empty_title),
             style = MaterialTheme.typography.titleLarge,

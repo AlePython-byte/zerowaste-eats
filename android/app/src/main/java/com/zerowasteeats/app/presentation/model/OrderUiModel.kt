@@ -16,7 +16,7 @@ data class OrderUiModel(
     val merchantName: String,
     val quantity: Int,
     val totalPrice: String,
-    val pickupTime: String,
+    val pickupWindow: PickupWindow,
     val reservationCode: String,
     val status: OrderStatus
 )

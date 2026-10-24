@@ -1,7 +1,6 @@
 package com.zerowasteeats.app.presentation.components.settings
 
 import android.content.res.Configuration
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,11 +12,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.os.LocaleListCompat
 import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.components.common.AppCard
 import com.zerowasteeats.app.presentation.theme.AppSpacing
@@ -26,12 +23,8 @@ import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
 
 @Composable
 fun LanguageSettingCard(modifier: Modifier = Modifier) {
-    val languages = listOf(
-        "es" to R.string.language_name_es,
-        "en" to R.string.language_name_en
-    )
-    // Read from the configuration so the selector updates without an activity recreation.
-    val current = LocalConfiguration.current.locales[0]?.language ?: "es"
+    val languages = AppLanguage.entries
+    val current = currentLanguageTag()
 
     AppCard(modifier = modifier.fillMaxWidth()) {
         Text(
@@ -47,19 +40,15 @@ fun LanguageSettingCard(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(AppSpacing.medium))
         SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-            languages.forEachIndexed { index, (tag, nameRes) ->
+            languages.forEachIndexed { index, language ->
                 SegmentedButton(
-                    selected = current == tag,
+                    selected = current == language.tag,
                     onClick = {
-                        if (current != tag) {
-                            AppCompatDelegate.setApplicationLocales(
-                                LocaleListCompat.forLanguageTags(tag)
-                            )
-                        }
+                        if (current != language.tag) changeLanguage(language.tag)
                     },
                     shape = SegmentedButtonDefaults.itemShape(index, languages.size)
                 ) {
-                    Text(text = stringResource(nameRes))
+                    Text(text = stringResource(language.nameRes))
                 }
             }
         }

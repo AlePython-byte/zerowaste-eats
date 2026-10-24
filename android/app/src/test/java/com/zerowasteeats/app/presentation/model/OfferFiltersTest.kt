@@ -1,5 +1,6 @@
 package com.zerowasteeats.app.presentation.model
 
+import java.time.LocalTime
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -23,7 +24,7 @@ class OfferFiltersTest {
         discountPercent = discount,
         distance = distance,
         remainingQuantity = 1,
-        pickupTime = "",
+        pickupWindow = PickupWindow(PickupDay.Today, LocalTime.NOON, LocalTime.of(13, 0)),
         isFavorite = false,
         category = category
     )

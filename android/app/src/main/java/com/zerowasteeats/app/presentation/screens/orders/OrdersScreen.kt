@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.R
+import com.zerowasteeats.app.presentation.components.common.EmptyStateIcon
 import com.zerowasteeats.app.presentation.components.orders.OrderCard
 import com.zerowasteeats.app.presentation.data.MockOrders
 import com.zerowasteeats.app.presentation.model.OrderStatus
@@ -183,12 +184,16 @@ private fun EmptyOrdersState(selectedTab: OrdersTab, modifier: Modifier = Modifi
             OrdersTab.ACTIVE -> stringResource(R.string.orders_empty_active)
             OrdersTab.HISTORY -> stringResource(R.string.orders_empty_history)
         }
-        
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
-            textAlign = TextAlign.Center
-        )
+
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            EmptyStateIcon(R.drawable.ic_empty_receipt)
+            Spacer(modifier = Modifier.height(AppSpacing.regular))
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }

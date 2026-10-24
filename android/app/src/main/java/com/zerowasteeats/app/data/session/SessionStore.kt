@@ -28,7 +28,8 @@ class PrefsSessionStore(private val store: KeyValueStore) : SessionStore {
             UserRole.CUSTOMER -> Session.Customer(userId, displayName, email)
             UserRole.MERCHANT -> {
                 val businessName = store.getString(KEY_BUSINESS_NAME) ?: return discardUnreadable()
-                Session.Merchant(userId, displayName, email, businessName)
+                // A session saved before the city was kept has none: it stays empty
+                Session.Merchant(userId, displayName, email, businessName, store.getString(KEY_CITY).orEmpty())
             }
         }
     }
@@ -49,7 +50,8 @@ class PrefsSessionStore(private val store: KeyValueStore) : SessionStore {
                     KEY_ROLE to UserRole.MERCHANT.name,
                     KEY_DISPLAY_NAME to session.displayName,
                     KEY_EMAIL to session.email,
-                    KEY_BUSINESS_NAME to session.businessName
+                    KEY_BUSINESS_NAME to session.businessName,
+                    KEY_CITY to session.city
                 )
             )
             Session.Loading, Session.SignedOut -> clear()
@@ -73,5 +75,6 @@ class PrefsSessionStore(private val store: KeyValueStore) : SessionStore {
         private const val KEY_DISPLAY_NAME = "display_name"
         private const val KEY_EMAIL = "email"
         private const val KEY_BUSINESS_NAME = "business_name"
+        private const val KEY_CITY = "city"
     }
 }

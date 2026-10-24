@@ -89,6 +89,7 @@ class FakeAuthRepositoryTest {
 
         assertEquals(UserRole.MERCHANT, user.role)
         assertEquals("Tienda Luis", user.businessName)
+        assertEquals("Pasto", user.city)
     }
 
     @Test

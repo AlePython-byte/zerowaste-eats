@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">ZeroWaste Eats</string>
 
     <string name="category_all">Todo</string>
@@ -32,7 +32,9 @@
     <string name="common_favorite_add_cd">Marcar como favorito</string>
     <string name="common_favorite_remove_cd">Quitar de favoritos</string>
 
-    <string name="home_greeting">Buenos días</string>
+    <string name="home_greeting_morning">Buenos días</string>
+    <string name="home_greeting_afternoon">Buenas tardes</string>
+    <string name="home_greeting_evening">Buenas noches</string>
     <string name="home_subtitle">Encuentra algo bueno cerca de ti</string>
     <string name="home_search_placeholder">Buscar comida cerca de ti</string>
     <string name="home_section_nearby">Cerca de ti</string>
@@ -41,6 +43,15 @@
 
     <string name="offer_detail_about_title">Acerca de esta oferta</string>
     <string name="offer_detail_about_body">Disfruta de nuestros productos frescos del día, empacados para que no se desperdicien. Ideal para sorprenderte o compartir.</string>
+    <string name="pickup_offer_format">Recoge %1$s, %2$s</string>
+    <string name="pickup_order_format">%1$s, %2$s</string>
+    <string name="pickup_day_today">hoy</string>
+    <string name="pickup_day_tomorrow">mañana</string>
+    <string name="pickup_day_yesterday">ayer</string>
+    <string name="pickup_day_date">el %1$s</string>
+    <string name="order_day_today">Hoy</string>
+    <string name="order_day_tomorrow">Mañana</string>
+    <string name="order_day_yesterday">Ayer</string>
     <string name="offer_detail_pickup_title">Recogida</string>
     <string name="offer_detail_reserve">Reservar</string>
 
@@ -113,4 +124,179 @@
     <string name="field_show_password">Mostrar contraseña</string>
     <string name="field_hide_password">Ocultar contraseña</string>
     <string name="button_loading">Cargando</string>
+
+    <string name="language_code_es" translatable="false">ES</string>
+    <string name="language_code_en" translatable="false">EN</string>
+
+    <string name="welcome_headline">Rescata comida rica antes de que se pierda</string>
+    <string name="welcome_create_account">Crear cuenta</string>
+    <string name="welcome_sign_in">Ya tengo cuenta</string>
+    <string name="welcome_switch_to_dark_cd">Activar modo oscuro</string>
+    <string name="welcome_switch_to_light_cd">Activar modo claro</string>
+
+    <string name="auth_field_email">Correo</string>
+    <string name="auth_field_password">Contraseña</string>
+    <string name="auth_retry">Reintentar</string>
+    <string name="auth_error_invalid_credentials">Correo o contraseña incorrectos.</string>
+    <string name="auth_error_email_registered">Ese correo ya está registrado. Prueba a ingresar.</string>
+    <string name="auth_error_network">No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo.</string>
+
+    <string name="validation_required">Este campo es obligatorio.</string>
+    <plurals name="validation_name_too_short">
+        <item quantity="one">Escribe al menos %1$d carácter.</item>
+        <item quantity="many">Escribe al menos %1$d caracteres.</item>
+        <item quantity="other">Escribe al menos %1$d caracteres.</item>
+    </plurals>
+    <plurals name="validation_name_too_long">
+        <item quantity="one">Usa %1$d carácter como máximo.</item>
+        <item quantity="many">Usa %1$d caracteres como máximo.</item>
+        <item quantity="other">Usa %1$d caracteres como máximo.</item>
+    </plurals>
+    <string name="validation_email_invalid">Ingresa un correo válido.</string>
+    <plurals name="validation_password_too_short">
+        <item quantity="one">Usa al menos %1$d carácter.</item>
+        <item quantity="many">Usa al menos %1$d caracteres.</item>
+        <item quantity="other">Usa al menos %1$d caracteres.</item>
+    </plurals>
+
+    <string name="signin_title">Ingresa a tu cuenta</string>
+    <string name="signin_subtitle">Qué bueno verte de nuevo.</string>
+    <string name="signin_submit">Ingresar</string>
+    <string name="signin_forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="signin_to_sign_up">¿No tienes cuenta? Crea una</string>
+    <string name="signin_debug_title">Solo depuración</string>
+    <string name="signin_debug_as_customer">Entrar como comprador</string>
+    <string name="signin_debug_as_merchant">Entrar como negocio</string>
+    <string name="signin_debug_simulate_network_error">Simular error de red</string>
+
+    <string name="signup_step_format">Paso %1$d de %2$d</string>
+    <string name="signup_role_title">¿Cómo quieres usar ZeroWaste Eats?</string>
+    <string name="signup_role_customer_title">Quiero rescatar comida</string>
+    <string name="signup_role_customer_description">Encuentra ofertas cerca de ti a buen precio.</string>
+    <string name="signup_role_merchant_title">Tengo un negocio</string>
+    <string name="signup_role_merchant_description">Publica tus excedentes y llega a más clientes.</string>
+    <string name="signup_details_title">Crea tu cuenta</string>
+    <string name="signup_field_name">Nombre</string>
+    <string name="signup_field_business_name">Nombre del negocio</string>
+    <string name="signup_field_city">Ciudad</string>
+    <string name="signup_continue">Continuar</string>
+    <string name="signup_submit">Crear cuenta</string>
+    <string name="signup_to_sign_in">¿Ya tienes cuenta? Ingresa</string>
+
+    <string name="forgot_password_title">Recupera tu contraseña</string>
+    <string name="forgot_password_subtitle">Escribe tu correo y te ayudamos a crear una nueva.</string>
+    <string name="forgot_password_submit">Enviar enlace</string>
+    <string name="forgot_password_sent">Si existe una cuenta con ese correo, te enviamos un enlace</string>
+    <string name="forgot_password_back_to_sign_in">Volver a ingresar</string>
+
+    <string name="common_sign_out">Cerrar sesión</string>
+    <string name="common_cancel">Cancelar</string>
+    <string name="profile_sign_out_title">¿Cerrar sesión?</string>
+    <string name="profile_sign_out_message">Tendrás que ingresar de nuevo para ver tus pedidos.</string>
+    <string name="mode_badge_merchant">Negocio</string>
+    <string name="merchant_nav_dashboard">Panel</string>
+    <string name="merchant_nav_offers">Ofertas</string>
+    <string name="merchant_nav_reservations">Reservas</string>
+    <string name="merchant_nav_business">Negocio</string>
+    <string name="merchant_tab_offers">Mis ofertas</string>
+    <string name="merchant_tab_reservations">Reservas</string>
+    <string name="merchant_dashboard_greeting">Hola, %1$s</string>
+    <string name="merchant_dashboard_empty_title">Aún no hay actividad</string>
+    <string name="merchant_dashboard_empty_message">Publica tu primera oferta y aquí verás cómo rescatas comida.</string>
+    <string name="merchant_metric_active_offers">Ofertas activas</string>
+    <string name="merchant_metric_pending_reservations">Reservas pendientes</string>
+    <string name="merchant_metric_rescued_meals">Comidas rescatadas</string>
+    <string name="merchant_upcoming_pickups">Próximas recogidas</string>
+    <string name="merchant_upcoming_empty">No tienes recogidas pendientes.</string>
+    <string name="merchant_publish_offer">Publicar oferta</string>
+    <string name="merchant_review_title">En revisión</string>
+    <string name="merchant_review_message">Estamos revisando tu negocio. Mientras tanto, puedes publicar ofertas.</string>
+    <plurals name="merchant_pickup_quantity">
+        <item quantity="one">%1$d unidad</item>
+        <item quantity="many">%1$d unidades</item>
+        <item quantity="other">%1$d unidades</item>
+    </plurals>
+    <string name="common_undo">Deshacer</string>
+    <string name="merchant_new_offer">Nueva oferta</string>
+    <string name="merchant_filter_active">Activas</string>
+    <string name="merchant_filter_paused">Pausadas</string>
+    <string name="merchant_filter_sold_out">Agotadas</string>
+    <string name="merchant_offer_status_active">Activa</string>
+    <string name="merchant_offer_status_paused">Pausada</string>
+    <string name="merchant_offer_status_sold_out">Agotada</string>
+    <string name="merchant_offer_status_expired">Vencida</string>
+    <string name="merchant_offer_menu_cd">Más opciones para %1$s</string>
+    <string name="merchant_offer_edit">Editar</string>
+    <string name="merchant_offer_pause">Pausar</string>
+    <string name="merchant_offer_resume">Reanudar</string>
+    <string name="merchant_offer_paused_message">Oferta pausada</string>
+    <string name="merchant_offer_resumed_message">Oferta reanudada</string>
+    <string name="merchant_offers_empty_active_title">No tienes ofertas activas</string>
+    <string name="merchant_offers_empty_active_message">Publica una oferta para que otros puedan rescatarla.</string>
+    <string name="merchant_offers_empty_paused_title">No tienes ofertas pausadas</string>
+    <string name="merchant_offers_empty_paused_message">Las ofertas que pauses aparecerán aquí, listas para reanudar.</string>
+    <string name="merchant_offers_empty_sold_out_title">Nada agotado ni vencido</string>
+    <string name="merchant_offers_empty_sold_out_message">Aquí verás las ofertas que se agoten o venzan.</string>
+    <string name="common_ok">Aceptar</string>
+    <string name="offer_editor_title_edit">Editar oferta</string>
+    <string name="offer_editor_save_changes">Guardar cambios</string>
+    <string name="offer_editor_discard_title">¿Descartar cambios?</string>
+    <string name="offer_editor_keep_editing">Seguir editando</string>
+    <string name="offer_editor_discard">Descartar</string>
+    <string name="offer_editor_not_found_message">Puede que ya no exista. Vuelve a Mis ofertas e inténtalo de nuevo.</string>
+    <string name="offer_published_message">Oferta publicada</string>
+    <string name="offer_saved_message">Cambios guardados</string>
+    <string name="offer_field_title">Título</string>
+    <string name="offer_field_category">Categoría</string>
+    <string name="offer_field_photo">Foto</string>
+    <string name="offer_field_original_price">Precio original</string>
+    <string name="offer_field_discounted_price">Precio con descuento</string>
+    <string name="offer_field_quantity">Cantidad disponible</string>
+    <string name="offer_quantity_decrease_cd">Restar uno</string>
+    <string name="offer_quantity_increase_cd">Sumar uno</string>
+    <string name="offer_field_pickup">Franja de recogida (hoy)</string>
+    <string name="offer_field_pickup_start">Desde</string>
+    <string name="offer_field_pickup_end">Hasta</string>
+    <string name="offer_pickup_choose_time">Elegir hora</string>
+    <string name="offer_photo_croissant">Croissants</string>
+    <string name="offer_photo_salmon_bowl">Bowl de salmón</string>
+    <string name="offer_photo_desserts">Postres</string>
+    <string name="offer_photo_burger">Hamburguesa</string>
+    <string name="offer_photo_vegetables">Verduras</string>
+    <string name="offer_error_choose">Elige una opción.</string>
+    <string name="offer_error_price_not_positive">Escribe un precio mayor que cero.</string>
+    <string name="offer_error_discount_not_lower">Debe ser menor que el precio original.</string>
+    <!-- Not a plural: the two numbers are the limits of the range, not a count -->
+    <string name="offer_error_quantity_range" tools:ignore="PluralsCandidate">Escribe una cantidad entre %1$d y %2$d.</string>
+    <string name="offer_error_end_not_after_start">Debe ser después de la hora de inicio.</string>
+    <string name="offer_error_end_in_past">Esa hora ya pasó. La recogida es para hoy.</string>
+    <string name="merchant_reservations_tab_pending">Pendientes</string>
+    <string name="merchant_reservations_tab_completed">Completadas</string>
+    <string name="merchant_confirm_pickup">Confirmar recogida</string>
+    <string name="merchant_reservation_delivered">Entregada</string>
+    <string name="merchant_pickup_confirmed">Recogida confirmada</string>
+    <string name="merchant_code_instructions">Pide al cliente su código de recogida y escríbelo aquí.</string>
+    <string name="merchant_code_label">Código de recogida</string>
+    <string name="merchant_code_confirm">Confirmar</string>
+    <string name="merchant_code_debug_hint">Código de prueba: %1$s</string>
+    <string name="merchant_code_already_completed">Esta reserva ya se entregó.</string>
+    <plurals name="merchant_code_wrong">
+        <item quantity="one">Código incorrecto. Te queda %1$d intento.</item>
+        <item quantity="many">Código incorrecto. Te quedan %1$d intentos.</item>
+        <item quantity="other">Código incorrecto. Te quedan %1$d intentos.</item>
+    </plurals>
+    <plurals name="merchant_code_locked">
+        <item quantity="one">Demasiados intentos. Vuelve a intentarlo en %1$d segundo.</item>
+        <item quantity="many">Demasiados intentos. Vuelve a intentarlo en %1$d segundos.</item>
+        <item quantity="other">Demasiados intentos. Vuelve a intentarlo en %1$d segundos.</item>
+    </plurals>
+    <string name="merchant_reservations_empty_pending_title">Nada pendiente por ahora</string>
+    <string name="merchant_reservations_empty_pending_message">Cuando alguien reserve una de tus ofertas, aparecerá aquí.</string>
+    <string name="merchant_reservations_empty_completed_title">Aún no has entregado pedidos</string>
+    <string name="merchant_reservations_empty_completed_message">Las recogidas que confirmes aparecerán aquí.</string>
+    <string name="merchant_verified">Verificado</string>
+    <string name="merchant_business_details_title">Datos del negocio</string>
+    <string name="merchant_business_description">Descripción</string>
+    <string name="merchant_business_address">Dirección</string>
+    <string name="merchant_business_missing">Sin completar</string>
 </resources>
