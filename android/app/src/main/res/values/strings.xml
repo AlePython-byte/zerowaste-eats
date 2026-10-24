@@ -159,4 +159,10 @@
     <string name="signup_continue">Continuar</string>
     <string name="signup_submit">Crear cuenta</string>
     <string name="signup_to_sign_in">¿Ya tienes cuenta? Ingresa</string>
+
+    <string name="forgot_password_title">Recupera tu contraseña</string>
+    <string name="forgot_password_subtitle">Escribe tu correo y te ayudamos a crear una nueva.</string>
+    <string name="forgot_password_submit">Enviar enlace</string>
+    <string name="forgot_password_sent">Si existe una cuenta con ese correo, te enviamos un enlace</string>
+    <string name="forgot_password_back_to_sign_in">Volver a ingresar</string>
 </resources>

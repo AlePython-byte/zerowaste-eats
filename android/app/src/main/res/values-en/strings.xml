@@ -151,4 +151,10 @@
     <string name="signup_continue">Continue</string>
     <string name="signup_submit">Create account</string>
     <string name="signup_to_sign_in">Already have an account? Sign in</string>
+
+    <string name="forgot_password_title">Reset your password</string>
+    <string name="forgot_password_subtitle">Enter your email and we will help you create a new one.</string>
+    <string name="forgot_password_submit">Send link</string>
+    <string name="forgot_password_sent">If an account exists for that email, we sent you a link</string>
+    <string name="forgot_password_back_to_sign_in">Back to sign in</string>
 </resources>
