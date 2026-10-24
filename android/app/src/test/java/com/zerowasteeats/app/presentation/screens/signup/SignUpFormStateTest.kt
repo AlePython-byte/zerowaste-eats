@@ -165,25 +165,44 @@ class SignUpFormStateTest {
         assertEquals("Medellín", request.city)
     }
 
+    private fun SignUpFormState.saved(): Any =
+        with(SignUpFormState.Saver) { SaverScope { true }.save(this@saved) }!!
+
     @Test
-    fun saver_roundTripsEveryValue_theStep_andWhichErrorsAreShown() {
+    fun saver_roundTripsEveryValueExceptThePassword_theStep_andWhichErrorsAreShown() {
         val form = filledMerchant().apply {
             onCityChange("")
             continueToDetails()
             validateDetails()
         }
 
-        val saved = with(SignUpFormState.Saver) { SaverScope { true }.save(form) }
-        val restored = SignUpFormState.Saver.restore(saved!!)!!
+        val restored = SignUpFormState.Saver.restore(form.saved())!!
 
         assertEquals(SignUpStep.DETAILS, restored.step)
         assertEquals(UserRole.MERCHANT, restored.role)
         assertEquals("Ana Pérez", restored.displayName)
         assertEquals("ana@correo.co", restored.email)
-        assertEquals("clave1234", restored.password)
         assertEquals("Panadería Sol", restored.businessName)
         assertEquals("", restored.city)
         assertEquals(ValidationError.REQUIRED, restored.errorOf(SignUpField.CITY))
         assertNull(restored.errorOf(SignUpField.NAME))
+    }
+
+    @Test
+    fun saver_leavesThePasswordOutOfTheSavedState() {
+        val form = filledCustomer().apply { onPasswordChange("una-clave-secreta") }
+
+        val saved = form.saved()
+
+        assertFalse(saved.toString().contains("una-clave-secreta"))
+        assertEquals("", SignUpFormState.Saver.restore(saved)!!.password)
+    }
+
+    @Test
+    fun saver_savesOnlyTypesThatSavedStateHandleAccepts() {
+        val saved = filledMerchant().apply { validateDetails() }.saved()
+
+        assertTrue(saved is java.util.ArrayList<*>)
+        assertTrue((saved as java.util.ArrayList<*>).last() is java.util.ArrayList<*>)
     }
 }

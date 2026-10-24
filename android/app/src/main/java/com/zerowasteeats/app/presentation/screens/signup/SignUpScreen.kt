@@ -25,7 +25,6 @@ import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.ContentType
@@ -69,10 +68,8 @@ fun SignUpScreen(
     val viewModel: SignUpViewModel = viewModel(
         factory = SignUpViewModelFactory(container.sessionManager)
     )
-    val form = rememberSaveable(saver = SignUpFormState.Saver) { SignUpFormState() }
-
     SignUpContent(
-        form = form,
+        form = viewModel.form,
         isLoading = viewModel.isLoading,
         error = viewModel.error,
         onFieldEdited = viewModel::clearError,

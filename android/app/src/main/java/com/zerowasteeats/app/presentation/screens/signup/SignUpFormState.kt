@@ -21,8 +21,8 @@ enum class SignUpField { NAME, EMAIL, PASSWORD, BUSINESS_NAME, CITY }
  * as in [com.zerowasteeats.app.presentation.screens.signin.SignInFormState]: a field shows its
  * error only after it was left or the form was sent, and then follows each change.
  *
- * Going back to the first step keeps every value. [Saver] keeps them across rotation and
- * process death.
+ * Going back to the first step keeps every value. [Saver] keeps everything except the
+ * password, so a restored form (after the process was killed) asks for it again.
  */
 class SignUpFormState(
     step: SignUpStep = SignUpStep.ROLE,
@@ -134,23 +134,25 @@ class SignUpFormState(
 
     companion object {
         /**
-         * Saves every value, the password too: the saved state lives in memory for rotation and
-         * is not meant to be written anywhere else.
+         * Never includes the password: saved state can end up outside the app's memory, and a
+         * password has no business there. Whoever holds the form across rotations (the
+         * ViewModel) keeps the password alive in memory instead.
+         *
+         * Saves ArrayLists because that is what SavedStateHandle accepts.
          */
         val Saver: Saver<SignUpFormState, Any> = Saver(
             save = { form -> form.toSavedList() },
             restore = { saved -> restoreFrom(saved) }
         )
 
-        private fun SignUpFormState.toSavedList(): List<Any> = listOf(
+        private fun SignUpFormState.toSavedList(): ArrayList<Any> = arrayListOf(
             step.name,
             role.name,
             displayName,
             email,
-            password,
             businessName,
             city,
-            shown.map { it.name }
+            ArrayList(shown.map { it.name })
         )
 
         private fun restoreFrom(saved: Any): SignUpFormState {
@@ -160,10 +162,9 @@ class SignUpFormState(
                 role = UserRole.valueOf(values[1] as String),
                 displayName = values[2] as String,
                 email = values[3] as String,
-                password = values[4] as String,
-                businessName = values[5] as String,
-                city = values[6] as String,
-                shownFields = (values[7] as List<*>)
+                businessName = values[4] as String,
+                city = values[5] as String,
+                shownFields = (values[6] as List<*>)
                     .map { SignUpField.valueOf(it as String) }
                     .toSet()
             )
