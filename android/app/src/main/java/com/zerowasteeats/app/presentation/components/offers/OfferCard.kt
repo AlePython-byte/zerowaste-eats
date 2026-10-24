@@ -1,6 +1,7 @@
 package com.zerowasteeats.app.presentation.components.offers
 
 import com.zerowasteeats.app.R
+import com.zerowasteeats.app.presentation.format.formatted
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.animation.core.Spring
@@ -204,7 +205,7 @@ fun OfferCard(
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text = offer.pickupTime,
+                text = offer.pickupWindow.formatted(withPickupPrefix = true),
                 style = MaterialTheme.typography.labelMedium,
                 color = RescateCreamMuted,
                 maxLines = 1,

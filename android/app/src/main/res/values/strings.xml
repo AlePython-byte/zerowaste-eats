@@ -43,6 +43,15 @@
 
     <string name="offer_detail_about_title">Acerca de esta oferta</string>
     <string name="offer_detail_about_body">Disfruta de nuestros productos frescos del día, empacados para que no se desperdicien. Ideal para sorprenderte o compartir.</string>
+    <string name="pickup_offer_format">Recoge %1$s, %2$s</string>
+    <string name="pickup_order_format">%1$s, %2$s</string>
+    <string name="pickup_day_today">hoy</string>
+    <string name="pickup_day_tomorrow">mañana</string>
+    <string name="pickup_day_yesterday">ayer</string>
+    <string name="pickup_day_date">el %1$s</string>
+    <string name="order_day_today">Hoy</string>
+    <string name="order_day_tomorrow">Mañana</string>
+    <string name="order_day_yesterday">Ayer</string>
     <string name="offer_detail_pickup_title">Recogida</string>
     <string name="offer_detail_reserve">Reservar</string>
 

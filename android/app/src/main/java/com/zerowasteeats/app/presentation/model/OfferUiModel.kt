@@ -10,7 +10,7 @@ data class OfferUiModel(
     val discountPercent: Int,
     val distance: String,
     val remainingQuantity: Int,
-    val pickupTime: String,
+    val pickupWindow: PickupWindow,
     val isFavorite: Boolean,
     val category: OfferCategory
 )

@@ -5,6 +5,9 @@ import com.zerowasteeats.app.presentation.model.OfferCategory
 import com.zerowasteeats.app.presentation.model.OfferFilters
 import com.zerowasteeats.app.presentation.model.OfferSort
 import com.zerowasteeats.app.presentation.model.OfferUiModel
+import com.zerowasteeats.app.presentation.model.PickupDay
+import com.zerowasteeats.app.presentation.model.PickupWindow
+import java.time.LocalTime
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -23,7 +26,7 @@ class ExploreStateTest {
         discountPercent = 40,
         distance = "1.0 km",
         remainingQuantity = 1,
-        pickupTime = "",
+        pickupWindow = PickupWindow(PickupDay.Today, LocalTime.NOON, LocalTime.of(13, 0)),
         isFavorite = false,
         category = category
     )

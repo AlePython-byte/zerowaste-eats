@@ -2,6 +2,9 @@ package com.zerowasteeats.app.presentation.data
 
 import com.zerowasteeats.app.presentation.model.OfferCategory
 import com.zerowasteeats.app.presentation.model.OfferUiModel
+import com.zerowasteeats.app.presentation.model.PickupDay
+import com.zerowasteeats.app.presentation.model.PickupWindow
+import java.time.LocalTime
 
 object MockOffers {
     fun getList(): List<OfferUiModel> = listOf(
@@ -15,7 +18,7 @@ object MockOffers {
             discountPercent = 40,
             distance = "0.5 km",
             remainingQuantity = 2,
-            pickupTime = "Recoge hoy, 6:00 p. m. - 7:30 p. m.",
+            pickupWindow = PickupWindow(PickupDay.Today, LocalTime.of(18, 0), LocalTime.of(19, 30)),
             isFavorite = false,
             category = OfferCategory.BAKERY
         ),
@@ -29,7 +32,7 @@ object MockOffers {
             discountPercent = 40,
             distance = "1.2 km",
             remainingQuantity = 1,
-            pickupTime = "Recoge hoy, 8:00 p. m. - 9:00 p. m.",
+            pickupWindow = PickupWindow(PickupDay.Today, LocalTime.of(20, 0), LocalTime.of(21, 0)),
             isFavorite = true,
             category = OfferCategory.PREPARED_FOOD
         ),
@@ -43,7 +46,7 @@ object MockOffers {
             discountPercent = 50,
             distance = "2.5 km",
             remainingQuantity = 3,
-            pickupTime = "Recoge mañana, 10:00 a. m. - 12:00 p. m.",
+            pickupWindow = PickupWindow(PickupDay.Tomorrow, LocalTime.of(10, 0), LocalTime.of(12, 0)),
             isFavorite = false,
             category = OfferCategory.DESSERTS
         ),
@@ -57,7 +60,7 @@ object MockOffers {
             discountPercent = 40,
             distance = "1.8 km",
             remainingQuantity = 1,
-            pickupTime = "Recoge hoy, 7:00 p. m. - 8:30 p. m.",
+            pickupWindow = PickupWindow(PickupDay.Today, LocalTime.of(19, 0), LocalTime.of(20, 30)),
             isFavorite = false,
             category = OfferCategory.PREPARED_FOOD
         ),
@@ -71,7 +74,7 @@ object MockOffers {
             discountPercent = 50,
             distance = "3.1 km",
             remainingQuantity = 4,
-            pickupTime = "Recoge mañana, 8:00 a. m. - 10:00 a. m.",
+            pickupWindow = PickupWindow(PickupDay.Tomorrow, LocalTime.of(8, 0), LocalTime.of(10, 0)),
             isFavorite = false,
             category = OfferCategory.PRODUCE
         )

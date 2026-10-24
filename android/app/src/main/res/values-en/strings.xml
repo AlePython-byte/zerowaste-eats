@@ -40,6 +40,15 @@
 
     <string name="offer_detail_about_title">About this offer</string>
     <string name="offer_detail_about_body">Enjoy our fresh products of the day, packed so they don\'t go to waste. Perfect for a surprise or to share.</string>
+    <string name="pickup_offer_format">Pickup %1$s, %2$s</string>
+    <string name="pickup_order_format">%1$s, %2$s</string>
+    <string name="pickup_day_today">today</string>
+    <string name="pickup_day_tomorrow">tomorrow</string>
+    <string name="pickup_day_yesterday">yesterday</string>
+    <string name="pickup_day_date">on %1$s</string>
+    <string name="order_day_today">Today</string>
+    <string name="order_day_tomorrow">Tomorrow</string>
+    <string name="order_day_yesterday">Yesterday</string>
     <string name="offer_detail_pickup_title">Pickup</string>
     <string name="offer_detail_reserve">Reserve</string>
 
