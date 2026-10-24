@@ -29,7 +29,9 @@
     <string name="common_favorite_add_cd">Mark as favorite</string>
     <string name="common_favorite_remove_cd">Remove from favorites</string>
 
-    <string name="home_greeting">Good morning</string>
+    <string name="home_greeting_morning">Good morning</string>
+    <string name="home_greeting_afternoon">Good afternoon</string>
+    <string name="home_greeting_evening">Good evening</string>
     <string name="home_subtitle">Find something good near you</string>
     <string name="home_search_placeholder">Search for food near you</string>
     <string name="home_section_nearby">Near you</string>
