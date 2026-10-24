@@ -17,6 +17,8 @@ sealed interface Session {
         val userId: String,
         val displayName: String,
         val email: String,
-        val businessName: String
+        val businessName: String,
+        /** Empty for a session saved before the city was kept. */
+        val city: String = ""
     ) : Session
 }

@@ -22,7 +22,7 @@ import com.zerowasteeats.app.data.session.Session
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppButtonStyle
 import com.zerowasteeats.app.presentation.components.navigation.TabItem
-import com.zerowasteeats.app.presentation.screens.merchant.MerchantTabPlaceholder
+import com.zerowasteeats.app.presentation.screens.merchant.business.MerchantBusinessScreen
 import com.zerowasteeats.app.presentation.screens.merchant.dashboard.MerchantDashboardScreen
 import com.zerowasteeats.app.presentation.screens.merchant.editor.OfferEditorScreen
 import com.zerowasteeats.app.presentation.screens.merchant.offers.MerchantOffersScreen
@@ -129,19 +129,7 @@ fun MerchantNavigation(
                 MerchantReservationsScreen(session = session)
             }
             composable(MerchantDestination.BUSINESS.route) {
-                MerchantTabPlaceholder(
-                    title = session.businessName,
-                    emptyTitle = stringResource(R.string.merchant_business_empty_title),
-                    emptyMessage = stringResource(R.string.merchant_business_empty_message),
-                    // TEMPORARY: replaced by the real business profile
-                    signOut = {
-                        AppButton(
-                            text = stringResource(R.string.common_sign_out),
-                            onClick = onSignOut,
-                            style = AppButtonStyle.SECONDARY
-                        )
-                    }
-                )
+                MerchantBusinessScreen(session = session, onSignOut = onSignOut)
             }
         }
     }

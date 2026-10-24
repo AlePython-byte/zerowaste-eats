@@ -9,7 +9,9 @@ data class AuthUser(
     val displayName: String,
     val email: String,
     /** Only set for [UserRole.MERCHANT]. */
-    val businessName: String? = null
+    val businessName: String? = null,
+    /** Only set for [UserRole.MERCHANT]. */
+    val city: String? = null
 )
 
 /** Data for a new account. A merchant also needs a business name and a city. */

@@ -19,12 +19,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +42,7 @@ import com.zerowasteeats.app.presentation.components.common.AppCard
 import com.zerowasteeats.app.presentation.components.common.MetricCard
 import com.zerowasteeats.app.presentation.components.settings.AppearanceSettingCard
 import com.zerowasteeats.app.presentation.components.settings.LanguageSettingCard
+import com.zerowasteeats.app.presentation.components.settings.SignOutDialog
 import com.zerowasteeats.app.presentation.data.MockProfile
 import com.zerowasteeats.app.presentation.model.ProfileUiModel
 import com.zerowasteeats.app.presentation.theme.AppRadius
@@ -128,32 +127,6 @@ fun ProfileScreen(
             onDismiss = { isSignOutDialogOpen = false }
         )
     }
-}
-
-@Composable
-private fun SignOutDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = stringResource(R.string.profile_sign_out_title)) },
-        text = { Text(text = stringResource(R.string.profile_sign_out_message)) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(
-                    text = stringResource(R.string.common_sign_out),
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(
-                    text = stringResource(R.string.common_cancel),
-                    color = MaterialTheme.colorScheme.tertiary
-                )
-            }
-        },
-        containerColor = SurfaceTokens.surface
-    )
 }
 
 @Composable

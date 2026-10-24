@@ -25,7 +25,8 @@ class FakeMerchantDataTest {
         userId = "m-2",
         displayName = "Luis Gómez",
         email = "luis@sol.co",
-        businessName = "Panadería Sol"
+        businessName = "Panadería Sol",
+        city = "Medellín"
     )
 
     private fun repositoriesFor(session: Session.Merchant) =
@@ -67,6 +68,9 @@ class FakeMerchantDataTest {
         assertTrue(repositories.reservations.reservations.value.isEmpty())
         assertFalse(repositories.profile.profile.value.isVerified)
         assertEquals("Panadería Sol", repositories.profile.profile.value.businessName)
+        // The city typed at sign up is where the profile starts
+        assertEquals("Medellín", repositories.profile.profile.value.city)
+        assertEquals("", repositories.profile.profile.value.address)
     }
 
     @Test

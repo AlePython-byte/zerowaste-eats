@@ -52,7 +52,8 @@ object FakeMerchantData {
                         businessName = session.businessName,
                         description = "",
                         address = "",
-                        city = "",
+                        // What was typed at sign up; the rest is filled in later
+                        city = session.city,
                         isVerified = false
                     )
                 )

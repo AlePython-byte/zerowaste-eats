@@ -58,7 +58,7 @@ class SessionManagerTest {
         manager.signIn(FakeAuthRepository.DEMO_MERCHANT_EMAIL, demoPassword)
 
         assertEquals(
-            Session.Merchant("demo-merchant", "Negocio Demo", "negocio@demo.co", "Panadería Demo"),
+            Session.Merchant("demo-merchant", "Negocio Demo", "negocio@demo.co", "Panadería Demo", "Pasto"),
             manager.session.value
         )
     }
@@ -117,6 +117,22 @@ class SessionManagerTest {
     }
 
     @Test
+    fun signUp_merchantKeepsTheCityInTheSession_andAfterARestart() = runBlocking {
+        val data = InMemoryKeyValueStore()
+        val first = SessionManager(FakeAuthRepository(latencyMillis = 0), PrefsSessionStore(data))
+
+        first.signUp(
+            SignUpRequest("Luis", "luis@tienda.co", "clave1234", UserRole.MERCHANT, "Tienda Luis", " Pasto ")
+        )
+
+        assertEquals("Pasto", (first.session.value as Session.Merchant).city)
+
+        val restarted = SessionManager(FakeAuthRepository(latencyMillis = 0), PrefsSessionStore(data))
+        restarted.restore()
+        assertEquals("Pasto", (restarted.session.value as Session.Merchant).city)
+    }
+
+    @Test
     fun signUp_repeatedEmailFailsWithoutChangingTheSession() = runBlocking {
         val manager = manager()
 
@@ -149,6 +165,9 @@ class SessionManagerTest {
         manager.signIn(FakeAuthRepository.DEMO_MERCHANT_EMAIL, demoPassword)
 
         assertTrue(manager.session.value is Session.Merchant)
-        assertEquals(Session.Merchant("demo-merchant", "Negocio Demo", "negocio@demo.co", "Panadería Demo"), manager().session.value)
+        assertEquals(
+            Session.Merchant("demo-merchant", "Negocio Demo", "negocio@demo.co", "Panadería Demo", "Pasto"),
+            manager().session.value
+        )
     }
 }
