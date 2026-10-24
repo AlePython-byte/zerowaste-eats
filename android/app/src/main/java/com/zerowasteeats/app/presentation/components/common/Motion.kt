@@ -91,6 +91,19 @@ private fun Modifier.offerEntrance(
     }
 }
 
+/**
+ * Timeline of the animated logo, in milliseconds from its start (about 1.2 s in all). The bag
+ * springs in on its own clock from 0; the other three steps follow this timeline, each starting
+ * while the one before is still settling so the sequence reads as one movement.
+ */
+internal const val LOGO_HANDLE_START_MILLIS = ENTRANCE_MILLIS
+internal const val LOGO_HANDLE_MILLIS = ENTRANCE_MILLIS + 100
+internal const val LOGO_LEAF_START_MILLIS = 2 * ENTRANCE_MILLIS
+internal const val LOGO_LEAF_MILLIS = ENTRANCE_MILLIS + 50
+internal const val LOGO_HEART_START_MILLIS = LOGO_LEAF_START_MILLIS + LOGO_LEAF_MILLIS
+internal const val LOGO_HEART_MILLIS = ENTRANCE_MILLIS - 50
+internal const val LOGO_TOTAL_MILLIS = LOGO_HEART_START_MILLIS + LOGO_HEART_MILLIS
+
 /** Pause between one section's entrance and the next in [staggeredEntrance]. */
 internal const val STAGGER_MILLIS = 60
 
