@@ -1,7 +1,7 @@
 package com.zerowasteeats.app.presentation.format
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.model.PickupDay
@@ -34,8 +34,8 @@ object PickupFormat {
  */
 @Composable
 fun PickupWindow.formatted(withPickupPrefix: Boolean): String {
-    // Reading the configuration makes this follow a language change
-    val locale = LocalConfiguration.current.locales[0] ?: Locale.getDefault()
+    // Observable, so the text follows a language change
+    val locale = LocalLocale.current.platformLocale
     val times = PickupFormat.timeRange(start, end, locale)
     val dayText = when (val day = day) {
         PickupDay.Today -> stringResource(if (withPickupPrefix) R.string.pickup_day_today else R.string.order_day_today)
