@@ -187,12 +187,26 @@
     <string name="merchant_tab_offers">Mis ofertas</string>
     <string name="merchant_tab_reservations">Reservas</string>
     <string name="merchant_tab_business">Negocio</string>
-    <string name="merchant_dashboard_empty_title">Tu panel está en construcción</string>
-    <string name="merchant_dashboard_empty_message">Aquí verás el resumen de tu negocio.</string>
     <string name="merchant_offers_empty_title">Aún no tienes ofertas</string>
     <string name="merchant_offers_empty_message">Publica tu primera oferta para que otros puedan rescatarla.</string>
     <string name="merchant_reservations_empty_title">Aún no tienes reservas</string>
     <string name="merchant_reservations_empty_message">Cuando alguien reserve una de tus ofertas, aparecerá aquí.</string>
     <string name="merchant_business_empty_title">Tu negocio</string>
     <string name="merchant_business_empty_message">Pronto podrás editar los datos de tu negocio.</string>
+    <string name="merchant_dashboard_greeting">Hola, %1$s</string>
+    <string name="merchant_dashboard_empty_title">Aún no hay actividad</string>
+    <string name="merchant_dashboard_empty_message">Publica tu primera oferta y aquí verás cómo rescatas comida.</string>
+    <string name="merchant_metric_active_offers">Ofertas activas</string>
+    <string name="merchant_metric_pending_reservations">Reservas pendientes</string>
+    <string name="merchant_metric_rescued_meals">Comidas rescatadas</string>
+    <string name="merchant_upcoming_pickups">Próximas recogidas</string>
+    <string name="merchant_upcoming_empty">No tienes recogidas pendientes.</string>
+    <string name="merchant_publish_offer">Publicar oferta</string>
+    <string name="merchant_review_title">En revisión</string>
+    <string name="merchant_review_message">Estamos revisando tu negocio. Mientras tanto, puedes publicar ofertas.</string>
+    <plurals name="merchant_pickup_quantity">
+        <item quantity="one">%1$d unidad</item>
+        <item quantity="many">%1$d unidades</item>
+        <item quantity="other">%1$d unidades</item>
+    </plurals>
 </resources>

@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppButtonStyle
 import com.zerowasteeats.app.presentation.components.common.AppCard
+import com.zerowasteeats.app.presentation.components.common.MetricCard
 import com.zerowasteeats.app.presentation.components.settings.AppearanceSettingCard
 import com.zerowasteeats.app.presentation.components.settings.LanguageSettingCard
 import com.zerowasteeats.app.presentation.data.MockProfile
@@ -259,39 +260,6 @@ private fun ImpactSection(profile: ProfileUiModel, modifier: Modifier = Modifier
             modifier = Modifier.fillMaxWidth(),
             isHighlight = true
         )
-    }
-}
-
-@Composable
-private fun MetricCard(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-    isHighlight: Boolean = false
-) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(AppRadius.large),
-        color = SurfaceTokens.surface,
-        border = BorderStroke(SurfaceTokens.borderWidth, SurfaceTokens.border)
-    ) {
-        Column(
-            modifier = Modifier.padding(AppSpacing.regular),
-            horizontalAlignment = Alignment.Start
-        ) {
-            Text(
-                text = value,
-                style = if (isHighlight) MaterialTheme.typography.displaySmall else MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.tertiary,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
     }
 }
 

@@ -19,6 +19,7 @@ import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppButtonStyle
 import com.zerowasteeats.app.presentation.components.navigation.TabItem
 import com.zerowasteeats.app.presentation.screens.merchant.MerchantTabPlaceholder
+import com.zerowasteeats.app.presentation.screens.merchant.dashboard.MerchantDashboardScreen
 
 enum class MerchantDestination(
     val route: String,
@@ -63,10 +64,10 @@ fun MerchantNavigation(
                 .consumeWindowInsets(innerPadding)
         ) {
             composable(MerchantDestination.DASHBOARD.route) {
-                MerchantTabPlaceholder(
-                    title = stringResource(R.string.merchant_tab_dashboard),
-                    emptyTitle = stringResource(R.string.merchant_dashboard_empty_title),
-                    emptyMessage = stringResource(R.string.merchant_dashboard_empty_message)
+                MerchantDashboardScreen(
+                    session = session,
+                    // The offer editor comes later; for now this leads to the offers tab
+                    onPublishOffer = { navController.navigateToTab(MerchantDestination.OFFERS.route) }
                 )
             }
             composable(MerchantDestination.OFFERS.route) {

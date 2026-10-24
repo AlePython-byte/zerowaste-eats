@@ -91,19 +91,29 @@ private fun Modifier.offerEntrance(
     }
 }
 
+/** Pause between one section's entrance and the next in [staggeredEntrance]. */
+internal const val STAGGER_MILLIS = 60
+
 /**
- * Fades the content in while it rises [rise] to its place, once, when it first shows.
- * Static from the start when system animations are off, and in previews, where effects
- * do not run and the content would stay invisible.
+ * Fades the content in while it rises [rise] to its place, once, when it first shows, after
+ * waiting [delayMillis]. Static from the start when [enabled] is false, when system animations
+ * are off, and in previews, where effects do not run and the content would stay invisible.
  */
 @Composable
-fun Modifier.entranceRise(rise: Dp = 8.dp): Modifier {
-    val animate = rememberAnimationsEnabled() && !LocalInspectionMode.current
+fun Modifier.entranceRise(
+    rise: Dp = 8.dp,
+    delayMillis: Int = 0,
+    enabled: Boolean = true
+): Modifier {
+    val animate = enabled && rememberAnimationsEnabled() && !LocalInspectionMode.current
     val progress = remember { Animatable(if (animate) 0f else 1f) }
 
     LaunchedEffect(Unit) {
         if (progress.value < 1f) {
-            progress.animateTo(1f, tween(ENTRANCE_MILLIS, easing = FastOutSlowInEasing))
+            progress.animateTo(
+                1f,
+                tween(ENTRANCE_MILLIS, delayMillis = delayMillis, easing = FastOutSlowInEasing)
+            )
         }
     }
 
@@ -112,3 +122,14 @@ fun Modifier.entranceRise(rise: Dp = 8.dp): Modifier {
         translationY = (1f - progress.value) * rise.toPx()
     }
 }
+
+/**
+ * [entranceRise] for the [index]-th section of a screen: each one starts [STAGGER_MILLIS] after
+ * the one before, so they appear one after another. Later ones start together, so a long
+ * screen does not keep the last section waiting.
+ */
+@Composable
+fun Modifier.staggeredEntrance(index: Int, enabled: Boolean = true): Modifier =
+    entranceRise(delayMillis = index.coerceIn(0, MAX_STAGGERED_SECTIONS) * STAGGER_MILLIS, enabled = enabled)
+
+private const val MAX_STAGGERED_SECTIONS = 6
