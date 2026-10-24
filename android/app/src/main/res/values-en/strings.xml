@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">ZeroWaste Eats</string>
 
     <string name="category_all">All</string>
@@ -245,7 +245,8 @@
     <string name="offer_error_choose">Choose an option.</string>
     <string name="offer_error_price_not_positive">Enter a price above zero.</string>
     <string name="offer_error_discount_not_lower">It must be lower than the original price.</string>
-    <string name="offer_error_quantity_range">Enter a quantity between %1$d and %2$d.</string>
+    <!-- Not a plural: the two numbers are the limits of the range, not a count -->
+    <string name="offer_error_quantity_range" tools:ignore="PluralsCandidate">Enter a quantity between %1$d and %2$d.</string>
     <string name="offer_error_end_not_after_start">It must be after the start time.</string>
     <string name="offer_error_end_in_past">That time has passed. Pickup is for today.</string>
 </resources>

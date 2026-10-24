@@ -257,8 +257,8 @@ fun OfferEditorContent(
 
                 PickupSection(
                     form = form,
-                    startModifier = fieldModifier(OfferField.PICKUP_START),
-                    endModifier = fieldModifier(OfferField.PICKUP_END),
+                    startBringIntoView = bringIntoView.getValue(OfferField.PICKUP_START),
+                    endBringIntoView = bringIntoView.getValue(OfferField.PICKUP_END),
                     onPick = { field ->
                         focusManager.clearFocus()
                         openTimePicker = field
@@ -583,16 +583,19 @@ private fun QuantitySection(
 @Composable
 private fun PickupSection(
     form: OfferEditorFormState,
-    startModifier: Modifier,
-    endModifier: Modifier,
-    onPick: (OfferField) -> Unit
+    /** Scrolls to the start time when it is the first field with an error. */
+    startBringIntoView: BringIntoViewRequester,
+    /** Scrolls to the end time when it is the first field with an error. */
+    endBringIntoView: BringIntoViewRequester,
+    onPick: (OfferField) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val locale = LocalConfiguration.current.locales[0]
     val formatter = remember(locale) {
         DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)
     }
 
-    Column {
+    Column(modifier = modifier) {
         Text(
             text = stringResource(R.string.offer_field_pickup),
             modifier = Modifier.padding(bottom = AppSpacing.small),
@@ -608,7 +611,9 @@ private fun PickupSection(
                 },
                 error = form.errorOf(OfferField.PICKUP_START)?.message(),
                 onClick = { onPick(OfferField.PICKUP_START) },
-                modifier = startModifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
+                    .bringIntoViewRequester(startBringIntoView)
             )
             TimeField(
                 labelRes = R.string.offer_field_pickup_end,
@@ -617,7 +622,9 @@ private fun PickupSection(
                 },
                 error = form.errorOf(OfferField.PICKUP_END)?.message(),
                 onClick = { onPick(OfferField.PICKUP_END) },
-                modifier = endModifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
+                    .bringIntoViewRequester(endBringIntoView)
             )
         }
     }
