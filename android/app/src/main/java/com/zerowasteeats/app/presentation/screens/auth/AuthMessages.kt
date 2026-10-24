@@ -1,6 +1,7 @@
 package com.zerowasteeats.app.presentation.screens.auth
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.zerowasteeats.app.R
 import com.zerowasteeats.app.data.auth.AuthError
@@ -12,12 +13,24 @@ import com.zerowasteeats.app.data.auth.ValidationError
 fun ValidationError.message(): String = when (this) {
     ValidationError.REQUIRED -> stringResource(R.string.validation_required)
     ValidationError.NAME_TOO_SHORT ->
-        stringResource(R.string.validation_name_too_short, AuthValidators.NAME_MIN_LENGTH)
+        pluralStringResource(
+            R.plurals.validation_name_too_short,
+            AuthValidators.NAME_MIN_LENGTH,
+            AuthValidators.NAME_MIN_LENGTH
+        )
     ValidationError.NAME_TOO_LONG ->
-        stringResource(R.string.validation_name_too_long, AuthValidators.NAME_MAX_LENGTH)
+        pluralStringResource(
+            R.plurals.validation_name_too_long,
+            AuthValidators.NAME_MAX_LENGTH,
+            AuthValidators.NAME_MAX_LENGTH
+        )
     ValidationError.EMAIL_INVALID -> stringResource(R.string.validation_email_invalid)
     ValidationError.PASSWORD_TOO_SHORT ->
-        stringResource(R.string.validation_password_too_short, AuthValidators.PASSWORD_MIN_LENGTH)
+        pluralStringResource(
+            R.plurals.validation_password_too_short,
+            AuthValidators.PASSWORD_MIN_LENGTH,
+            AuthValidators.PASSWORD_MIN_LENGTH
+        )
 }
 
 /** The text of the form-level banner for each way a sign in or sign up can fail. */
