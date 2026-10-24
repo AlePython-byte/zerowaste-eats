@@ -50,7 +50,10 @@ fun ZeroWasteEatsApp() {
             when (space) {
                 AppSpace.Loading -> Box(modifier = Modifier.fillMaxSize())
                 AppSpace.Auth -> AuthNavigation()
-                is AppSpace.Customer -> CustomerNavigation()
+                is AppSpace.Customer -> CustomerNavigation(
+                    session = space.session,
+                    onSignOut = sessionManager::signOut
+                )
                 is AppSpace.Merchant -> MerchantPlaceholder(
                     businessName = space.session.businessName,
                     onSignOut = sessionManager::signOut

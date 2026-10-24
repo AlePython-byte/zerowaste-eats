@@ -169,4 +169,7 @@
 
     <string name="common_sign_out">Sign out</string>
     <string name="merchant_placeholder_message">Business space, coming soon</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="profile_sign_out_title">Sign out?</string>
+    <string name="profile_sign_out_message">You will need to sign in again to see your orders.</string>
 </resources>

@@ -28,6 +28,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.zerowasteeats.app.R
+import com.zerowasteeats.app.data.session.Session
 import com.zerowasteeats.app.presentation.components.navigation.AppBottomBar
 import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.screens.explore.ExploreScreen
@@ -45,7 +46,10 @@ import com.zerowasteeats.app.presentation.screens.profile.ProfileScreen
  */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun CustomerNavigation() {
+fun CustomerNavigation(
+    session: Session.Customer,
+    onSignOut: () -> Unit
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -82,6 +86,8 @@ fun CustomerNavigation() {
         CustomerNavHost(
             navController = navController,
             exploreViewRequest = exploreViewRequest,
+            session = session,
+            onSignOut = onSignOut,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
@@ -94,6 +100,8 @@ fun CustomerNavigation() {
 private fun CustomerNavHost(
     navController: NavHostController,
     exploreViewRequest: ExploreViewRequest,
+    session: Session.Customer,
+    onSignOut: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Lets the offer photo travel between the card and the detail screen
@@ -128,7 +136,11 @@ private fun CustomerNavHost(
                     OrdersScreen()
                 }
                 composable(CustomerDestination.PROFILE.route) {
-                    ProfileScreen()
+                    ProfileScreen(
+                        displayName = session.displayName,
+                        email = session.email,
+                        onSignOut = onSignOut
+                    )
                 }
                 sharedComposable("offer/{offerId}") { backStackEntry ->
                     val offerId = backStackEntry.arguments?.getString("offerId")

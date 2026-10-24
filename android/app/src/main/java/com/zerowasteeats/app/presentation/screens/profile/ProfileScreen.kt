@@ -19,17 +19,27 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import com.zerowasteeats.app.R
 import androidx.compose.ui.Alignment
+import android.content.res.Configuration
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zerowasteeats.app.presentation.components.common.AppButton
+import com.zerowasteeats.app.presentation.components.common.AppButtonStyle
 import com.zerowasteeats.app.presentation.components.common.AppCard
 import com.zerowasteeats.app.presentation.components.settings.AppearanceSettingCard
 import com.zerowasteeats.app.presentation.components.settings.LanguageSettingCard
@@ -38,10 +48,21 @@ import com.zerowasteeats.app.presentation.model.ProfileUiModel
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.SurfaceTokens
+import com.zerowasteeats.app.presentation.theme.ThemeMode
+import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
 
+/**
+ * The customer's profile. Name and email come from the session; the impact numbers are still
+ * sample data. Signing out asks first, then [onSignOut] ends the session.
+ */
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(
+    displayName: String,
+    email: String,
+    onSignOut: () -> Unit
+) {
     val profile = MockProfile.getProfile()
+    var isSignOutDialogOpen by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
@@ -63,7 +84,7 @@ fun ProfileScreen() {
             }
 
             item {
-                ProfileHeroCard(profile = profile)
+                ProfileHeroCard(displayName = displayName, email = email)
             }
 
             item {
@@ -85,8 +106,53 @@ fun ProfileScreen() {
             item {
                 InfoSection()
             }
+
+            item {
+                AppButton(
+                    text = stringResource(R.string.common_sign_out),
+                    onClick = { isSignOutDialogOpen = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    style = AppButtonStyle.SECONDARY
+                )
+            }
         }
     }
+
+    if (isSignOutDialogOpen) {
+        SignOutDialog(
+            onConfirm = {
+                isSignOutDialogOpen = false
+                onSignOut()
+            },
+            onDismiss = { isSignOutDialogOpen = false }
+        )
+    }
+}
+
+@Composable
+private fun SignOutDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(R.string.profile_sign_out_title)) },
+        text = { Text(text = stringResource(R.string.profile_sign_out_message)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(
+                    text = stringResource(R.string.common_sign_out),
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(
+                    text = stringResource(R.string.common_cancel),
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+            }
+        },
+        containerColor = SurfaceTokens.surface
+    )
 }
 
 @Composable
@@ -111,7 +177,11 @@ private fun ProfileHeader(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ProfileHeroCard(profile: ProfileUiModel, modifier: Modifier = Modifier) {
+private fun ProfileHeroCard(
+    displayName: String,
+    email: String,
+    modifier: Modifier = Modifier
+) {
     AppCard(modifier = modifier.fillMaxWidth()) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -125,7 +195,7 @@ private fun ProfileHeroCard(profile: ProfileUiModel, modifier: Modifier = Modifi
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Text(
-                        text = profile.initials,
+                        text = initialsOf(displayName),
                         style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.tertiary
                     )
@@ -137,21 +207,14 @@ private fun ProfileHeroCard(profile: ProfileUiModel, modifier: Modifier = Modifi
             // Info
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = profile.displayName,
+                    text = displayName,
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = profile.roleLabel,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    fontWeight = FontWeight.Medium
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = profile.city,
+                    text = email,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -294,4 +357,32 @@ private fun InfoSection(modifier: Modifier = Modifier) {
             lineHeight = MaterialTheme.typography.bodyMedium.lineHeight
         )
     }
+}
+
+/** Up to two letters for the avatar: the first of the first and last words of [name]. */
+internal fun initialsOf(name: String): String {
+    val words = name.trim().split(Regex("\\s+")).filter { it.isNotEmpty() }
+    if (words.isEmpty()) return ""
+    val first = words.first().first().toString()
+    val last = if (words.size > 1) words.last().first().toString() else ""
+    return (first + last).uppercase()
+}
+
+@Composable
+private fun ProfileScreenPreviewContent(themeMode: ThemeMode) {
+    ZeroWasteEatsTheme(themeMode = themeMode) {
+        ProfileScreen(displayName = "Comprador Demo", email = "comprador@demo.co", onSignOut = {})
+    }
+}
+
+@Preview(name = "Light", widthDp = 380, heightDp = 1600, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Composable
+private fun ProfileScreenLightPreview() {
+    ProfileScreenPreviewContent(ThemeMode.LIGHT)
+}
+
+@Preview(name = "Dark", widthDp = 380, heightDp = 1600, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun ProfileScreenDarkPreview() {
+    ProfileScreenPreviewContent(ThemeMode.DARK)
 }

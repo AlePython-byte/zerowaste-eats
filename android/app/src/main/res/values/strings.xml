@@ -180,4 +180,7 @@
 
     <string name="common_sign_out">Cerrar sesión</string>
     <string name="merchant_placeholder_message">Espacio de negocio, próximamente</string>
+    <string name="common_cancel">Cancelar</string>
+    <string name="profile_sign_out_title">¿Cerrar sesión?</string>
+    <string name="profile_sign_out_message">Tendrás que ingresar de nuevo para ver tus pedidos.</string>
 </resources>
