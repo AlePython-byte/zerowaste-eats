@@ -176,8 +176,6 @@
     <string name="merchant_tab_offers">My offers</string>
     <string name="merchant_tab_reservations">Reservations</string>
     <string name="merchant_tab_business">Business</string>
-    <string name="merchant_offers_empty_title">You have no offers yet</string>
-    <string name="merchant_offers_empty_message">Publish your first offer so others can rescue it.</string>
     <string name="merchant_reservations_empty_title">You have no reservations yet</string>
     <string name="merchant_reservations_empty_message">When someone reserves one of your offers, it will show up here.</string>
     <string name="merchant_business_empty_title">Your business</string>
@@ -197,4 +195,28 @@
         <item quantity="one">%1$d item</item>
         <item quantity="other">%1$d items</item>
     </plurals>
+    <string name="common_undo">Undo</string>
+    <string name="common_back">Back</string>
+    <string name="merchant_new_offer">New offer</string>
+    <string name="merchant_filter_active">Active</string>
+    <string name="merchant_filter_paused">Paused</string>
+    <string name="merchant_filter_sold_out">Sold out</string>
+    <string name="merchant_offer_status_active">Active</string>
+    <string name="merchant_offer_status_paused">Paused</string>
+    <string name="merchant_offer_status_sold_out">Sold out</string>
+    <string name="merchant_offer_status_expired">Expired</string>
+    <string name="merchant_offer_menu_cd">More options for %1$s</string>
+    <string name="merchant_offer_edit">Edit</string>
+    <string name="merchant_offer_pause">Pause</string>
+    <string name="merchant_offer_resume">Resume</string>
+    <string name="merchant_offer_paused_message">Offer paused</string>
+    <string name="merchant_offer_resumed_message">Offer resumed</string>
+    <string name="merchant_offers_empty_active_title">You have no active offers</string>
+    <string name="merchant_offers_empty_active_message">Publish an offer so others can rescue it.</string>
+    <string name="merchant_offers_empty_paused_title">You have no paused offers</string>
+    <string name="merchant_offers_empty_paused_message">Offers you pause will show up here, ready to resume.</string>
+    <string name="merchant_offers_empty_sold_out_title">Nothing sold out or expired</string>
+    <string name="merchant_offers_empty_sold_out_message">Offers that sell out or expire will show up here.</string>
+    <string name="merchant_offer_editor_soon_title">The editor is coming soon</string>
+    <string name="merchant_offer_editor_soon_message">Soon you will be able to publish and edit your offers from here.</string>
 </resources>

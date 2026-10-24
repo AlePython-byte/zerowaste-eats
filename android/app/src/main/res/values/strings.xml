@@ -187,8 +187,6 @@
     <string name="merchant_tab_offers">Mis ofertas</string>
     <string name="merchant_tab_reservations">Reservas</string>
     <string name="merchant_tab_business">Negocio</string>
-    <string name="merchant_offers_empty_title">Aún no tienes ofertas</string>
-    <string name="merchant_offers_empty_message">Publica tu primera oferta para que otros puedan rescatarla.</string>
     <string name="merchant_reservations_empty_title">Aún no tienes reservas</string>
     <string name="merchant_reservations_empty_message">Cuando alguien reserve una de tus ofertas, aparecerá aquí.</string>
     <string name="merchant_business_empty_title">Tu negocio</string>
@@ -209,4 +207,28 @@
         <item quantity="many">%1$d unidades</item>
         <item quantity="other">%1$d unidades</item>
     </plurals>
+    <string name="common_undo">Deshacer</string>
+    <string name="common_back">Volver</string>
+    <string name="merchant_new_offer">Nueva oferta</string>
+    <string name="merchant_filter_active">Activas</string>
+    <string name="merchant_filter_paused">Pausadas</string>
+    <string name="merchant_filter_sold_out">Agotadas</string>
+    <string name="merchant_offer_status_active">Activa</string>
+    <string name="merchant_offer_status_paused">Pausada</string>
+    <string name="merchant_offer_status_sold_out">Agotada</string>
+    <string name="merchant_offer_status_expired">Vencida</string>
+    <string name="merchant_offer_menu_cd">Más opciones para %1$s</string>
+    <string name="merchant_offer_edit">Editar</string>
+    <string name="merchant_offer_pause">Pausar</string>
+    <string name="merchant_offer_resume">Reanudar</string>
+    <string name="merchant_offer_paused_message">Oferta pausada</string>
+    <string name="merchant_offer_resumed_message">Oferta reanudada</string>
+    <string name="merchant_offers_empty_active_title">No tienes ofertas activas</string>
+    <string name="merchant_offers_empty_active_message">Publica una oferta para que otros puedan rescatarla.</string>
+    <string name="merchant_offers_empty_paused_title">No tienes ofertas pausadas</string>
+    <string name="merchant_offers_empty_paused_message">Las ofertas que pauses aparecerán aquí, listas para reanudar.</string>
+    <string name="merchant_offers_empty_sold_out_title">Nada agotado ni vencido</string>
+    <string name="merchant_offers_empty_sold_out_message">Aquí verás las ofertas que se agoten o venzan.</string>
+    <string name="merchant_offer_editor_soon_title">El editor llega pronto</string>
+    <string name="merchant_offer_editor_soon_message">Pronto podrás publicar y editar tus ofertas desde aquí.</string>
 </resources>

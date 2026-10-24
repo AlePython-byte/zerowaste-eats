@@ -1,5 +1,6 @@
 package com.zerowasteeats.app.presentation.navigation
 
+import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,10 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.zerowasteeats.app.R
 import com.zerowasteeats.app.data.session.Session
 import com.zerowasteeats.app.presentation.components.common.AppButton
@@ -20,15 +23,27 @@ import com.zerowasteeats.app.presentation.components.common.AppButtonStyle
 import com.zerowasteeats.app.presentation.components.navigation.TabItem
 import com.zerowasteeats.app.presentation.screens.merchant.MerchantTabPlaceholder
 import com.zerowasteeats.app.presentation.screens.merchant.dashboard.MerchantDashboardScreen
+import com.zerowasteeats.app.presentation.screens.merchant.offers.MerchantOfferEditPlaceholder
+import com.zerowasteeats.app.presentation.screens.merchant.offers.MerchantOffersScreen
 
 enum class MerchantDestination(
     val route: String,
-    @StringRes val labelRes: Int
+    @param:StringRes val labelRes: Int
 ) {
     DASHBOARD(route = "merchant_dashboard", labelRes = R.string.merchant_tab_dashboard),
     OFFERS(route = "merchant_offers", labelRes = R.string.merchant_tab_offers),
     RESERVATIONS(route = "merchant_reservations", labelRes = R.string.merchant_tab_reservations),
-    BUSINESS(route = "merchant_business", labelRes = R.string.merchant_tab_business)
+    BUSINESS(route = "merchant_business", labelRes = R.string.merchant_tab_business);
+
+    companion object {
+        const val EDIT_OFFER_ID_ARG = "id"
+
+        /** The offer editor. The id is optional: without it the editor starts a new offer. */
+        const val EDIT_OFFER_ROUTE = "merchant_offer_edit?$EDIT_OFFER_ID_ARG={$EDIT_OFFER_ID_ARG}"
+
+        fun editOfferRoute(offerId: String?): String =
+            if (offerId == null) "merchant_offer_edit" else "merchant_offer_edit?$EDIT_OFFER_ID_ARG=${Uri.encode(offerId)}"
+    }
 }
 
 /** The business's bottom bar tabs, in display order. */
@@ -71,11 +86,24 @@ fun MerchantNavigation(
                 )
             }
             composable(MerchantDestination.OFFERS.route) {
-                MerchantTabPlaceholder(
-                    title = stringResource(R.string.merchant_tab_offers),
-                    emptyTitle = stringResource(R.string.merchant_offers_empty_title),
-                    emptyMessage = stringResource(R.string.merchant_offers_empty_message)
+                MerchantOffersScreen(
+                    session = session,
+                    onNewOffer = { navController.navigate(MerchantDestination.editOfferRoute(null)) },
+                    onEditOffer = { id -> navController.navigate(MerchantDestination.editOfferRoute(id)) }
                 )
+            }
+            // Not a tab, so the bottom bar is hidden while the editor is open
+            composable(
+                route = MerchantDestination.EDIT_OFFER_ROUTE,
+                arguments = listOf(
+                    navArgument(MerchantDestination.EDIT_OFFER_ID_ARG) {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    }
+                )
+            ) {
+                MerchantOfferEditPlaceholder(onBack = { navController.popBackStack() })
             }
             composable(MerchantDestination.RESERVATIONS.route) {
                 MerchantTabPlaceholder(
