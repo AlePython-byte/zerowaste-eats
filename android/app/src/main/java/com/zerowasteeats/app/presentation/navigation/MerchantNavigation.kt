@@ -33,10 +33,10 @@ enum class MerchantDestination(
     val route: String,
     @param:StringRes val labelRes: Int
 ) {
-    DASHBOARD(route = "merchant_dashboard", labelRes = R.string.merchant_tab_dashboard),
-    OFFERS(route = "merchant_offers", labelRes = R.string.merchant_tab_offers),
-    RESERVATIONS(route = "merchant_reservations", labelRes = R.string.merchant_tab_reservations),
-    BUSINESS(route = "merchant_business", labelRes = R.string.merchant_tab_business);
+    DASHBOARD(route = "merchant_dashboard", labelRes = R.string.merchant_nav_dashboard),
+    OFFERS(route = "merchant_offers", labelRes = R.string.merchant_nav_offers),
+    RESERVATIONS(route = "merchant_reservations", labelRes = R.string.merchant_nav_reservations),
+    BUSINESS(route = "merchant_business", labelRes = R.string.merchant_nav_business);
 
     companion object {
         const val EDIT_OFFER_ID_ARG = "id"

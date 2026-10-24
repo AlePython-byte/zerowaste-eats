@@ -33,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.theme.AppRadius
@@ -61,11 +62,11 @@ fun AppBottomBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = AppSpacing.small, horizontal = AppSpacing.small),
-            horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
             tabs.forEach { tab ->
                 AppBottomBarItem(
+                    modifier = Modifier.weight(1f),
                     tab = tab,
                     isSelected = selectedRoute == tab.route,
                     accent = accent,
@@ -78,6 +79,7 @@ fun AppBottomBar(
 
 @Composable
 private fun AppBottomBarItem(
+    modifier: Modifier,
     tab: TabItem,
     isSelected: Boolean,
     accent: Color,
@@ -86,15 +88,15 @@ private fun AppBottomBarItem(
     val description = tab.contentDescriptionRes?.let { stringResource(it) }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .then(
                 if (description != null) Modifier.semantics { contentDescription = description }
                 else Modifier
             )
             .clip(RoundedCornerShape(AppRadius.large))
             .clickable(onClick = onClick)
-            .defaultMinSize(minHeight = 48.dp, minWidth = 64.dp)
-            .padding(horizontal = AppSpacing.medium, vertical = AppSpacing.small),
+            .defaultMinSize(minHeight = 48.dp)
+            .padding(horizontal = AppSpacing.extraSmall, vertical = AppSpacing.small),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -126,7 +128,10 @@ private fun AppBottomBarItem(
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                 ),
-                color = contentColor
+                color = contentColor,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis
             )
 
             Spacer(modifier = Modifier.height(4.dp))

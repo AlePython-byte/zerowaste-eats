@@ -172,10 +172,12 @@
     <string name="profile_sign_out_title">Sign out?</string>
     <string name="profile_sign_out_message">You will need to sign in again to see your orders.</string>
     <string name="mode_badge_merchant">Business</string>
-    <string name="merchant_tab_dashboard">Dashboard</string>
+    <string name="merchant_nav_dashboard">Overview</string>
+    <string name="merchant_nav_offers">Offers</string>
+    <string name="merchant_nav_reservations">Bookings</string>
+    <string name="merchant_nav_business">Business</string>
     <string name="merchant_tab_offers">My offers</string>
     <string name="merchant_tab_reservations">Reservations</string>
-    <string name="merchant_tab_business">Business</string>
     <string name="merchant_dashboard_greeting">Hello, %1$s</string>
     <string name="merchant_dashboard_empty_title">No activity yet</string>
     <string name="merchant_dashboard_empty_message">Publish your first offer and you will see how you rescue food here.</string>

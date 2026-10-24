@@ -183,10 +183,12 @@
     <string name="profile_sign_out_title">¿Cerrar sesión?</string>
     <string name="profile_sign_out_message">Tendrás que ingresar de nuevo para ver tus pedidos.</string>
     <string name="mode_badge_merchant">Negocio</string>
-    <string name="merchant_tab_dashboard">Panel</string>
+    <string name="merchant_nav_dashboard">Panel</string>
+    <string name="merchant_nav_offers">Ofertas</string>
+    <string name="merchant_nav_reservations">Reservas</string>
+    <string name="merchant_nav_business">Negocio</string>
     <string name="merchant_tab_offers">Mis ofertas</string>
     <string name="merchant_tab_reservations">Reservas</string>
-    <string name="merchant_tab_business">Negocio</string>
     <string name="merchant_dashboard_greeting">Hola, %1$s</string>
     <string name="merchant_dashboard_empty_title">Aún no hay actividad</string>
     <string name="merchant_dashboard_empty_message">Publica tu primera oferta y aquí verás cómo rescatas comida.</string>
