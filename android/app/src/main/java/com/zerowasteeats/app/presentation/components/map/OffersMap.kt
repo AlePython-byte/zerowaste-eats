@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.CameraPositionState
@@ -153,8 +154,13 @@ private fun MapOfferCard(
             ) {
                 Text(
                     text = offer.merchantName,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = AppSpacing.small),
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.tertiary
+                    color = MaterialTheme.colorScheme.tertiary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = offer.distance,
@@ -169,7 +175,8 @@ private fun MapOfferCard(
                 text = offer.title,
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
 
             Spacer(modifier = Modifier.height(AppSpacing.small))
@@ -181,8 +188,13 @@ private fun MapOfferCard(
             ) {
                 Text(
                     text = offer.discountedPrice,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = AppSpacing.small),
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.tertiary
+                    color = MaterialTheme.colorScheme.tertiary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
 
                 AppButton(
