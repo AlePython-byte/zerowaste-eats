@@ -25,7 +25,13 @@ class OfferEditorFormStateTest {
     private val today: LocalDate = LocalDate.of(2026, 10, 24)
     private val clock = Clock.fixed(Instant.parse("2026-10-24T15:00:00Z"), zone)
 
-    private fun validForm() = OfferEditorFormState.newOffer().apply {
+    /** A new form with nothing filled in, not even the default pickup window. */
+    private fun emptyForm() = OfferEditorFormState(OfferEditorValues(), isNewOffer = true)
+
+    private fun clockAt(time: String): Clock =
+        Clock.fixed(Instant.parse("2026-10-24T${time}:00Z"), zone)
+
+    private fun validForm() = OfferEditorFormState.newOffer(clock).apply {
         onTitleChange("Croissants del día")
         onCategorySelected(OfferCategory.BAKERY)
         onPhotoSelected(OfferPhoto.CROISSANT)
@@ -45,14 +51,14 @@ class OfferEditorFormStateTest {
 
     @Test
     fun newForm_showsNoErrors_evenThoughItIsNotValid() {
-        val form = OfferEditorFormState.newOffer()
+        val form = OfferEditorFormState.newOffer(clock)
 
         OfferField.entries.forEach { assertNull(form.errorOf(it)) }
     }
 
     @Test
     fun typing_showsNoErrorBeforeLeavingTheField() {
-        val form = OfferEditorFormState.newOffer()
+        val form = OfferEditorFormState.newOffer(clock)
 
         form.onTitleChange("P")
         form.onOriginalPriceChange("0")
@@ -63,7 +69,7 @@ class OfferEditorFormStateTest {
 
     @Test
     fun afterLeavingAField_itsErrorFollowsEachChange() {
-        val form = OfferEditorFormState.newOffer()
+        val form = OfferEditorFormState.newOffer(clock)
         form.onTitleChange("P")
         form.onBlur(OfferField.TITLE)
         assertEquals(OfferFieldError.TITLE_TOO_SHORT, form.errorOf(OfferField.TITLE))
@@ -75,7 +81,7 @@ class OfferEditorFormStateTest {
 
     @Test
     fun validate_showsEveryError_andReturnsTheFirstInScreenOrder() {
-        val form = OfferEditorFormState.newOffer()
+        val form = emptyForm()
 
         assertEquals(OfferField.TITLE, form.validate())
         assertEquals(OfferFieldError.REQUIRED, form.errorOf(OfferField.CATEGORY))
@@ -114,7 +120,7 @@ class OfferEditorFormStateTest {
 
     @Test
     fun categoryAndPhoto_mustBeChosen_andChoosingShowsTheResult() {
-        val form = OfferEditorFormState.newOffer()
+        val form = OfferEditorFormState.newOffer(clock)
         assertEquals(OfferFieldError.REQUIRED, form.shownError(OfferField.CATEGORY))
         assertEquals(OfferFieldError.REQUIRED, form.shownError(OfferField.PHOTO))
 
@@ -128,7 +134,7 @@ class OfferEditorFormStateTest {
     @Test
     fun all_isNotACategory() {
         assertThrows(IllegalArgumentException::class.java) {
-            OfferEditorFormState.newOffer().onCategorySelected(OfferCategory.ALL)
+            OfferEditorFormState.newOffer(clock).onCategorySelected(OfferCategory.ALL)
         }
     }
 
@@ -165,7 +171,7 @@ class OfferEditorFormStateTest {
 
     @Test
     fun priceInput_keepsDigitsOnly_withoutLeadingZeros_andAtMostNine() {
-        val form = OfferEditorFormState.newOffer()
+        val form = OfferEditorFormState.newOffer(clock)
 
         form.onOriginalPriceChange("$15.000")
         assertEquals("15000", form.values.originalPrice)
@@ -193,7 +199,7 @@ class OfferEditorFormStateTest {
 
     @Test
     fun quantityStepper_staysWithinTheLimits() {
-        val form = OfferEditorFormState.newOffer()
+        val form = OfferEditorFormState.newOffer(clock)
         assertEquals("1", form.values.quantity)
 
         form.decrementQuantity()
@@ -210,7 +216,7 @@ class OfferEditorFormStateTest {
 
     @Test
     fun pickupTimes_areRequired_andTheEndMustBeAfterTheStart() {
-        val form = OfferEditorFormState.newOffer()
+        val form = emptyForm()
         assertEquals(OfferFieldError.REQUIRED, form.shownError(OfferField.PICKUP_START))
         assertEquals(OfferFieldError.REQUIRED, form.shownError(OfferField.PICKUP_END))
 
@@ -248,6 +254,145 @@ class OfferEditorFormStateTest {
         assertNull(form.validate())
     }
 
+    // --- Default pickup window ---
+
+    @Test
+    fun defaultWindow_inTheMorning_startsAtTheNextHalfHour_forAnHour() {
+        assertEquals(9 * 60 + 30 to 10 * 60 + 30, OfferEditorFormState.defaultPickupWindow(9 * 60 + 10))
+    }
+
+    @Test
+    fun defaultWindow_inTheAfternoon_roundsUpToTheNextHour() {
+        assertEquals(16 * 60 to 17 * 60, OfferEditorFormState.defaultPickupWindow(15 * 60 + 45))
+    }
+
+    @Test
+    fun defaultWindow_onTheHalfHour_startsAtTheNextOne() {
+        assertEquals(15 * 60 to 16 * 60, OfferEditorFormState.defaultPickupWindow(14 * 60 + 30))
+    }
+
+    @Test
+    fun defaultWindow_at2310_isCutAtMidnight() {
+        assertEquals(23 * 60 + 30 to 23 * 60 + 59, OfferEditorFormState.defaultPickupWindow(23 * 60 + 10))
+    }
+
+    @Test
+    fun defaultWindow_at2350_startsNow_soItStillFits() {
+        val (start, end) = OfferEditorFormState.defaultPickupWindow(23 * 60 + 50)
+
+        assertEquals(23 * 60 + 50, start)
+        assertEquals(23 * 60 + 59, end)
+    }
+
+    @Test
+    fun defaultWindow_at2359_cannotFit_soSavingShowsTheUsualError() {
+        assertEquals(23 * 60 + 58 to 23 * 60 + 59, OfferEditorFormState.defaultPickupWindow(23 * 60 + 59))
+
+        val form = validForm().apply {
+            onPickupStartSelected(23 * 60 + 58)
+            onPickupEndSelected(23 * 60 + 59)
+        }
+        assertEquals(OfferField.PICKUP_END, form.validate(nowMinutes = 23 * 60 + 59))
+        assertEquals(OfferFieldError.END_IN_PAST, form.errorOf(OfferField.PICKUP_END))
+    }
+
+    @Test
+    fun newOffer_takesTheDefaultWindowFromTheClock_andIsUnchanged() {
+        val morning = OfferEditorFormState.newOffer(clockAt("09:10"))
+        val night = OfferEditorFormState.newOffer(clockAt("23:10"))
+
+        assertEquals(9 * 60 + 30, morning.values.pickupStartMinutes)
+        assertEquals(10 * 60 + 30, morning.values.pickupEndMinutes)
+        assertEquals(23 * 60 + 59, night.values.pickupEndMinutes)
+        assertFalse(morning.hasUnsavedChanges)
+        assertFalse(morning.isPickupWindowChanged)
+        assertNull(morning.errorOf(OfferField.PICKUP_START))
+    }
+
+    @Test
+    fun aNewOffer_withItsDefaultWindow_passesTheTimeCheck() {
+        val form = OfferEditorFormState.newOffer(clockAt("23:50")).apply {
+            onTitleChange("Pan de la casa")
+            onCategorySelected(OfferCategory.BAKERY)
+            onPhotoSelected(OfferPhoto.CROISSANT)
+            onOriginalPriceChange("12000")
+            onDiscountedPriceChange("6000")
+        }
+
+        assertNull(form.validate(nowMinutes = 23 * 60 + 50))
+    }
+
+    // --- Editing an offer whose pickup is over ---
+
+    @Test
+    fun editingThePrice_ofAnOfferWhosePickupEnded_doesNotAskToChangeTheTime() {
+        // Pickup 18:00 to 19:30, and now it is 21:00
+        val form = OfferEditorFormState.fromOffer(sampleOffer(), zone).apply {
+            onDiscountedPriceChange("7000")
+            onQuantityChange("3")
+        }
+
+        assertNull(form.validate(nowMinutes = 21 * 60))
+        assertNull(form.errorOf(OfferField.PICKUP_END))
+    }
+
+    @Test
+    fun changingTheWindow_ofAnOfferWhosePickupEnded_mustEndLaterThanNow() {
+        val form = OfferEditorFormState.fromOffer(sampleOffer(), zone).apply {
+            onPickupEndSelected(20 * 60)
+        }
+
+        assertTrue(form.isPickupWindowChanged)
+        assertEquals(OfferField.PICKUP_END, form.validate(nowMinutes = 21 * 60))
+        assertEquals(OfferFieldError.END_IN_PAST, form.errorOf(OfferField.PICKUP_END))
+    }
+
+    @Test
+    fun editingWithoutTouchingTheWindow_keepsTheOffersOwnPickupTimes() {
+        val original = endedYesterday()
+        val form = OfferEditorFormState.fromOffer(original, zone).apply { onDiscountedPriceChange("7000") }
+
+        val draft = form.toDraft(today, zone, existingOffer = original)
+
+        assertEquals(original.pickupStart, draft.pickupStart)
+        assertEquals(original.pickupEnd, draft.pickupEnd)
+        assertEquals(7_000L, draft.discountedPrice)
+    }
+
+    @Test
+    fun editingTheWindow_movesItToToday() {
+        val original = endedYesterday()
+        val form = OfferEditorFormState.fromOffer(original, zone).apply { onPickupEndSelected(21 * 60) }
+
+        val draft = form.toDraft(today, zone, existingOffer = original)
+
+        assertEquals(Instant.parse("2026-10-24T18:00:00Z"), draft.pickupStart)
+        assertEquals(Instant.parse("2026-10-24T21:00:00Z"), draft.pickupEnd)
+    }
+
+    @Test
+    fun savingAPriceChange_ofAnEndedOffer_goesThroughTheRepository() = runBlocking {
+        // The clock says 15:00, and this pickup ended yesterday
+        val original = endedYesterday().copy(status = MerchantOfferStatus.EXPIRED)
+        val repository = FakeMerchantOfferRepository(listOf(original), latencyMillis = 0, clock = clock)
+        val form = OfferEditorFormState.fromOffer(original, zone).apply { onDiscountedPriceChange("7000") }
+        assertNull(form.validate(nowMinutes = 15 * 60))
+
+        val result = saveOffer(repository, original.id, form.toDraft(today, zone, original))
+
+        assertEquals(OfferSaveResult.UPDATED, result)
+        val saved = repository.offers.value.single()
+        assertEquals(7_000L, saved.discountedPrice)
+        assertEquals(original.pickupEnd, saved.pickupEnd)
+        // The pickup is still over, so the offer stays expired
+        assertEquals(MerchantOfferStatus.EXPIRED, saved.status)
+    }
+
+    private fun endedYesterday() = sampleOffer().copy(
+        pickupStart = Instant.parse("2026-10-23T18:00:00Z"),
+        pickupEnd = Instant.parse("2026-10-23T19:30:00Z")
+    )
+
     // --- Discount percent ---
 
     @Test
@@ -262,7 +407,7 @@ class OfferEditorFormStateTest {
 
     @Test
     fun discountPercent_isNullUntilBothPricesMakeSense() {
-        val form = OfferEditorFormState.newOffer()
+        val form = OfferEditorFormState.newOffer(clock)
         assertNull(form.discountPercent)
 
         form.onOriginalPriceChange("10000")
@@ -277,7 +422,7 @@ class OfferEditorFormStateTest {
 
     @Test
     fun newForm_hasNoUnsavedChanges_untilSomethingIsTyped() {
-        val form = OfferEditorFormState.newOffer()
+        val form = OfferEditorFormState.newOffer(clock)
         assertFalse(form.hasUnsavedChanges)
 
         form.onTitleChange("P")
@@ -286,7 +431,7 @@ class OfferEditorFormStateTest {
 
     @Test
     fun undoingAnEdit_byHand_leavesNoUnsavedChanges() {
-        val form = OfferEditorFormState.newOffer()
+        val form = OfferEditorFormState.newOffer(clock)
 
         form.onTitleChange("Pan")
         form.onTitleChange("")
@@ -305,7 +450,7 @@ class OfferEditorFormStateTest {
 
     @Test
     fun leavingAField_isNotAChange() {
-        val form = OfferEditorFormState.newOffer()
+        val form = OfferEditorFormState.newOffer(clock)
 
         form.onBlur(OfferField.TITLE)
         form.validate()
@@ -328,6 +473,7 @@ class OfferEditorFormStateTest {
 
         assertEquals(form.values, restored.values)
         assertEquals(form.initialValues, restored.initialValues)
+        assertFalse(restored.isNewOffer)
         assertTrue(restored.hasUnsavedChanges)
         assertEquals(OfferFieldError.TITLE_TOO_SHORT, restored.errorOf(OfferField.TITLE))
         assertEquals(OfferFieldError.END_NOT_AFTER_START, restored.errorOf(OfferField.PICKUP_END))
@@ -346,12 +492,13 @@ class OfferEditorFormStateTest {
 
     @Test
     fun saver_keepsAnEmptyNewForm() {
-        val form = OfferEditorFormState.newOffer()
+        val form = OfferEditorFormState.newOffer(clock)
 
         val saved = with(OfferEditorFormState.Saver) { SaverScope { true }.save(form) }!!
         val restored = OfferEditorFormState.Saver.restore(saved)!!
 
         assertEquals(form.values, restored.values)
+        assertTrue(restored.isNewOffer)
         assertFalse(restored.hasUnsavedChanges)
     }
 

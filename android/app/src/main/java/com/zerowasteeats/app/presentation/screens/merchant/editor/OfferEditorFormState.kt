@@ -10,6 +10,7 @@ import com.zerowasteeats.app.data.merchant.MerchantOfferDraft
 import com.zerowasteeats.app.data.merchant.MerchantOfferRepository
 import com.zerowasteeats.app.data.merchant.OfferPhoto
 import com.zerowasteeats.app.presentation.model.OfferCategory
+import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
@@ -53,6 +54,8 @@ data class OfferEditorValues(
  */
 class OfferEditorFormState(
     val initialValues: OfferEditorValues,
+    /** True for an offer that does not exist yet, false when editing one. */
+    val isNewOffer: Boolean,
     values: OfferEditorValues = initialValues,
     shownFields: Set<OfferField> = emptySet(),
     endMustBeAfterMinutes: Int? = null
@@ -66,6 +69,11 @@ class OfferEditorFormState(
     private var endMustBeAfterMinutes by mutableStateOf(endMustBeAfterMinutes)
 
     val hasUnsavedChanges: Boolean get() = values != initialValues
+
+    /** Whether the pickup start or end differs from what the editor opened with. */
+    val isPickupWindowChanged: Boolean
+        get() = values.pickupStartMinutes != initialValues.pickupStartMinutes ||
+            values.pickupEndMinutes != initialValues.pickupEndMinutes
 
     /** Whole percent off, rounded down, once both prices make sense; null before that. */
     val discountPercent: Int?
@@ -121,7 +129,8 @@ class OfferEditorFormState(
     /**
      * For the save button: every field shows its error. Returns the first field, in screen
      * order, that is not valid, or null when the offer can be saved. With [nowMinutes], the
-     * time of day now, a pickup that has already ended today is an error too.
+     * time of day now, a pickup that has already ended today is an error too, but only for a new
+     * offer or a changed window: editing the price of an offer whose pickup is over is fine.
      */
     fun validate(nowMinutes: Int? = null): OfferField? {
         endMustBeAfterMinutes = nowMinutes
@@ -130,10 +139,24 @@ class OfferEditorFormState(
     }
 
     /**
-     * The offer to save, with the pickup window on [date]. Call only after [validate] returned
-     * null; it fails on a form that is not valid.
+     * The offer to save. A new or changed pickup window goes on [date]; when editing
+     * [existingOffer] without touching the window, its own start and end are kept as they were,
+     * day included. Call only after [validate] returned null; it fails on a form that is not valid.
      */
-    fun toDraft(date: LocalDate, zone: ZoneId): MerchantOfferDraft = with(values) {
+    fun toDraft(
+        date: LocalDate,
+        zone: ZoneId,
+        existingOffer: MerchantOffer? = null
+    ): MerchantOfferDraft {
+        val draft = draftOn(date, zone)
+        return if (existingOffer != null && !isPickupWindowChanged) {
+            draft.copy(pickupStart = existingOffer.pickupStart, pickupEnd = existingOffer.pickupEnd)
+        } else {
+            draft
+        }
+    }
+
+    private fun draftOn(date: LocalDate, zone: ZoneId): MerchantOfferDraft = with(values) {
         MerchantOfferDraft(
             title = title.trim(),
             category = requireNotNull(category),
@@ -182,7 +205,8 @@ class OfferEditorFormState(
                 pickupEndMinutes == null -> OfferFieldError.REQUIRED
                 pickupStartMinutes != null && pickupEndMinutes <= pickupStartMinutes ->
                     OfferFieldError.END_NOT_AFTER_START
-                endMustBeAfterMinutes.let { now -> now != null && pickupEndMinutes <= now } ->
+                endMustBeAfterMinutes.let { now -> now != null && pickupEndMinutes <= now } &&
+                    (isNewOffer || isPickupWindowChanged) ->
                     OfferFieldError.END_IN_PAST
                 else -> null
             }
@@ -228,7 +252,34 @@ class OfferEditorFormState(
 
         fun timeOf(minutes: Int): LocalTime = LocalTime.of(minutes / 60, minutes % 60)
 
-        fun newOffer() = OfferEditorFormState(OfferEditorValues())
+        /** The last minute of the day: a pickup today cannot end later. */
+        const val LAST_MINUTE_OF_DAY = 23 * 60 + 59
+        private const val DEFAULT_WINDOW_MINUTES = 60
+
+        /**
+         * The pickup window a new offer starts with, as (start, end) minutes after midnight: from
+         * the next half hour, for an hour, cut at 23:59. Late at night the start moves back to
+         * [nowMinutes] so the window still fits; at 23:59 itself nothing fits, so the end stays at
+         * 23:59 and saving shows the usual "time has passed" error.
+         */
+        fun defaultPickupWindow(nowMinutes: Int): Pair<Int, Int> {
+            val nextHalfHour = (nowMinutes / 30 + 1) * 30
+            return when {
+                nextHalfHour + DEFAULT_WINDOW_MINUTES <= LAST_MINUTE_OF_DAY ->
+                    nextHalfHour to nextHalfHour + DEFAULT_WINDOW_MINUTES
+                nextHalfHour < LAST_MINUTE_OF_DAY -> nextHalfHour to LAST_MINUTE_OF_DAY
+                else -> minOf(nowMinutes, LAST_MINUTE_OF_DAY - 1) to LAST_MINUTE_OF_DAY
+            }
+        }
+
+        /** An empty form, with the default pickup window worked out from [clock]. */
+        fun newOffer(clock: Clock = Clock.systemDefaultZone()): OfferEditorFormState {
+            val (start, end) = defaultPickupWindow(minutesOf(LocalTime.now(clock)))
+            return OfferEditorFormState(
+                OfferEditorValues(pickupStartMinutes = start, pickupEndMinutes = end),
+                isNewOffer = true
+            )
+        }
 
         /** The form for editing [offer], with its pickup times read in [zone]. */
         fun fromOffer(offer: MerchantOffer, zone: ZoneId) = OfferEditorFormState(
@@ -241,7 +292,8 @@ class OfferEditorFormState(
                 quantity = offer.quantity.toString(),
                 pickupStartMinutes = minutesOf(offer.pickupStart.atZone(zone).toLocalTime()),
                 pickupEndMinutes = minutesOf(offer.pickupEnd.atZone(zone).toLocalTime())
-            )
+            ),
+            isNewOffer = false
         )
 
         /** Keeps both the values as opened and as typed, and which errors are on screen. */
@@ -251,13 +303,15 @@ class OfferEditorFormState(
                     form.initialValues.toSavedList(),
                     form.values.toSavedList(),
                     ArrayList(form.shown.map { it.name }),
-                    form.endMustBeAfterMinutes ?: NO_TIME
+                    form.endMustBeAfterMinutes ?: NO_TIME,
+                    form.isNewOffer
                 )
             },
             restore = { saved ->
                 val parts = saved as List<*>
                 OfferEditorFormState(
                     initialValues = valuesFrom(parts[0] as List<*>),
+                    isNewOffer = parts[4] as Boolean,
                     values = valuesFrom(parts[1] as List<*>),
                     shownFields = (parts[2] as List<*>).map { OfferField.valueOf(it as String) }.toSet(),
                     endMustBeAfterMinutes = (parts[3] as Int).takeIf { it != NO_TIME }

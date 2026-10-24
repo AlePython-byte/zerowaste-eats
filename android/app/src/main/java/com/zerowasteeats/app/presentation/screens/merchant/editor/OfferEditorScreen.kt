@@ -100,9 +100,9 @@ import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 import com.zerowasteeats.app.presentation.theme.ThemeMode
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
+import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import kotlinx.coroutines.launch
@@ -141,10 +141,11 @@ fun OfferEditorScreen(
         return
     }
 
-    val zone = ZoneId.systemDefault()
+    val clock = remember { Clock.systemDefaultZone() }
+    val zone = clock.zone
     val form = rememberSaveable(saver = OfferEditorFormState.Saver) {
         existingOffer?.let { OfferEditorFormState.fromOffer(it, zone) }
-            ?: OfferEditorFormState.newOffer()
+            ?: OfferEditorFormState.newOffer(clock)
     }
 
     OfferEditorContent(
@@ -154,8 +155,9 @@ fun OfferEditorScreen(
         saveFailed = viewModel.notFound,
         onClose = onClose,
         // The pickup window is for today, for now
-        onSave = { viewModel.save(form.toDraft(LocalDate.now(zone), zone)) },
-        modifier = modifier
+        onSave = { viewModel.save(form.toDraft(LocalDate.now(clock), zone, existingOffer)) },
+        modifier = modifier,
+        nowMinutes = { OfferEditorFormState.minutesOf(LocalTime.now(clock)) }
     )
 }
 
@@ -678,7 +680,7 @@ private fun PickupTimeDialog(
     // With no time yet, start in the evening, and the end an hour after the start
     val initial = current ?: when (field) {
         OfferField.PICKUP_END -> ((values.pickupStartMinutes ?: DEFAULT_START_MINUTES) + 60)
-            .coerceAtMost(LAST_MINUTE_OF_DAY)
+            .coerceAtMost(OfferEditorFormState.LAST_MINUTE_OF_DAY)
         else -> DEFAULT_START_MINUTES
     }
     val state = rememberTimePickerState(
@@ -771,7 +773,6 @@ private fun photoNameRes(photo: OfferPhoto): Int = when (photo) {
 }
 
 private const val DEFAULT_START_MINUTES = 18 * 60
-private const val LAST_MINUTE_OF_DAY = 23 * 60 + 59
 
 @Composable
 private fun EditorPreviewContent(themeMode: ThemeMode, withErrors: Boolean) {
