@@ -8,7 +8,8 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="window_background">#FFF7F1E8</color>
-    <!-- Brand colors; the same values as RescateButter and RescateDiscountBadge -->
+    <!-- Brand colors; the same values as RescateButter, RescateDiscountBadge and RescateCream -->
     <color name="brand_butter">#FFF2B84B</color>
     <color name="brand_coral">#FFC23B26</color>
+    <color name="brand_cream">#FFF7F1E8</color>
 </resources>

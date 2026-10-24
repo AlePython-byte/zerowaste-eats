@@ -5,9 +5,11 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.PathNode
 import com.zerowasteeats.app.presentation.theme.RescateButter
 import com.zerowasteeats.app.presentation.theme.RescateCarbon
+import com.zerowasteeats.app.presentation.theme.RescateCream
 import com.zerowasteeats.app.presentation.theme.RescateDiscountBadge
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
+import kotlin.math.hypot
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -61,6 +63,42 @@ class LogoPathsTest {
         else -> error("LogoPaths uses absolute commands only, found $this")
     }
 
+    /** Points along the path, curves included, for measuring how far the shape reaches. */
+    private fun List<PathNode>.outline(steps: Int = 32): List<Pair<Float, Float>> {
+        val points = mutableListOf<Pair<Float, Float>>()
+        var x = 0f
+        var y = 0f
+        forEach { node ->
+            when (node) {
+                is PathNode.MoveTo -> { x = node.x; y = node.y }
+                is PathNode.LineTo -> { x = node.x; y = node.y }
+                is PathNode.HorizontalTo -> x = node.x
+                is PathNode.VerticalTo -> y = node.y
+                is PathNode.QuadTo -> {
+                    for (i in 1..steps) {
+                        val t = i.toFloat() / steps
+                        val u = 1 - t
+                        points += (u * u * x + 2 * u * t * node.x1 + t * t * node.x2) to
+                            (u * u * y + 2 * u * t * node.y1 + t * t * node.y2)
+                    }
+                    x = node.x2; y = node.y2
+                }
+                is PathNode.CurveTo -> {
+                    for (i in 1..steps) {
+                        val t = i.toFloat() / steps
+                        val u = 1 - t
+                        points += (u * u * u * x + 3 * u * u * t * node.x1 + 3 * u * t * t * node.x2 + t * t * t * node.x3) to
+                            (u * u * u * y + 3 * u * u * t * node.y1 + 3 * u * t * t * node.y2 + t * t * t * node.y3)
+                    }
+                    x = node.x3; y = node.y3
+                }
+                else -> Unit
+            }
+            points += x to y
+        }
+        return points
+    }
+
     @Test
     fun icLogo_copiesLogoPathsExactly() {
         val paths = namedPaths("ic_logo")
@@ -85,6 +123,39 @@ class LogoPathsTest {
     fun brandColors_matchTheTheme() {
         assertEquals(RescateButter, color("brand_butter"))
         assertEquals(RescateDiscountBadge, color("brand_coral"))
+        assertEquals(RescateCream, color("brand_cream"))
+    }
+
+    @Test
+    fun launcherLayers_copyTheBagAndHandleExactly() {
+        listOf("ic_launcher_foreground", "ic_launcher_monochrome").forEach { layer ->
+            val paths = namedPaths(layer)
+
+            assertEquals(layer, LogoPaths.BAG_WITH_CUTOUTS, paths.getValue("bag_body").getAttributeNS(android, "pathData"))
+            assertEquals(layer, "evenOdd", paths.getValue("bag_body").getAttributeNS(android, "fillType"))
+            assertEquals(layer, LogoPaths.HANDLE, paths.getValue("handle_stroke").getAttributeNS(android, "pathData"))
+        }
+    }
+
+    @Test
+    fun launcherSymbol_fitsTheSafeZone() {
+        // Adaptive icons are 108 dp; launchers may mask everything outside a 66 dp circle
+        val safeRadius = 33f
+        val centre = LogoPaths.VIEWPORT / 2
+        listOf("ic_launcher_foreground", "ic_launcher_monochrome").forEach { layer ->
+            val group = document("drawable/$layer.xml").getElementsByTagName("group").item(0) as Element
+            val scale = group.getAttributeNS(android, "scaleX").toFloat()
+            assertEquals(scale, group.getAttributeNS(android, "scaleY").toFloat())
+            assertEquals(centre, group.getAttributeNS(android, "pivotX").toFloat())
+            assertEquals(centre, group.getAttributeNS(android, "pivotY").toFloat())
+
+            val bagReach = LogoPaths.bag.outline().maxOf { (x, y) -> hypot(x - centre, y - centre) }
+            val handleReach = LogoPaths.handle.outline().maxOf { (x, y) -> hypot(x - centre, y - centre) } +
+                LogoPaths.HANDLE_STROKE_WIDTH / 2
+
+            assertTrue("$layer reaches ${bagReach * scale}", bagReach * scale <= safeRadius)
+            assertTrue("$layer reaches ${handleReach * scale}", handleReach * scale <= safeRadius)
+        }
     }
 
     @Test
