@@ -1,18 +1,14 @@
 package com.zerowasteeats.app.presentation.screens.merchant.offers
 
 import android.content.res.Configuration
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,7 +41,8 @@ import com.zerowasteeats.app.data.session.Session
 import com.zerowasteeats.app.presentation.components.common.EmptyState
 import com.zerowasteeats.app.presentation.components.common.ModeBadge
 import com.zerowasteeats.app.presentation.components.common.offerListItem
-import com.zerowasteeats.app.presentation.components.filters.CountFilterChip
+import com.zerowasteeats.app.presentation.components.common.SegmentOption
+import com.zerowasteeats.app.presentation.components.common.SegmentedCountControl
 import com.zerowasteeats.app.presentation.components.offers.MerchantOfferCard
 import com.zerowasteeats.app.presentation.model.OfferCategory
 import com.zerowasteeats.app.presentation.screens.merchant.editor.OfferSaveResult
@@ -183,22 +180,13 @@ fun MerchantOffersContent(
             }
 
             item(key = "filters") {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState())
-                        .selectableGroup(),
-                    horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
-                ) {
-                    OfferFilter.entries.forEach { filter ->
-                        CountFilterChip(
-                            text = stringResource(filterLabelRes(filter)),
-                            count = state.counts.getValue(filter),
-                            isSelected = state.filter == filter,
-                            onClick = { onFilterSelected(filter) }
-                        )
-                    }
-                }
+                SegmentedCountControl(
+                    options = OfferFilter.entries.map { filter ->
+                        SegmentOption(stringResource(filterLabelRes(filter)), state.counts.getValue(filter))
+                    },
+                    selectedIndex = state.filter.ordinal,
+                    onSelect = { index -> onFilterSelected(OfferFilter.entries[index]) }
+                )
             }
 
             if (state.visibleOffers.isEmpty()) {

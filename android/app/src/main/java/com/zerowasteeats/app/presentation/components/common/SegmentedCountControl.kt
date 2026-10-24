@@ -4,6 +4,8 @@ import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,7 +24,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.presentation.theme.AppRadius
@@ -45,10 +49,12 @@ fun SegmentedCountControl(
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // With a large system font the count drops under the label, so neither gets cut
+    val stacked = LocalDensity.current.fontScale > STACK_FONT_SCALE
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .height(52.dp),
+            .height(if (stacked) 80.dp else 52.dp),
         shape = RoundedCornerShape(AppRadius.extraLarge),
         color = SurfaceTokens.surface,
         border = BorderStroke(SurfaceTokens.borderWidth, SurfaceTokens.border)
@@ -78,7 +84,7 @@ fun SegmentedCountControl(
                             shadowElevation = 2.dp
                         ) {}
                     }
-                    SegmentLabel(option = option, isSelected = isSelected)
+                    SegmentLabel(option = option, isSelected = isSelected, stacked = stacked)
                 }
             }
         }
@@ -86,22 +92,24 @@ fun SegmentedCountControl(
 }
 
 @Composable
-private fun SegmentLabel(option: SegmentOption, isSelected: Boolean) {
+private fun SegmentLabel(option: SegmentOption, isSelected: Boolean, stacked: Boolean) {
     val contentColor = if (isSelected) {
         MaterialTheme.colorScheme.onPrimary
     } else {
         MaterialTheme.colorScheme.onSurface
     }
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
-    ) {
+    val label: @Composable () -> Unit = {
         Text(
             text = option.label,
             style = MaterialTheme.typography.labelLarge,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-            color = contentColor
+            color = contentColor,
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Ellipsis
         )
+    }
+    val count: @Composable () -> Unit = {
         Surface(
             shape = CircleShape,
             color = if (isSelected) {
@@ -120,7 +128,25 @@ private fun SegmentLabel(option: SegmentOption, isSelected: Boolean) {
             )
         }
     }
+    if (stacked) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            label()
+            Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
+            count()
+        }
+    } else {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
+        ) {
+            // The label gives way first, so the count is always visible
+            Box(modifier = Modifier.weight(1f, fill = false)) { label() }
+            count()
+        }
+    }
 }
+
+private const val STACK_FONT_SCALE = 1.15f
 
 @Composable
 private fun SegmentedCountControlPreviewContent(themeMode: ThemeMode) {
