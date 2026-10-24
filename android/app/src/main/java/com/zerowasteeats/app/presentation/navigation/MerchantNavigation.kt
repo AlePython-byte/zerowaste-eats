@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavType
@@ -23,8 +24,9 @@ import com.zerowasteeats.app.presentation.components.common.AppButtonStyle
 import com.zerowasteeats.app.presentation.components.navigation.TabItem
 import com.zerowasteeats.app.presentation.screens.merchant.MerchantTabPlaceholder
 import com.zerowasteeats.app.presentation.screens.merchant.dashboard.MerchantDashboardScreen
-import com.zerowasteeats.app.presentation.screens.merchant.offers.MerchantOfferEditPlaceholder
+import com.zerowasteeats.app.presentation.screens.merchant.editor.OfferEditorScreen
 import com.zerowasteeats.app.presentation.screens.merchant.offers.MerchantOffersScreen
+import com.zerowasteeats.app.presentation.screens.merchant.offers.OfferSavedNotice
 
 enum class MerchantDestination(
     val route: String,
@@ -63,6 +65,8 @@ fun MerchantNavigation(
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    // Carries "offer published" / "changes saved" from the editor to the offer list
+    val offerSavedNotice = remember { OfferSavedNotice() }
 
     TabScaffold(
         tabs = merchantTabs,
@@ -82,14 +86,15 @@ fun MerchantNavigation(
                 MerchantDashboardScreen(
                     session = session,
                     // The offer editor comes later; for now this leads to the offers tab
-                    onPublishOffer = { navController.navigateToTab(MerchantDestination.OFFERS.route) }
+                    onPublishOffer = { navController.navigate(MerchantDestination.editOfferRoute(null)) }
                 )
             }
             composable(MerchantDestination.OFFERS.route) {
                 MerchantOffersScreen(
                     session = session,
                     onNewOffer = { navController.navigate(MerchantDestination.editOfferRoute(null)) },
-                    onEditOffer = { id -> navController.navigate(MerchantDestination.editOfferRoute(id)) }
+                    onEditOffer = { id -> navController.navigate(MerchantDestination.editOfferRoute(id)) },
+                    savedNotice = offerSavedNotice
                 )
             }
             // Not a tab, so the bottom bar is hidden while the editor is open
@@ -102,8 +107,22 @@ fun MerchantNavigation(
                         defaultValue = null
                     }
                 )
-            ) {
-                MerchantOfferEditPlaceholder(onBack = { navController.popBackStack() })
+            ) { backStackEntry ->
+                OfferEditorScreen(
+                    session = session,
+                    offerId = backStackEntry.arguments?.getString(MerchantDestination.EDIT_OFFER_ID_ARG),
+                    onClose = { navController.popBackStack() },
+                    onSaved = { result ->
+                        offerSavedNotice.post(result)
+                        // Back to the offers list, also when the editor was opened from the dashboard
+                        navController.popBackStack()
+                        // Opened from the list, the pop is already there: navigating again would
+                        // rebuild the list and cancel its snackbar
+                        if (navController.currentDestination?.route != MerchantDestination.OFFERS.route) {
+                            navController.navigateToTab(MerchantDestination.OFFERS.route)
+                        }
+                    }
+                )
             }
             composable(MerchantDestination.RESERVATIONS.route) {
                 MerchantTabPlaceholder(

@@ -208,7 +208,6 @@
         <item quantity="other">%1$d unidades</item>
     </plurals>
     <string name="common_undo">Deshacer</string>
-    <string name="common_back">Volver</string>
     <string name="merchant_new_offer">Nueva oferta</string>
     <string name="merchant_filter_active">Activas</string>
     <string name="merchant_filter_paused">Pausadas</string>
@@ -229,6 +228,36 @@
     <string name="merchant_offers_empty_paused_message">Las ofertas que pauses aparecerán aquí, listas para reanudar.</string>
     <string name="merchant_offers_empty_sold_out_title">Nada agotado ni vencido</string>
     <string name="merchant_offers_empty_sold_out_message">Aquí verás las ofertas que se agoten o venzan.</string>
-    <string name="merchant_offer_editor_soon_title">El editor llega pronto</string>
-    <string name="merchant_offer_editor_soon_message">Pronto podrás publicar y editar tus ofertas desde aquí.</string>
+    <string name="common_ok">Aceptar</string>
+    <string name="offer_editor_title_edit">Editar oferta</string>
+    <string name="offer_editor_save_changes">Guardar cambios</string>
+    <string name="offer_editor_discard_title">¿Descartar cambios?</string>
+    <string name="offer_editor_keep_editing">Seguir editando</string>
+    <string name="offer_editor_discard">Descartar</string>
+    <string name="offer_editor_not_found_message">Puede que ya no exista. Vuelve a Mis ofertas e inténtalo de nuevo.</string>
+    <string name="offer_published_message">Oferta publicada</string>
+    <string name="offer_saved_message">Cambios guardados</string>
+    <string name="offer_field_title">Título</string>
+    <string name="offer_field_category">Categoría</string>
+    <string name="offer_field_photo">Foto</string>
+    <string name="offer_field_original_price">Precio original</string>
+    <string name="offer_field_discounted_price">Precio con descuento</string>
+    <string name="offer_field_quantity">Cantidad disponible</string>
+    <string name="offer_quantity_decrease_cd">Restar uno</string>
+    <string name="offer_quantity_increase_cd">Sumar uno</string>
+    <string name="offer_field_pickup">Franja de recogida (hoy)</string>
+    <string name="offer_field_pickup_start">Desde</string>
+    <string name="offer_field_pickup_end">Hasta</string>
+    <string name="offer_pickup_choose_time">Elegir hora</string>
+    <string name="offer_photo_croissant">Croissants</string>
+    <string name="offer_photo_salmon_bowl">Bowl de salmón</string>
+    <string name="offer_photo_desserts">Postres</string>
+    <string name="offer_photo_burger">Hamburguesa</string>
+    <string name="offer_photo_vegetables">Verduras</string>
+    <string name="offer_error_choose">Elige una opción.</string>
+    <string name="offer_error_price_not_positive">Escribe un precio mayor que cero.</string>
+    <string name="offer_error_discount_not_lower">Debe ser menor que el precio original.</string>
+    <string name="offer_error_quantity_range">Escribe una cantidad entre %1$d y %2$d.</string>
+    <string name="offer_error_end_not_after_start">Debe ser después de la hora de inicio.</string>
+    <string name="offer_error_end_in_past">Esa hora ya pasó. La recogida es para hoy.</string>
 </resources>

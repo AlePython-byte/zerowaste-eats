@@ -27,6 +27,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -47,6 +48,7 @@ import com.zerowasteeats.app.presentation.components.common.offerListItem
 import com.zerowasteeats.app.presentation.components.filters.CountFilterChip
 import com.zerowasteeats.app.presentation.components.offers.MerchantOfferCard
 import com.zerowasteeats.app.presentation.model.OfferCategory
+import com.zerowasteeats.app.presentation.screens.merchant.editor.OfferSaveResult
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.ThemeMode
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
@@ -58,6 +60,7 @@ fun MerchantOffersScreen(
     session: Session.Merchant,
     onNewOffer: () -> Unit,
     onEditOffer: (offerId: String) -> Unit,
+    savedNotice: OfferSavedNotice,
     modifier: Modifier = Modifier
 ) {
     val container =
@@ -73,6 +76,25 @@ fun MerchantOffersScreen(
     val pausedMessage = stringResource(R.string.merchant_offer_paused_message)
     val resumedMessage = stringResource(R.string.merchant_offer_resumed_message)
     val undoLabel = stringResource(R.string.common_undo)
+    val publishedMessage = stringResource(R.string.offer_published_message)
+    val savedMessage = stringResource(R.string.offer_saved_message)
+
+    // Coming back from the editor: say what was saved, once. Keyed on the notice itself, not
+    // on its value: consuming it clears the value, which would otherwise restart the effect
+    // and cancel the snackbar it just opened.
+    LaunchedEffect(savedNotice) {
+        snapshotFlow { savedNotice.pending }.collect {
+            when (savedNotice.consume()) {
+                OfferSaveResult.CREATED -> {
+                    // A new offer is active, so show the group it landed in
+                    viewModel.selectFilter(OfferFilter.ACTIVE)
+                    snackbarHostState.showSnackbar(publishedMessage)
+                }
+                OfferSaveResult.UPDATED -> snackbarHostState.showSnackbar(savedMessage)
+                OfferSaveResult.NOT_FOUND, null -> Unit
+            }
+        }
+    }
 
     // Each pause or resume says so and offers to take it back. A newer one replaces the
     // snackbar of the one before, instead of queueing behind it.
