@@ -132,9 +132,12 @@ fun ZeroWasteEatsTheme(
         window.statusBarColor = colorScheme.background.toArgb()
         window.navigationBarColor = colorScheme.background.toArgb()
 
-        WindowCompat
-            .getInsetsController(window, view)
-            .isAppearanceLightStatusBars = !isDark
+        // Dark icons on the light theme and light icons on the dark one, in both bars,
+        // whatever the system theme is
+        WindowCompat.getInsetsController(window, view).apply {
+            isAppearanceLightStatusBars = !isDark
+            isAppearanceLightNavigationBars = !isDark
+        }
     }
 
     MaterialTheme(

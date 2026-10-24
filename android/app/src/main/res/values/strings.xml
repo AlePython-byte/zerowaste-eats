@@ -177,4 +177,7 @@
     <string name="forgot_password_submit">Enviar enlace</string>
     <string name="forgot_password_sent">Si existe una cuenta con ese correo, te enviamos un enlace</string>
     <string name="forgot_password_back_to_sign_in">Volver a ingresar</string>
+
+    <string name="common_sign_out">Cerrar sesión</string>
+    <string name="merchant_placeholder_message">Espacio de negocio, próximamente</string>
 </resources>

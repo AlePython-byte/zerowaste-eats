@@ -166,4 +166,7 @@
     <string name="forgot_password_submit">Send link</string>
     <string name="forgot_password_sent">If an account exists for that email, we sent you a link</string>
     <string name="forgot_password_back_to_sign_in">Back to sign in</string>
+
+    <string name="common_sign_out">Sign out</string>
+    <string name="merchant_placeholder_message">Business space, coming soon</string>
 </resources>
