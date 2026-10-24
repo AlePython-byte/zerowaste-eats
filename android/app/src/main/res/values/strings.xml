@@ -113,4 +113,13 @@
     <string name="field_show_password">Mostrar contraseña</string>
     <string name="field_hide_password">Ocultar contraseña</string>
     <string name="button_loading">Cargando</string>
+
+    <string name="language_code_es" translatable="false">ES</string>
+    <string name="language_code_en" translatable="false">EN</string>
+
+    <string name="welcome_headline">Rescata comida rica antes de que se pierda</string>
+    <string name="welcome_create_account">Crear cuenta</string>
+    <string name="welcome_sign_in">Ya tengo cuenta</string>
+    <string name="welcome_switch_to_dark_cd">Activar modo oscuro</string>
+    <string name="welcome_switch_to_light_cd">Activar modo claro</string>
 </resources>

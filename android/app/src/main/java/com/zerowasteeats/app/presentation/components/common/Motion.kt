@@ -13,6 +13,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 
@@ -28,7 +30,8 @@ fun rememberAnimationsEnabled(): Boolean {
     }
 }
 
-private const val ENTRANCE_MILLIS = 300
+/** Also the length of the short screen and step transitions. */
+internal const val ENTRANCE_MILLIS = 300
 private const val PLACEMENT_MILLIS = 300
 
 /**
@@ -85,5 +88,27 @@ private fun Modifier.offerEntrance(
     return graphicsLayer {
         alpha = progress.value
         translationY = (1f - progress.value) * 16.dp.toPx()
+    }
+}
+
+/**
+ * Fades the content in while it rises [rise] to its place, once, when it first shows.
+ * Static from the start when system animations are off, and in previews, where effects
+ * do not run and the content would stay invisible.
+ */
+@Composable
+fun Modifier.entranceRise(rise: Dp = 8.dp): Modifier {
+    val animate = rememberAnimationsEnabled() && !LocalInspectionMode.current
+    val progress = remember { Animatable(if (animate) 0f else 1f) }
+
+    LaunchedEffect(Unit) {
+        if (progress.value < 1f) {
+            progress.animateTo(1f, tween(ENTRANCE_MILLIS, easing = FastOutSlowInEasing))
+        }
+    }
+
+    return graphicsLayer {
+        alpha = progress.value
+        translationY = (1f - progress.value) * rise.toPx()
     }
 }
