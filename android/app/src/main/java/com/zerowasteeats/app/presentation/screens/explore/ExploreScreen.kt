@@ -68,6 +68,9 @@ import com.zerowasteeats.app.presentation.components.offers.OfferCard
 import com.zerowasteeats.app.presentation.data.MockMapCoordinates
 import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.model.OfferUiModel
+import com.zerowasteeats.app.presentation.navigation.LocalBottomBarInset
+import com.zerowasteeats.app.presentation.navigation.SuppressBottomBarFade
+import com.zerowasteeats.app.presentation.navigation.aboveBottomBar
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -109,7 +112,7 @@ fun ExploreScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState, modifier = Modifier.aboveBottomBar()) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -201,6 +204,8 @@ private fun ExploreMap(
     onOfferClick: (String) -> Unit,
     onLocationMessage: (String) -> Unit
 ) {
+    // The map stops above the bar, as it always did, with a plain backdrop and no fade over it
+    SuppressBottomBarFade()
     var isMapReady by remember { mutableStateOf(!animationsEnabled) }
     LaunchedEffect(Unit) {
         delay(MAP_VEIL_TIMEOUT_MILLIS)
@@ -215,7 +220,7 @@ private fun ExploreMap(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = AppSpacing.small)
+            .padding(top = AppSpacing.small, bottom = LocalBottomBarInset.current)
     ) {
         OffersMap(
             offers = state.filteredOffers,
@@ -295,7 +300,8 @@ private fun OfferGrid(
             start = AppSpacing.regular,
             end = AppSpacing.regular,
             top = AppSpacing.small,
-            bottom = AppSpacing.large // Trailing gap; the bottom bar inset comes from the app scaffold
+            // Trailing gap, plus the floating bar the grid runs under
+            bottom = AppSpacing.large + LocalBottomBarInset.current
         ),
         horizontalArrangement = Arrangement.spacedBy(GridSpacing),
         verticalArrangement = Arrangement.spacedBy(GridSpacing)
@@ -339,7 +345,8 @@ private fun OfferList(
             start = AppSpacing.regular,
             end = AppSpacing.regular,
             top = AppSpacing.small,
-            bottom = AppSpacing.large // Trailing gap; the bottom bar inset comes from the app scaffold
+            // Trailing gap, plus the floating bar the list runs under
+            bottom = AppSpacing.large + LocalBottomBarInset.current
         ),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
     ) {

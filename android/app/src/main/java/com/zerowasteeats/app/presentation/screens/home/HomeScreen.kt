@@ -46,6 +46,7 @@ import com.zerowasteeats.app.presentation.components.offers.OfferCard
 import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.theme.AppRadius
+import com.zerowasteeats.app.presentation.navigation.LocalBottomBarInset
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
@@ -89,7 +90,8 @@ LazyColumn(
                     start = AppSpacing.regular,
                     end = AppSpacing.regular,
                     top = AppSpacing.regular, // Slightly tighter top spacing
-                    bottom = AppSpacing.large // Trailing gap; the bottom bar inset comes from the app scaffold
+                    // Trailing gap, plus the floating bar the list runs under
+                    bottom = AppSpacing.large + LocalBottomBarInset.current
                 ),
                 verticalArrangement = Arrangement.spacedBy(AppSpacing.medium) // Improved info density
             ) {

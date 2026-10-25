@@ -41,6 +41,8 @@ import com.zerowasteeats.app.presentation.components.common.SegmentOption
 import com.zerowasteeats.app.presentation.components.common.SegmentedCountControl
 import com.zerowasteeats.app.presentation.components.common.offerListItem
 import com.zerowasteeats.app.presentation.components.reservations.MerchantReservationCard
+import com.zerowasteeats.app.presentation.navigation.LocalBottomBarInset
+import com.zerowasteeats.app.presentation.navigation.aboveBottomBar
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.ThemeMode
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
@@ -122,13 +124,19 @@ fun MerchantReservationsContent(
     Scaffold(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState, modifier = Modifier.aboveBottomBar()) }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(AppSpacing.regular),
+            contentPadding = PaddingValues(
+                start = AppSpacing.regular,
+                end = AppSpacing.regular,
+                top = AppSpacing.regular,
+                // The floating bar sits over the bottom of the list
+                bottom = AppSpacing.regular + LocalBottomBarInset.current
+            ),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
         ) {
             item(key = "header") {

@@ -2,7 +2,6 @@ package com.zerowasteeats.app.presentation.navigation
 
 import android.net.Uri
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -74,14 +73,11 @@ fun MerchantNavigation(
         currentRoute = currentRoute,
         onTabClick = { tab -> navController.navigateToTab(tab.route) },
         accent = MaterialTheme.colorScheme.secondary
-    ) { innerPadding ->
+    ) {
         NavHost(
             navController = navController,
             startDestination = MerchantDestination.DASHBOARD.route,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .consumeWindowInsets(innerPadding)
+            modifier = Modifier.fillMaxSize()
         ) {
             composable(MerchantDestination.DASHBOARD.route) {
                 MerchantDashboardScreen(

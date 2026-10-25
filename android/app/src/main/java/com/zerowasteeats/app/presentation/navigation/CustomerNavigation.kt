@@ -1,7 +1,6 @@
 package com.zerowasteeats.app.presentation.navigation
 
 import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -51,18 +50,15 @@ fun CustomerNavigation(
         currentRoute = currentRoute,
         onTabClick = { tab -> navController.navigateToTab(tab.route) },
         accent = MaterialTheme.colorScheme.tertiary
-    ) { innerPadding ->
-        // innerPadding reserves the bottom bar's height, so content ends above it
-        // instead of flowing underneath. Screens only add a small trailing gap.
+    ) {
+        // The content fills the area and runs under the bar; scrolling screens add
+        // LocalBottomBarInset to their bottom padding so the last item can clear it.
         CustomerNavHost(
             navController = navController,
             exploreViewRequest = exploreViewRequest,
             session = session,
             onSignOut = onSignOut,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .consumeWindowInsets(innerPadding)
+            modifier = Modifier.fillMaxSize()
         )
     }
 }

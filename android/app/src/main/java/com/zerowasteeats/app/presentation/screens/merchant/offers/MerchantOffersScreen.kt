@@ -46,6 +46,8 @@ import com.zerowasteeats.app.presentation.components.common.SegmentedCountContro
 import com.zerowasteeats.app.presentation.components.offers.MerchantOfferCard
 import com.zerowasteeats.app.presentation.model.OfferCategory
 import com.zerowasteeats.app.presentation.screens.merchant.editor.OfferSaveResult
+import com.zerowasteeats.app.presentation.navigation.LocalBottomBarInset
+import com.zerowasteeats.app.presentation.navigation.aboveBottomBar
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.ThemeMode
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
@@ -140,6 +142,7 @@ fun MerchantOffersContent(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = onNewOffer,
+                modifier = Modifier.aboveBottomBar(),
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
@@ -160,8 +163,9 @@ fun MerchantOffersContent(
                 start = AppSpacing.regular,
                 end = AppSpacing.regular,
                 top = AppSpacing.regular,
-                // Room for the button, so the last card can scroll clear of it
-                bottom = FAB_CLEARANCE
+                // Room for the button, so the last card can scroll clear of it, and for the
+                // floating bar the list runs under
+                bottom = FAB_CLEARANCE + LocalBottomBarInset.current
             ),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
         ) {

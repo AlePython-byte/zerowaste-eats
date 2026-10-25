@@ -43,6 +43,7 @@ import com.zerowasteeats.app.presentation.components.common.ModeBadge
 import com.zerowasteeats.app.presentation.components.settings.AppearanceSettingCard
 import com.zerowasteeats.app.presentation.components.settings.LanguageSettingCard
 import com.zerowasteeats.app.presentation.components.settings.SignOutDialog
+import com.zerowasteeats.app.presentation.navigation.LocalBottomBarInset
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.ThemeMode
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
@@ -77,7 +78,9 @@ fun MerchantBusinessContent(
                 .fillMaxSize()
                 .statusBarsPadding()
                 .verticalScroll(rememberScrollState())
-                .padding(AppSpacing.regular),
+                .padding(AppSpacing.regular)
+                // The floating bar sits over the bottom of the scroll; this lets the end clear it
+                .padding(bottom = LocalBottomBarInset.current),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.extraLarge)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.small)) {

@@ -38,6 +38,7 @@ import com.zerowasteeats.app.presentation.components.orders.OrderCard
 import com.zerowasteeats.app.presentation.data.MockOrders
 import com.zerowasteeats.app.presentation.model.OrderStatus
 import com.zerowasteeats.app.presentation.theme.AppRadius
+import com.zerowasteeats.app.presentation.navigation.LocalBottomBarInset
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 
@@ -108,7 +109,8 @@ fun OrdersScreen() {
                         start = AppSpacing.regular,
                         end = AppSpacing.regular,
                         top = AppSpacing.small,
-                        bottom = AppSpacing.large // Trailing gap; the bottom bar inset comes from the app scaffold
+                        // Trailing gap, plus the floating bar the list runs under
+                        bottom = AppSpacing.large + LocalBottomBarInset.current
                     ),
                     verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
                 ) {

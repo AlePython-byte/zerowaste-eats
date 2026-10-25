@@ -46,6 +46,7 @@ import com.zerowasteeats.app.presentation.components.settings.SignOutDialog
 import com.zerowasteeats.app.presentation.data.MockProfile
 import com.zerowasteeats.app.presentation.model.ProfileUiModel
 import com.zerowasteeats.app.presentation.theme.AppRadius
+import com.zerowasteeats.app.presentation.navigation.LocalBottomBarInset
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 import com.zerowasteeats.app.presentation.theme.ThemeMode
@@ -75,7 +76,8 @@ fun ProfileScreen(
                 start = AppSpacing.regular,
                 end = AppSpacing.regular,
                 top = AppSpacing.regular,
-                bottom = AppSpacing.large // Trailing gap; the bottom bar inset comes from the app scaffold
+                // Trailing gap, plus the floating bar the list runs under
+                bottom = AppSpacing.large + LocalBottomBarInset.current
             ),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.extraLarge)
         ) {
