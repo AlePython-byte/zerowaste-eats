@@ -94,6 +94,19 @@ describe('Application (e2e)', () => {
     (path) => request(app.getHttpServer()).get(path).expect(404),
   );
 
+  it('throttles a client past the per-minute budget with a safe Spanish 429', async () => {
+    // The test environment uses the default budget of 60 requests per minute
+    for (let i = 0; i < 60; i++) {
+      await request(app.getHttpServer()).get('/api/v1/salud').expect(200);
+    }
+    const response = await request(app.getHttpServer())
+      .get('/api/v1/salud')
+      .expect(429);
+    expect(response.body.message).toBe(
+      'Demasiadas solicitudes. Intenta de nuevo en un momento.',
+    );
+  });
+
   it('GET /api/v1/salud/base-datos reports database connectivity', () => {
     return request(app.getHttpServer())
       .get('/api/v1/salud/base-datos')
