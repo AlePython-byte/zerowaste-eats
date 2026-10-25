@@ -2,3 +2,12 @@
 # The Google Maps Secrets Gradle Plugin will securely inject this into AndroidManifest.xml.
 # Do NOT commit your real local.properties to version control.
 MAPS_API_KEY=YOUR_REAL_GOOGLE_MAPS_API_KEY_HERE
+
+# Backend base URL, ending in "/". Debug defaults to the emulator's view of this computer.
+# On a real device use adb reverse tcp:3000 tcp:3000 and http://localhost:3000/api/v1/
+API_BASE_URL_DEBUG=http://10.0.2.2:3000/api/v1/
+# The deployed backend (HTTPS). Empty means release builds can only use demo data.
+API_BASE_URL_RELEASE=
+# Supabase project settings > API. The publishable key is public, but keep it out of Git.
+SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLISHABLE_KEY
