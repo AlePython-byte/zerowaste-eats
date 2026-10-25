@@ -20,15 +20,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
@@ -43,6 +46,7 @@ import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEn
 import com.zerowasteeats.app.presentation.data.MockMapCoordinates
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.theme.AppSpacing
+import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
@@ -83,12 +87,25 @@ fun OffersMap(
 
     val selectedOffer = offers.find { it.id == selectedOfferId }
     val animationsEnabled = rememberAnimationsEnabled()
+    // Follows the app's theme, not the system's. It is part of the map's properties, so a
+    // change is applied to the live map without rebuilding it.
+    val context = LocalContext.current
+    val isDark = isAppInDarkTheme()
+    val mapStyle = remember(isDark) {
+        MapStyleOptions.loadRawResourceStyle(
+            context,
+            if (isDark) R.raw.map_style_dark else R.raw.map_style_light
+        )
+    }
 
     Box(modifier = modifier) {
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
-            properties = MapProperties(isMyLocationEnabled = userLocation.hasPermission),
+            properties = MapProperties(
+                isMyLocationEnabled = userLocation.hasPermission,
+                mapStyleOptions = mapStyle
+            ),
             uiSettings = MapUiSettings(myLocationButtonEnabled = false), // We use custom UI
             contentPadding = contentPadding,
             onMapLoaded = onMapLoaded,
