@@ -1,5 +1,9 @@
 package com.zerowasteeats.app.presentation.components.map
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -28,15 +33,17 @@ import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppCard
+import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.data.MockMapCoordinates
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.theme.AppSpacing
+import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
 /**
@@ -75,6 +82,7 @@ fun OffersMap(
     }
 
     val selectedOffer = offers.find { it.id == selectedOfferId }
+    val animationsEnabled = rememberAnimationsEnabled()
 
     Box(modifier = modifier) {
         GoogleMap(
@@ -91,15 +99,33 @@ fun OffersMap(
                 key(offer.id) {
                     val position = MockMapCoordinates.getCoordinatesForOffer(offer.id)
                     val markerState = rememberMarkerState(position = position)
-                    Marker(
+                    val selected = offer.id == selectedOfferId
+                    val pinScale by animateFloatAsState(
+                        targetValue = if (selected) SELECTED_PIN_SCALE else 1f,
+                        animationSpec = if (animationsEnabled) {
+                            spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium)
+                        } else {
+                            snap()
+                        },
+                        label = "pinScale"
+                    )
+                    // The pin is redrawn into a bitmap whenever a key changes, so the scale is
+                    // rounded to hundredths: a few redraws, only for the selected pin
+                    val scaleStep = (pinScale * 100).roundToInt()
+                    val pinTitle = stringResource(R.string.map_pin_title, offer.title, offer.discountedPrice)
+                    MarkerComposable(
+                        offer.id, offer.discountedPrice, selected, scaleStep,
                         state = markerState,
-                        title = offer.merchantName,
-                        snippet = offer.title,
+                        title = pinTitle,
+                        // Above the others, so the selected pin is never hidden under a neighbour
+                        zIndex = if (selected) 1f else 0f,
                         onClick = {
                             onSelectOffer(offer.id)
                             true // consume the event to show custom UI
                         }
-                    )
+                    ) {
+                        PricePin(price = offer.discountedPrice, selected = selected, scale = scaleStep / 100f)
+                    }
                 }
             }
         }

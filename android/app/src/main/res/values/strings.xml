@@ -104,6 +104,7 @@
     <string name="explore_empty_subtitle">Prueba con otra búsqueda o cambia los filtros.</string>
 
     <string name="map_my_location_cd">Mi ubicación</string>
+    <string name="map_pin_title">%1$s, %2$s</string>
     <string name="map_view_offer">Ver oferta</string>
     <string name="map_location_unavailable">No pudimos obtener tu ubicación.</string>
     <string name="map_location_permission_required">Activa el permiso de ubicación para usar esta función.</string>
