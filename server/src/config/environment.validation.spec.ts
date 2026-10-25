@@ -166,4 +166,30 @@ describe('validateEnvironment', () => {
       ).toThrow('CORS_ORIGINS must be a comma-separated list of origins.');
     },
   );
+
+  it('keeps the telemetry credentials only as a complete pair', () => {
+    expect(validateEnvironment(validConfig)).not.toHaveProperty(
+      'OBSERVE_APP_KEY',
+    );
+    expect(
+      validateEnvironment({
+        ...validConfig,
+        OBSERVE_APP_KEY: ' key-placeholder ',
+        OBSERVE_APP_SECRET: ' secret-placeholder ',
+      }),
+    ).toMatchObject({
+      OBSERVE_APP_KEY: 'key-placeholder',
+      OBSERVE_APP_SECRET: 'secret-placeholder',
+    });
+  });
+
+  it.each([
+    { OBSERVE_APP_KEY: 'key-placeholder' },
+    { OBSERVE_APP_SECRET: 'secret-placeholder' },
+    { OBSERVE_APP_KEY: 'key-placeholder', OBSERVE_APP_SECRET: '  ' },
+  ])('rejects half a telemetry pair without reflecting it (%j)', (pair) => {
+    expect(() => validateEnvironment({ ...validConfig, ...pair })).toThrow(
+      'OBSERVE_APP_KEY and OBSERVE_APP_SECRET must be set together.',
+    );
+  });
 });

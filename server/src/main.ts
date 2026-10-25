@@ -1,12 +1,17 @@
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule, ObserveInstrument } from './app.module';
+import { readObserveCredentials } from './config/telemetry';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    instrument: ObserveInstrument,
-  });
+  await ConfigModule.envVariablesLoaded;
+  // Instrumented only when telemetry has credentials, like the module itself
+  const telemetryEnabled = readObserveCredentials(process.env) !== null;
+  const app = await NestFactory.create(
+    AppModule,
+    telemetryEnabled ? { instrument: ObserveInstrument } : {},
+  );
   app.setGlobalPrefix('api/v1');
   const corsOrigins = app
     .get(ConfigService)

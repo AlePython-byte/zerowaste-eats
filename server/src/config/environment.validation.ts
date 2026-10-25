@@ -13,6 +13,9 @@ export interface EnvironmentVariables {
   CORS_ORIGINS: string[];
   /** Requests per minute allowed from one client before it is throttled. */
   RATE_LIMIT_PER_MINUTE: number;
+  /** Telemetry credentials; both or neither. Without them telemetry stays off. */
+  OBSERVE_APP_KEY?: string;
+  OBSERVE_APP_SECRET?: string;
 }
 
 const DEFAULT_AI_MODEL = 'claude-haiku-5-5';
@@ -149,6 +152,21 @@ export function validateEnvironment(
     throw new Error('AI_MODEL must be a model identifier.');
   }
 
+  const observeKey = config.OBSERVE_APP_KEY;
+  const observeSecret = config.OBSERVE_APP_SECRET;
+  const hasText = (value: unknown): value is string =>
+    typeof value === 'string' && value.trim() !== '';
+  const isBlank = (value: unknown) =>
+    value === undefined || (typeof value === 'string' && value.trim() === '');
+  if (
+    !(hasText(observeKey) && hasText(observeSecret)) &&
+    !(isBlank(observeKey) && isBlank(observeSecret))
+  ) {
+    throw new Error(
+      'OBSERVE_APP_KEY and OBSERVE_APP_SECRET must be set together.',
+    );
+  }
+
   return {
     DATABASE_URL: databaseUrl,
     SUPABASE_URL: supabaseUrl,
@@ -173,5 +191,11 @@ export function validateEnvironment(
       DEFAULT_RATE_LIMIT_PER_MINUTE,
       10000,
     ),
+    ...(hasText(observeKey) && hasText(observeSecret)
+      ? {
+          OBSERVE_APP_KEY: observeKey.trim(),
+          OBSERVE_APP_SECRET: observeSecret.trim(),
+        }
+      : {}),
   };
 }

@@ -3,7 +3,6 @@ import {
   BadRequestException,
   DynamicModule,
   INestApplication,
-  Module,
   ValidationPipe,
 } from '@nestjs/common';
 import request from 'supertest';
@@ -18,9 +17,6 @@ import {
   publicUserProfile,
   userRecord,
 } from './fixtures/user-profile';
-
-@Module({})
-class TestObserveModule {}
 
 describe('Application (e2e)', () => {
   let app: INestApplication<App>;
@@ -45,16 +41,13 @@ describe('Application (e2e)', () => {
       id: 'b7a2c1b3-736e-45fc-8df5-c1dd6cc88d13',
       email: 'customer@example.test',
     });
-    // Keep telemetry workers and external requests out of HTTP tests.
-    const imports = Reflect.getMetadata(
-      'imports',
-      AppModule,
-    ) as DynamicModule[];
-    const observeModule = imports.find(
-      (entry) => entry.module === ObserveModule,
-    );
-    if (!observeModule) {
-      throw new Error('ObserveModule is not registered in AppModule');
+    // Without credentials telemetry is not registered, so HTTP tests start no
+    // telemetry workers and make no external requests.
+    const imports = (await Promise.all(
+      Reflect.getMetadata('imports', AppModule) as unknown[],
+    )) as DynamicModule[];
+    if (imports.some((entry) => entry?.module === ObserveModule)) {
+      throw new Error('Telemetry must stay off without credentials');
     }
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -64,8 +57,6 @@ describe('Application (e2e)', () => {
       .useValue(databaseService)
       .overrideProvider(AuthService)
       .useValue(authService)
-      .overrideModule(observeModule)
-      .useModule(TestObserveModule)
       .compile();
 
     app = moduleFixture.createNestApplication();

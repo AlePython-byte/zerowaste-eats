@@ -1,10 +1,11 @@
-import { Module } from '@nestjs/common';
+import { DynamicModule, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { createObserveModule } from '@nestjs/observe';
 import { AuthModule } from './auth/auth.module';
 import { AuthService } from './auth/auth.service';
 import { SupabaseAuthGuard } from './auth/guards/supabase-auth.guard';
 import { validateEnvironment } from './config/environment.validation';
+import { readObserveCredentials } from './config/telemetry';
 import { DatabaseModule } from './database/database.module';
 import { DatabaseService } from './database/database.service';
 import { HealthModule } from './health/health.module';
@@ -22,6 +23,22 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule({
     instance instanceof SupabaseAuthGuard,
 });
 
+/** Stands in for telemetry when it has no credentials: nothing runs and nothing is sent. */
+@Module({})
+export class TelemetryOffModule {}
+
+/**
+ * Distributed tracing, correlated logs and metrics (https://observe.nestjs.com), only when
+ * its credentials are configured. Waits for the environment so a key in `.env` counts.
+ */
+async function telemetryModule(): Promise<DynamicModule> {
+  await ConfigModule.envVariablesLoaded;
+  const credentials = readObserveCredentials(process.env);
+  return credentials
+    ? ObserveModule.forRoot({ ...credentials, serviceId: 'server' })
+    : { module: TelemetryOffModule };
+}
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -29,13 +46,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule({
       ignoreEnvFile: process.env.NODE_ENV === 'test',
       validate: validateEnvironment,
     }),
-    // Distributed tracing, auto-correlated logs, request/job metrics, error
-    // telemetry, alarms, and more — out of the box. Sign up at https://observe.nestjs.com
-    ObserveModule.forRoot({
-      appKey: 'YOUR_APP_KEY',
-      appSecret: 'YOUR_APP_SECRET',
-      serviceId: 'server',
-    }),
+    telemetryModule(),
     DatabaseModule,
     HealthModule,
     AuthModule,
