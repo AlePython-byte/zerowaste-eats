@@ -23,6 +23,10 @@ describe('validateEnvironment', () => {
       ...validConfig,
       NODE_ENV: 'development',
       PORT: 3000,
+      AI_MODEL: 'claude-haiku-5-5',
+      AI_DAILY_LIMIT: 20,
+      CORS_ORIGINS: [],
+      RATE_LIMIT_PER_MINUTE: 60,
     });
   });
 
@@ -85,6 +89,81 @@ describe('validateEnvironment', () => {
           SUPABASE_PUBLISHABLE_KEY: value,
         }),
       ).toThrow('SUPABASE_PUBLISHABLE_KEY is required.');
+    },
+  );
+
+  it('leaves the AI key out when it is missing or blank, so suggestions run simulated', () => {
+    expect(validateEnvironment(validConfig)).not.toHaveProperty(
+      'ANTHROPIC_API_KEY',
+    );
+    expect(
+      validateEnvironment({ ...validConfig, ANTHROPIC_API_KEY: '   ' }),
+    ).not.toHaveProperty('ANTHROPIC_API_KEY');
+  });
+
+  it('keeps a supplied AI key, trimmed', () => {
+    expect(
+      validateEnvironment({
+        ...validConfig,
+        ANTHROPIC_API_KEY: ' test-key-placeholder ',
+      }),
+    ).toMatchObject({ ANTHROPIC_API_KEY: 'test-key-placeholder' });
+  });
+
+  it('accepts a configured AI model and rejects anything that is not an identifier', () => {
+    expect(
+      validateEnvironment({ ...validConfig, AI_MODEL: 'claude-opus-5-5' }),
+    ).toMatchObject({ AI_MODEL: 'claude-opus-5-5' });
+    for (const value of ['', 'Claude Haiku', 'model/../x', 42]) {
+      expect(() =>
+        validateEnvironment({ ...validConfig, AI_MODEL: value }),
+      ).toThrow('AI_MODEL must be a model identifier.');
+    }
+  });
+
+  it.each([
+    ['AI_DAILY_LIMIT', 1000],
+    ['RATE_LIMIT_PER_MINUTE', 10000],
+  ])('bounds %s', (name, max) => {
+    expect(validateEnvironment({ ...validConfig, [name]: '5' })).toMatchObject({
+      [name]: 5,
+    });
+    for (const value of ['', '0', '-1', '2.5', 'abc', String(max + 1)]) {
+      expect(() =>
+        validateEnvironment({ ...validConfig, [name]: value }),
+      ).toThrow(`${name} must be an integer between 1 and ${max}.`);
+    }
+  });
+
+  it('parses CORS origins and treats an empty list as CORS off', () => {
+    expect(
+      validateEnvironment({ ...validConfig, CORS_ORIGINS: '' }),
+    ).toMatchObject({
+      CORS_ORIGINS: [],
+    });
+    expect(
+      validateEnvironment({
+        ...validConfig,
+        CORS_ORIGINS: 'https://app.example.test, http://localhost:5173',
+      }),
+    ).toMatchObject({
+      CORS_ORIGINS: ['https://app.example.test', 'http://localhost:5173'],
+    });
+  });
+
+  it.each([
+    '*',
+    'app.example.test',
+    'https://app.example.test/path',
+    'ftp://app.example.test',
+    'https://user:secret@app.example.test',
+    'https://app.example.test,',
+  ])(
+    'rejects invalid CORS origin lists without reflecting them (%s)',
+    (value) => {
+      expect(() =>
+        validateEnvironment({ ...validConfig, CORS_ORIGINS: value }),
+      ).toThrow('CORS_ORIGINS must be a comma-separated list of origins.');
     },
   );
 });

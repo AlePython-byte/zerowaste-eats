@@ -8,7 +8,13 @@ async function bootstrap() {
     instrument: ObserveInstrument,
   });
   app.setGlobalPrefix('api/v1');
-  app.enableCors();
+  const corsOrigins = app
+    .get(ConfigService)
+    .getOrThrow<string[]>('CORS_ORIGINS');
+  // The mobile app does not need CORS; browsers get it only for listed origins
+  if (corsOrigins.length > 0) {
+    app.enableCors({ origin: corsOrigins });
+  }
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
