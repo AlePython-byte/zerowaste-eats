@@ -120,7 +120,9 @@ fun WelcomeScreen(
                     CompactLanguageSelector()
                 }
 
-                Spacer(modifier = Modifier.height(AppSpacing.large))
+                // The logo, the name and the headline sit in the middle of the room left between
+                // the top row and the buttons, so no big gap opens above or below them
+                Spacer(modifier = Modifier.weight(1f).heightIn(min = AppSpacing.large))
                 BrandHero(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     background = MaterialTheme.colorScheme.background
@@ -144,7 +146,9 @@ fun WelcomeScreen(
                                 delayMillis = LOGO_TOTAL_MILLIS,
                                 enabled = !introSeen
                             ),
-                        style = MaterialTheme.typography.titleMedium,
+                        // Brand accent: 5.9:1 on cream in light mode, butter on carbon in dark
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.tertiary,
                         textAlign = TextAlign.Center
                     )
@@ -215,8 +219,8 @@ private fun BrandHero(background: Color, modifier: Modifier = Modifier) {
 
     Box(
         modifier = modifier
-            .fillMaxWidth(0.66f)
-            .widthIn(max = 280.dp)
+            .fillMaxWidth(0.7f)
+            .widthIn(max = 300.dp)
             .aspectRatio(1f)
             // Decorative: the name under it says what the app is
             .clearAndSetSemantics {},
@@ -228,7 +232,9 @@ private fun BrandHero(background: Color, modifier: Modifier = Modifier) {
         }
         ZeroWasteLogo(
             animated = true,
-            modifier = Modifier.fillMaxSize(0.7f),
+            // The drawing leaves margin inside its square; at 0.95 the symbol is about 60% of the
+            // halo wide and 68% tall, and its farthest corner is still inside the circle
+            modifier = Modifier.fillMaxSize(0.95f),
             cutoutColor = halo.compositeOver(background)
         )
     }
