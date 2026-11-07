@@ -4,6 +4,8 @@ import android.content.Context
 import com.zerowasteeats.app.data.auth.AuthRepository
 import com.zerowasteeats.app.data.auth.FakeAuthRepository
 import com.zerowasteeats.app.data.auth.PrefsTokenStore
+import com.zerowasteeats.app.data.auth.SupabaseAuthRepository
+import com.zerowasteeats.app.data.users.UsersApi
 import com.zerowasteeats.app.data.auth.TokenStore
 import com.zerowasteeats.app.data.auth.supabase.SupabaseAuth
 import com.zerowasteeats.app.data.auth.supabase.SupabaseAuthClient
@@ -50,14 +52,6 @@ class AppContainer(context: Context) {
             null
         }
 
-    val authRepository: AuthRepository = FakeAuthRepository()
-
-    val sessionStore: SessionStore = PrefsSessionStore(
-        SharedPreferencesKeyValueStore(context, PrefsSessionStore.FILE_NAME)
-    )
-
-    val sessionManager = SessionManager(authRepository, sessionStore, tokenStore)
-
     /**
      * Retrofit for the backend, with the access token on every call and one renewal on a 401.
      * A renewal Supabase refuses ends the session. Null without a backend URL or a project.
@@ -71,11 +65,29 @@ class AppContainer(context: Context) {
             authenticator = TokenAuthenticator(
                 tokenStore = tokenStore,
                 refresh = supabase.tokenRefresher(),
-                onSessionExpired = sessionManager::expireSession
+                // Read when it fires: the session manager is built after this client
+                onSessionExpired = { sessionManager.expireSession() }
             )
         )
         createRetrofit(apiConfig.apiBaseUrl, client)
     }
+
+    /** Supabase plus the backend when both are configured; the demo accounts otherwise. */
+    val authRepository: AuthRepository = run {
+        val supabase = supabaseAuth
+        val backend = backendRetrofit
+        if (supabase != null && backend != null) {
+            SupabaseAuthRepository(supabase, backend.create(UsersApi::class.java), tokenStore)
+        } else {
+            FakeAuthRepository()
+        }
+    }
+
+    val sessionStore: SessionStore = PrefsSessionStore(
+        SharedPreferencesKeyValueStore(context, PrefsSessionStore.FILE_NAME)
+    )
+
+    val sessionManager = SessionManager(authRepository, sessionStore, tokenStore)
 
     private val merchantRepositories = mutableMapOf<String, MerchantRepositories>()
 

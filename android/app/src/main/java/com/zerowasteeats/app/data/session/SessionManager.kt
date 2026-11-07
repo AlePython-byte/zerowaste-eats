@@ -7,6 +7,11 @@ import com.zerowasteeats.app.data.auth.AuthResult
 import com.zerowasteeats.app.data.auth.AuthUser
 import com.zerowasteeats.app.data.auth.SignUpRequest
 import com.zerowasteeats.app.data.auth.TokenStore
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 /** Something to tell the person on the welcome screen after they were signed out. */
 enum class SessionNotice {
@@ -22,7 +27,9 @@ enum class SessionNotice {
 class SessionManager(
     private val authRepository: AuthRepository,
     private val sessionStore: SessionStore,
-    private val tokenStore: TokenStore
+    private val tokenStore: TokenStore,
+    /** Runs the server side of a sign out after the local one; outlives any screen. */
+    private val backgroundScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 ) {
     private val sessionState = mutableStateOf<Session>(Session.Loading)
     private val noticeState = mutableStateOf<SessionNotice?>(null)
@@ -46,9 +53,28 @@ class SessionManager(
     suspend fun signUp(request: SignUpRequest): AuthResult =
         authRepository.signUp(request).also(::startSessionIfSuccessful)
 
+    /** Retries a sign up that ended in [com.zerowasteeats.app.data.auth.AuthError.PROFILE_INCOMPLETE]. */
+    suspend fun completeProfile(): AuthResult =
+        authRepository.completeProfile().also(::startSessionIfSuccessful)
+
+    /**
+     * Forgets the session and its tokens right away, then tells the server in the background.
+     * Without network the person is still signed out on this device.
+     */
     fun signOut() {
+        val accessToken = tokenStore.load()?.accessToken
+        tokenStore.clear()
         sessionStore.clear()
         sessionState.value = Session.SignedOut
+        backgroundScope.launch {
+            try {
+                authRepository.signOut(accessToken)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                // Best effort: the session is already gone here, and expires on the server
+            }
+        }
     }
 
     /**

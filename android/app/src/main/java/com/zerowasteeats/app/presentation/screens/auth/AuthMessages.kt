@@ -38,5 +38,14 @@ fun ValidationError.message(): String = when (this) {
 fun AuthError.message(): String = when (this) {
     AuthError.INVALID_CREDENTIALS -> stringResource(R.string.auth_error_invalid_credentials)
     AuthError.EMAIL_ALREADY_REGISTERED -> stringResource(R.string.auth_error_email_registered)
+    AuthError.WEAK_PASSWORD -> stringResource(R.string.auth_error_weak_password)
+    AuthError.PROFILE_INCOMPLETE -> stringResource(R.string.auth_error_profile_incomplete)
     AuthError.NETWORK -> stringResource(R.string.auth_error_network)
+    AuthError.UNEXPECTED -> stringResource(R.string.auth_error_unexpected)
 }
+
+/** Errors where sending the same thing again may just work, so the banner offers a retry. */
+val AuthError.isRetryable: Boolean
+    get() = this == AuthError.NETWORK ||
+        this == AuthError.PROFILE_INCOMPLETE ||
+        this == AuthError.UNEXPECTED

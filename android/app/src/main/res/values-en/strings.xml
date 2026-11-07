@@ -134,6 +134,9 @@
     <string name="auth_error_email_registered">That email is already registered. Try signing in.</string>
     <string name="auth_error_network">We couldn\'t connect. Check your connection and try again.</string>
     <string name="session_expired">Your session expired, please sign in again.</string>
+    <string name="auth_error_weak_password">That password is too easy to guess. Try a longer one or mix letters, numbers and symbols.</string>
+    <string name="auth_error_profile_incomplete">Finish creating your profile: your account exists, but we couldn\'t save your details.</string>
+    <string name="auth_error_unexpected">Something went wrong. Please try again in a moment.</string>
 
     <string name="validation_required">This field is required.</string>
     <plurals name="validation_name_too_short">

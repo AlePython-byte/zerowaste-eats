@@ -2,7 +2,12 @@ package com.zerowasteeats.app.data.session
 
 import com.zerowasteeats.app.data.auth.AuthError
 import com.zerowasteeats.app.data.auth.AuthResult
+import com.zerowasteeats.app.data.auth.AuthRepository
 import com.zerowasteeats.app.data.auth.AuthTokens
+import com.zerowasteeats.app.data.auth.AuthUser
+import java.io.IOException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import com.zerowasteeats.app.data.auth.FakeAuthRepository
 import com.zerowasteeats.app.data.auth.PrefsTokenStore
 import com.zerowasteeats.app.data.auth.SignUpRequest
@@ -200,6 +205,58 @@ class SessionManagerTest {
         manager.expireSession()
         manager.signIn(FakeAuthRepository.DEMO_CUSTOMER_EMAIL, demoPassword)
         assertNull(manager.notice.value)
+    }
+
+    /** Signs in to the fake, and fails the server side of every sign out like being offline. */
+    private class OfflineSignOutRepository(
+        private val inner: FakeAuthRepository = FakeAuthRepository(latencyMillis = 0)
+    ) : AuthRepository by inner {
+        val signOutTokens = mutableListOf<String?>()
+        var completeResult: AuthResult = AuthResult.Failure(AuthError.PROFILE_INCOMPLETE)
+
+        override suspend fun signOut(accessToken: String?) {
+            signOutTokens += accessToken
+            throw IOException("offline")
+        }
+
+        override suspend fun completeProfile(): AuthResult = completeResult
+    }
+
+    @Test
+    fun signOut_withoutNetwork_stillForgetsSessionAndTokens() = runBlocking {
+        val repository = OfflineSignOutRepository()
+        val manager = SessionManager(
+            repository,
+            PrefsSessionStore(data),
+            tokens,
+            CoroutineScope(Dispatchers.Unconfined)
+        ).also { it.restore() }
+        manager.signIn(FakeAuthRepository.DEMO_CUSTOMER_EMAIL, demoPassword)
+        tokens.save(someTokens)
+
+        manager.signOut()
+
+        assertEquals(Session.SignedOut, manager.session.value)
+        assertNull(tokens.load())
+        assertTrue(data.contents.isEmpty())
+        // The server was still told, with the token the session had
+        assertEquals(listOf<String?>("access"), repository.signOutTokens)
+    }
+
+    @Test
+    fun completeProfile_startsTheSessionOnlyWhenItSucceeds() = runBlocking {
+        val repository = OfflineSignOutRepository()
+        val manager = SessionManager(repository, PrefsSessionStore(data), tokens).also { it.restore() }
+
+        assertEquals(AuthResult.Failure(AuthError.PROFILE_INCOMPLETE), manager.completeProfile())
+        assertEquals(Session.SignedOut, manager.session.value)
+
+        repository.completeResult = AuthResult.Success(
+            AuthUser("u1", UserRole.MERCHANT, "Ana", "a@b.co", "Tienda Ana", "Pasto")
+        )
+        manager.completeProfile()
+
+        assertEquals(Session.Merchant("u1", "Ana", "a@b.co", "Tienda Ana", "Pasto"), manager.session.value)
     }
 
     @Test
