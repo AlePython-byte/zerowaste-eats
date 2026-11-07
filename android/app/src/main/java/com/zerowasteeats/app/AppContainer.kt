@@ -3,6 +3,12 @@ package com.zerowasteeats.app
 import android.content.Context
 import com.zerowasteeats.app.data.auth.AuthRepository
 import com.zerowasteeats.app.data.auth.FakeAuthRepository
+import com.zerowasteeats.app.data.auth.PrefsTokenStore
+import com.zerowasteeats.app.data.auth.TokenStore
+import com.zerowasteeats.app.data.auth.supabase.SupabaseAuth
+import com.zerowasteeats.app.data.auth.supabase.SupabaseAuthClient
+import com.zerowasteeats.app.data.remote.ApiConfig
+import com.zerowasteeats.app.data.remote.createHttpClient
 import com.zerowasteeats.app.data.merchant.FakeMerchantData
 import com.zerowasteeats.app.data.merchant.MerchantRepositories
 import com.zerowasteeats.app.data.session.PrefsSessionStore
@@ -16,6 +22,27 @@ import com.zerowasteeats.app.data.session.SessionStore
  * ones later happens here, and nothing that uses them changes.
  */
 class AppContainer(context: Context) {
+
+    private val apiConfig = ApiConfig.fromBuildConfig()
+
+    private val httpClient = createHttpClient()
+
+    /** The Supabase tokens, in a file of their own that the session store never touches. */
+    val tokenStore: TokenStore = PrefsTokenStore(
+        SharedPreferencesKeyValueStore(context, PrefsTokenStore.FILE_NAME)
+    )
+
+    /** Null when local.properties names no Supabase project: then only demo data can work. */
+    val supabaseAuth: SupabaseAuth? =
+        if (apiConfig.supabaseUrl.isNotBlank() && apiConfig.supabasePublishableKey.isNotBlank()) {
+            SupabaseAuthClient.create(
+                apiConfig.supabaseUrl,
+                apiConfig.supabasePublishableKey,
+                httpClient
+            )
+        } else {
+            null
+        }
 
     val authRepository: AuthRepository = FakeAuthRepository()
 
