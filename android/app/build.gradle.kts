@@ -14,7 +14,7 @@ val localProperties = Properties().apply {
 }
 
 fun localProperty(name: String, default: String = ""): String =
-    localProperties.getProperty(name)?.trim() ?: default
+    localProperties.getProperty(name)?.let(LocalProperties::clean) ?: default
 
 /** A Kotlin string literal for a BuildConfig field. */
 fun stringField(value: String): String =
