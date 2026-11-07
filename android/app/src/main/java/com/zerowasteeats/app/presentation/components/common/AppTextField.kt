@@ -62,7 +62,10 @@ fun AppTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     trailingIcon: (@Composable () -> Unit)? = null,
     textStyle: TextStyle = LocalTextStyle.current,
-    capitalization: KeyboardCapitalization = KeyboardCapitalization.None
+    capitalization: KeyboardCapitalization = KeyboardCapitalization.None,
+    /** False for longer text (a description): it wraps and grows up to [maxLines]. */
+    singleLine: Boolean = true,
+    maxLines: Int = if (singleLine) 1 else 6
 ) {
     OutlinedTextField(
         value = value,
@@ -78,7 +81,8 @@ fun AppTextField(
         label = { Text(text = label) },
         isError = error != null,
         supportingText = error?.let { message -> { Text(text = message) } },
-        singleLine = true,
+        singleLine = singleLine,
+        maxLines = maxLines,
         shape = RoundedCornerShape(AppRadius.large),
         visualTransformation = visualTransformation,
         keyboardOptions = KeyboardOptions(

@@ -47,7 +47,8 @@ class FakeMerchantOfferRepository(
             pickupStart = draft.pickupStart,
             pickupEnd = draft.pickupEnd,
             status = resolveOfferStatus(draft.quantity, draft.pickupEnd, clock.instant(), null),
-            photo = draft.photo
+            photo = draft.photo,
+            description = draft.description.trim()
         )
         state.update { listOf(offer) + it }
         return offer
@@ -72,6 +73,7 @@ class FakeMerchantOfferRepository(
                         pickupStart = draft.pickupStart,
                         pickupEnd = draft.pickupEnd,
                         photo = draft.photo,
+                        description = draft.description.trim(),
                         status = resolveOfferStatus(
                             draft.quantity,
                             draft.pickupEnd,

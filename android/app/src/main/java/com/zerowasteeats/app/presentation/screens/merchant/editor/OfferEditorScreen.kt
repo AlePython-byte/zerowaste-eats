@@ -116,6 +116,7 @@ import kotlinx.coroutines.launch
 /** Fields typed with the keyboard: on a failed save these take the focus. */
 private val TEXT_FIELDS = setOf(
     OfferField.TITLE,
+    OfferField.DESCRIPTION,
     OfferField.ORIGINAL_PRICE,
     OfferField.DISCOUNTED_PRICE,
     OfferField.QUANTITY
@@ -139,7 +140,8 @@ fun OfferEditorScreen(
         factory = OfferEditorViewModelFactory(
             container.merchantRepositories(session).offers,
             offerId,
-            container.offerPhotoPreparer
+            container.offerPhotoPreparer,
+            container.offerSuggestions()
         )
     )
 
@@ -164,6 +166,7 @@ fun OfferEditorScreen(
     }
 
     LaunchedEffect(viewModel, form) { viewModel.prepared.collect(form::onDevicePhotoPrepared) }
+    LaunchedEffect(viewModel, form) { viewModel.suggested.collect(form::applySuggestion) }
 
     OfferEditorContent(
         form = form,
@@ -178,6 +181,14 @@ fun OfferEditorScreen(
             },
             isPreparing = viewModel.isPreparingPhoto,
             failed = viewModel.photoFailed
+        ),
+        suggestionPanel = SuggestionPanel(
+            state = viewModel.suggestion,
+            onSuggest = {
+                (form.values.photo as? OfferPhoto.Device)?.let { photo ->
+                    viewModel.suggest(photo, originalPriceForSuggestion(form))
+                }
+            }
         ),
         onClose = onClose,
         // The pickup window is for today, for now
@@ -204,6 +215,7 @@ fun OfferEditorContent(
     saveFailed: Boolean,
     onClose: () -> Unit,
     photoPicking: PhotoPicking = PhotoPicking(),
+    suggestionPanel: SuggestionPanel = SuggestionPanel(),
     /** Called with a form that already passed validation. */
     onSave: () -> Unit,
     modifier: Modifier = Modifier,
@@ -263,24 +275,54 @@ fun OfferEditorContent(
                     .padding(horizontal = AppSpacing.regular, vertical = AppSpacing.regular),
                 verticalArrangement = Arrangement.spacedBy(AppSpacing.extraLarge)
             ) {
-                AppTextField(
-                    value = form.values.title,
-                    onValueChange = form::onTitleChange,
-                    label = stringResource(R.string.offer_field_title),
-                    modifier = fieldModifier(OfferField.TITLE)
-                        .onFieldBlur { form.onBlur(OfferField.TITLE) },
-                    error = form.errorOf(OfferField.TITLE)?.message(),
-                    imeAction = ImeAction.Next,
-                    capitalization = KeyboardCapitalization.Sentences
-                )
+                Column {
+                    AppTextField(
+                        value = form.values.title,
+                        onValueChange = form::onTitleChange,
+                        label = stringResource(R.string.offer_field_title),
+                        modifier = fieldModifier(OfferField.TITLE)
+                            .onFieldBlur { form.onBlur(OfferField.TITLE) },
+                        error = form.errorOf(OfferField.TITLE)?.message(),
+                        imeAction = ImeAction.Next,
+                        capitalization = KeyboardCapitalization.Sentences
+                    )
+                    SuggestedByAiChip(
+                        visible = OfferField.TITLE in form.suggestedFields,
+                        modifier = Modifier.padding(top = AppSpacing.small)
+                    )
+                }
+
+                Column {
+                    AppTextField(
+                        value = form.values.description,
+                        onValueChange = form::onDescriptionChange,
+                        label = stringResource(R.string.offer_field_description),
+                        modifier = fieldModifier(OfferField.DESCRIPTION)
+                            .onFieldBlur { form.onBlur(OfferField.DESCRIPTION) },
+                        error = form.errorOf(OfferField.DESCRIPTION)?.message(),
+                        imeAction = ImeAction.Next,
+                        capitalization = KeyboardCapitalization.Sentences,
+                        singleLine = false
+                    )
+                    SuggestedByAiChip(
+                        visible = OfferField.DESCRIPTION in form.suggestedFields,
+                        modifier = Modifier.padding(top = AppSpacing.small)
+                    )
+                }
 
                 CategorySection(form = form, modifier = fieldModifier(OfferField.CATEGORY))
 
-                PhotoSection(
-                    form = form,
-                    picking = photoPicking,
-                    modifier = fieldModifier(OfferField.PHOTO)
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.regular)) {
+                    PhotoSection(
+                        form = form,
+                        picking = photoPicking,
+                        modifier = fieldModifier(OfferField.PHOTO)
+                    )
+                    // Only the merchant's own photo can be read for a suggestion
+                    if (form.values.photo is OfferPhoto.Device) {
+                        SuggestionSection(panel = suggestionPanel)
+                    }
+                }
 
                 PriceSection(form = form, fieldModifier = ::fieldModifier)
 
@@ -462,6 +504,10 @@ private fun CategorySection(form: OfferEditorFormState, modifier: Modifier) {
                 )
             }
         }
+        SuggestedByAiChip(
+            visible = OfferField.CATEGORY in form.suggestedFields,
+            modifier = Modifier.padding(top = AppSpacing.small)
+        )
     }
 }
 
@@ -619,6 +665,10 @@ private fun PriceSection(form: OfferEditorFormState, fieldModifier: (OfferField)
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Next,
                 visualTransformation = PesosInputTransformation
+            )
+            SuggestedByAiChip(
+                visible = OfferField.DISCOUNTED_PRICE in form.suggestedFields,
+                modifier = Modifier.padding(top = AppSpacing.small)
             )
             form.discountPercent?.let { percent ->
                 Text(
@@ -861,6 +911,10 @@ private fun OfferFieldError.message(): String = when (this) {
         R.plurals.validation_name_too_long,
         OfferEditorFormState.MAX_TITLE_LENGTH,
         OfferEditorFormState.MAX_TITLE_LENGTH
+    )
+    OfferFieldError.DESCRIPTION_TOO_LONG -> stringResource(
+        R.string.offer_error_description_too_long,
+        OfferEditorFormState.MAX_DESCRIPTION_LENGTH
     )
     OfferFieldError.PRICE_NOT_POSITIVE -> stringResource(R.string.offer_error_price_not_positive)
     OfferFieldError.DISCOUNT_NOT_LOWER -> stringResource(R.string.offer_error_discount_not_lower)

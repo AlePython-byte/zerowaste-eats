@@ -1,6 +1,10 @@
 package com.zerowasteeats.app.presentation.screens.merchant.editor
 
 import android.net.Uri
+import com.zerowasteeats.app.data.ai.OfferSuggestion
+import com.zerowasteeats.app.data.ai.OfferSuggestionRepository
+import com.zerowasteeats.app.data.ai.SuggestionResult
+import java.io.File
 import androidx.compose.runtime.getValue
 import com.zerowasteeats.app.data.merchant.OfferPhoto
 import com.zerowasteeats.app.data.photos.OfferPhotoPreparer
@@ -26,8 +30,30 @@ class OfferEditorViewModel(
     private val repository: MerchantOfferRepository,
     /** Null when creating a new offer. */
     val offerId: String?,
-    private val photoPreparer: OfferPhotoPreparer
+    private val photoPreparer: OfferPhotoPreparer,
+    private val suggestions: OfferSuggestionRepository
 ) : ViewModel() {
+
+    var suggestion by mutableStateOf<SuggestionUiState>(SuggestionUiState.Idle)
+        private set
+
+    // A suggestion that arrives during a rotation still fills the form when it comes back
+    private val suggestionsToApply = Channel<OfferSuggestion>(Channel.BUFFERED)
+    val suggested: Flow<OfferSuggestion> = suggestionsToApply.receiveAsFlow()
+
+    /**
+     * Asks for offer details from [photo]. On success the form is filled through [suggested];
+     * on failure the form is left exactly as it was, so the merchant can retry or go on by hand.
+     */
+    fun suggest(photo: OfferPhoto.Device, originalPrice: Long?) {
+        if (suggestion == SuggestionUiState.Loading) return
+        suggestion = SuggestionUiState.Loading
+        viewModelScope.launch {
+            val result = suggestions.suggest(File(photo.path), originalPrice)
+            if (result is SuggestionResult.Success) suggestionsToApply.send(result.suggestion)
+            suggestion = suggestionStateAfter(result)
+        }
+    }
 
     var isPreparingPhoto by mutableStateOf(false)
         private set
@@ -85,7 +111,8 @@ class OfferEditorViewModel(
 class OfferEditorViewModelFactory(
     private val repository: MerchantOfferRepository,
     private val offerId: String?,
-    private val photoPreparer: OfferPhotoPreparer
+    private val photoPreparer: OfferPhotoPreparer,
+    private val suggestions: OfferSuggestionRepository
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
@@ -93,6 +120,6 @@ class OfferEditorViewModelFactory(
         require(modelClass == OfferEditorViewModel::class.java) {
             "Unknown ViewModel class: ${modelClass.name}"
         }
-        return OfferEditorViewModel(repository, offerId, photoPreparer) as T
+        return OfferEditorViewModel(repository, offerId, photoPreparer, suggestions) as T
     }
 }

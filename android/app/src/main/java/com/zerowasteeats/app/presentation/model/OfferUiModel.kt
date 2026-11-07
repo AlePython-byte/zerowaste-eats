@@ -12,5 +12,7 @@ data class OfferUiModel(
     val remainingQuantity: Int,
     val pickupWindow: PickupWindow,
     val isFavorite: Boolean,
-    val category: OfferCategory
+    val category: OfferCategory,
+    /** What the business wrote about the offer; null when it wrote nothing. */
+    val description: String? = null
 )

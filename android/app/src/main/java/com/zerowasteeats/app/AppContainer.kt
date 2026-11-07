@@ -24,6 +24,12 @@ import com.zerowasteeats.app.data.remote.tokenRefresher
 import retrofit2.Retrofit
 import com.zerowasteeats.app.data.merchant.FakeMerchantData
 import com.zerowasteeats.app.data.merchant.MerchantRepositories
+import com.zerowasteeats.app.data.ai.AiSuggestionApi
+import com.zerowasteeats.app.data.ai.DemoOfferSuggestionRepository
+import com.zerowasteeats.app.data.ai.OfferSuggestionRepository
+import com.zerowasteeats.app.data.ai.RemoteOfferSuggestionRepository
+import java.util.concurrent.TimeUnit
+import okhttp3.OkHttpClient
 import com.zerowasteeats.app.data.photos.OfferPhotoPreparer
 import com.zerowasteeats.app.data.photos.OfferPhotoProcessor
 import com.zerowasteeats.app.data.session.PrefsSessionStore
@@ -104,6 +110,27 @@ class AppContainer(context: Context) {
     /** Readies a photo picked for an offer: upright, at most 1280 px, JPEG under 2 MB. */
     val offerPhotoPreparer: OfferPhotoPreparer = OfferPhotoProcessor(context.applicationContext)
 
+    private val demoSuggestions: OfferSuggestionRepository by lazy { DemoOfferSuggestionRepository() }
+
+    private val liveSuggestions: OfferSuggestionRepository? by lazy {
+        val backend = liveSetup.clientsOrNull?.backend ?: return@lazy null
+        // The server may wait up to 30 s for the model: give the answer room to arrive
+        val client = (backend.callFactory() as OkHttpClient).newBuilder()
+            .readTimeout(SUGGESTION_READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .build()
+        RemoteOfferSuggestionRepository(
+            backend.newBuilder().client(client).build().create(AiSuggestionApi::class.java)
+        )
+    }
+
+    /**
+     * Where offer suggestions come from in the current mode: the backend, or a local example
+     * that works offline. The mode cannot change while a business is signed in.
+     */
+    fun offerSuggestions(): OfferSuggestionRepository =
+        if (dataMode.mode.value == DataMode.LIVE) liveSuggestions ?: demoSuggestions
+        else demoSuggestions
+
     private fun buildAuthRepository(mode: DataMode): AuthRepository {
         val live = liveSetup.clientsOrNull
         return if (mode == DataMode.LIVE && live != null) {
@@ -130,3 +157,6 @@ class AppContainer(context: Context) {
             }
         }
 }
+
+/** Above the server's 30 s wait for the model, so a slow suggestion still arrives. */
+private const val SUGGESTION_READ_TIMEOUT_SECONDS = 45L

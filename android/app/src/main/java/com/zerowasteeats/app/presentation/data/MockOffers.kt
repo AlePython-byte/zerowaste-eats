@@ -20,7 +20,8 @@ object MockOffers {
             remainingQuantity = 2,
             pickupWindow = PickupWindow(PickupDay.Today, LocalTime.of(18, 0), LocalTime.of(19, 30)),
             isFavorite = false,
-            category = OfferCategory.BAKERY
+            category = OfferCategory.BAKERY,
+            description = "Croissants de mantequilla horneados esta mañana. Caliéntalos unos minutos para que queden crujientes."
         ),
         OfferUiModel(
             id = "2",
@@ -34,7 +35,8 @@ object MockOffers {
             remainingQuantity = 1,
             pickupWindow = PickupWindow(PickupDay.Today, LocalTime.of(20, 0), LocalTime.of(21, 0)),
             isFavorite = true,
-            category = OfferCategory.PREPARED_FOOD
+            category = OfferCategory.PREPARED_FOOD,
+            description = "Bowl de arroz, salmón y verduras preparado hoy. Mantenlo refrigerado y consúmelo esta noche."
         ),
         OfferUiModel(
             id = "3",
@@ -48,7 +50,8 @@ object MockOffers {
             remainingQuantity = 3,
             pickupWindow = PickupWindow(PickupDay.Tomorrow, LocalTime.of(10, 0), LocalTime.of(12, 0)),
             isFavorite = false,
-            category = OfferCategory.DESSERTS
+            category = OfferCategory.DESSERTS,
+            description = "Selección de postres de la vitrina de hoy: tortas, brownies y galletas. Consúmelos hoy mismo."
         ),
         OfferUiModel(
             id = "4",
@@ -62,7 +65,8 @@ object MockOffers {
             remainingQuantity = 1,
             pickupWindow = PickupWindow(PickupDay.Today, LocalTime.of(19, 0), LocalTime.of(20, 30)),
             isFavorite = false,
-            category = OfferCategory.PREPARED_FOOD
+            category = OfferCategory.PREPARED_FOOD,
+            description = "Hamburguesa con pan artesanal y papas, preparada al momento. Mejor recién recogida."
         ),
         OfferUiModel(
             id = "5",
@@ -76,7 +80,8 @@ object MockOffers {
             remainingQuantity = 4,
             pickupWindow = PickupWindow(PickupDay.Tomorrow, LocalTime.of(8, 0), LocalTime.of(10, 0)),
             isFavorite = false,
-            category = OfferCategory.PRODUCE
+            category = OfferCategory.PRODUCE,
+            description = "Verduras frescas con pequeños detalles de apariencia, perfectas para sopas, jugos o salteados."
         )
     )
 }
