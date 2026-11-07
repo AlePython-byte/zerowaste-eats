@@ -9,7 +9,13 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.zerowasteeats.app.R
+import com.zerowasteeats.app.ZeroWasteEatsApplication
+import com.zerowasteeats.app.data.session.SessionNotice
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -35,6 +41,10 @@ enum class AuthDestination(val route: String) {
 @Composable
 fun AuthNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
+    val sessionManager =
+        (LocalContext.current.applicationContext as ZeroWasteEatsApplication)
+            .container.sessionManager
+    val notice by sessionManager.notice
     val animationsEnabled = rememberAnimationsEnabled()
 
     // A short slide toward the side the screen comes from, or an instant swap when the
@@ -75,8 +85,18 @@ fun AuthNavigation(modifier: Modifier = Modifier) {
     ) {
         composable(AuthDestination.WELCOME.route) {
             WelcomeScreen(
-                onCreateAccount = { navController.navigate(AuthDestination.SIGN_UP.route) },
-                onSignIn = { navController.navigate(AuthDestination.SIGN_IN.route) }
+                onCreateAccount = {
+                    sessionManager.dismissNotice()
+                    navController.navigate(AuthDestination.SIGN_UP.route)
+                },
+                onSignIn = {
+                    sessionManager.dismissNotice()
+                    navController.navigate(AuthDestination.SIGN_IN.route)
+                },
+                notice = when (notice) {
+                    SessionNotice.SESSION_EXPIRED -> stringResource(R.string.session_expired)
+                    null -> null
+                }
             )
         }
         composable(AuthDestination.SIGN_IN.route) {

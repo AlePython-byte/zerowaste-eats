@@ -133,6 +133,7 @@
     <string name="auth_error_invalid_credentials">Incorrect email or password.</string>
     <string name="auth_error_email_registered">That email is already registered. Try signing in.</string>
     <string name="auth_error_network">We couldn\'t connect. Check your connection and try again.</string>
+    <string name="session_expired">Your session expired, please sign in again.</string>
 
     <string name="validation_required">This field is required.</string>
     <plurals name="validation_name_too_short">

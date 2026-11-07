@@ -2,10 +2,13 @@ package com.zerowasteeats.app.data.session
 
 import com.zerowasteeats.app.data.auth.AuthError
 import com.zerowasteeats.app.data.auth.AuthResult
+import com.zerowasteeats.app.data.auth.AuthTokens
 import com.zerowasteeats.app.data.auth.FakeAuthRepository
+import com.zerowasteeats.app.data.auth.PrefsTokenStore
 import com.zerowasteeats.app.data.auth.SignUpRequest
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -13,8 +16,11 @@ class SessionManagerTest {
 
     private val data = InMemoryKeyValueStore()
     private val repository = FakeAuthRepository(latencyMillis = 0)
+    private val tokenData = InMemoryKeyValueStore()
+    private val tokens = PrefsTokenStore(tokenData)
+    private val someTokens = AuthTokens("access", "refresh", 1_900_000_000)
 
-    private fun manager(restored: Boolean = true) = SessionManager(repository, PrefsSessionStore(data)).also {
+    private fun manager(restored: Boolean = true) = SessionManager(repository, PrefsSessionStore(data), tokens).also {
         if (restored) it.restore()
     }
 
@@ -119,7 +125,7 @@ class SessionManagerTest {
     @Test
     fun signUp_merchantKeepsTheCityInTheSession_andAfterARestart() = runBlocking {
         val data = InMemoryKeyValueStore()
-        val first = SessionManager(FakeAuthRepository(latencyMillis = 0), PrefsSessionStore(data))
+        val first = SessionManager(FakeAuthRepository(latencyMillis = 0), PrefsSessionStore(data), PrefsTokenStore(InMemoryKeyValueStore()))
 
         first.signUp(
             SignUpRequest("Luis", "luis@tienda.co", "clave1234", UserRole.MERCHANT, "Tienda Luis", " Pasto ")
@@ -127,7 +133,7 @@ class SessionManagerTest {
 
         assertEquals("Pasto", (first.session.value as Session.Merchant).city)
 
-        val restarted = SessionManager(FakeAuthRepository(latencyMillis = 0), PrefsSessionStore(data))
+        val restarted = SessionManager(FakeAuthRepository(latencyMillis = 0), PrefsSessionStore(data), PrefsTokenStore(InMemoryKeyValueStore()))
         restarted.restore()
         assertEquals("Pasto", (restarted.session.value as Session.Merchant).city)
     }
@@ -154,6 +160,65 @@ class SessionManagerTest {
         assertEquals(Session.SignedOut, manager.session.value)
         assertTrue(data.contents.isEmpty())
         assertEquals(Session.SignedOut, manager().session.value)
+    }
+
+    @Test
+    fun expireSession_dropsSessionAndTokens_andLeavesANotice() = runBlocking {
+        val manager = manager()
+        manager.signIn(FakeAuthRepository.DEMO_CUSTOMER_EMAIL, demoPassword)
+        tokens.save(someTokens)
+
+        manager.expireSession()
+
+        assertEquals(Session.SignedOut, manager.session.value)
+        assertEquals(SessionNotice.SESSION_EXPIRED, manager.notice.value)
+        assertNull(tokens.load())
+        assertTrue(data.contents.isEmpty())
+        // Nothing comes back on the next launch
+        assertEquals(Session.SignedOut, manager().session.value)
+    }
+
+    @Test
+    fun expireSession_whenAlreadySignedOut_leavesNoNotice() {
+        val manager = manager()
+
+        manager.expireSession()
+
+        assertNull(manager.notice.value)
+    }
+
+    @Test
+    fun theNotice_goesAwayWhenDismissed_orOnTheNextSignIn() = runBlocking {
+        val manager = manager()
+        manager.signIn(FakeAuthRepository.DEMO_CUSTOMER_EMAIL, demoPassword)
+        manager.expireSession()
+
+        manager.dismissNotice()
+        assertNull(manager.notice.value)
+
+        manager.signIn(FakeAuthRepository.DEMO_CUSTOMER_EMAIL, demoPassword)
+        manager.expireSession()
+        manager.signIn(FakeAuthRepository.DEMO_CUSTOMER_EMAIL, demoPassword)
+        assertNull(manager.notice.value)
+    }
+
+    @Test
+    fun restore_withoutASession_dropsLeftoverTokens() {
+        tokens.save(someTokens)
+
+        manager()
+
+        assertNull(tokens.load())
+    }
+
+    @Test
+    fun restore_withASession_keepsItsTokens() {
+        PrefsSessionStore(data).save(Session.Customer("u1", "Ana", "a@b.co"))
+        tokens.save(someTokens)
+
+        manager()
+
+        assertEquals(someTokens, tokens.load())
     }
 
     @Test

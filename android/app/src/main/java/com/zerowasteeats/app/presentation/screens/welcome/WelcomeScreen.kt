@@ -55,6 +55,7 @@ import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppButtonStyle
 import com.zerowasteeats.app.presentation.components.brand.ZeroWasteLogo
 import com.zerowasteeats.app.presentation.components.common.ENTRANCE_MILLIS
+import com.zerowasteeats.app.presentation.components.common.FormErrorBanner
 import com.zerowasteeats.app.presentation.components.common.HALO_BREATH_MILLIS
 import com.zerowasteeats.app.presentation.components.common.LOGO_TOTAL_MILLIS
 import com.zerowasteeats.app.presentation.components.common.STAGGER_MILLIS
@@ -69,12 +70,16 @@ import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
 import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
 import kotlinx.coroutines.delay
 
-/** First screen for someone signed out: the pitch, plus the way into sign up or sign in. */
+/**
+ * First screen for someone signed out: the pitch, plus the way into sign up or sign in.
+ * [notice] (a session that expired, say) shows above the buttons.
+ */
 @Composable
 fun WelcomeScreen(
     onCreateAccount: () -> Unit,
     onSignIn: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    notice: String? = null
 ) {
     val context = LocalContext.current
     val isDark = isAppInDarkTheme()
@@ -170,6 +175,13 @@ fun WelcomeScreen(
                 }
 
                 Spacer(modifier = Modifier.weight(1f).heightIn(min = AppSpacing.section))
+
+                FormErrorBanner(
+                    message = notice,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = AppSpacing.medium)
+                )
 
                 Column(
                     modifier = Modifier.fillMaxWidth().entranceRise(),

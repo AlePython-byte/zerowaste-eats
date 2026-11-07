@@ -141,6 +141,7 @@
     <string name="auth_error_invalid_credentials">Correo o contraseña incorrectos.</string>
     <string name="auth_error_email_registered">Ese correo ya está registrado. Prueba a ingresar.</string>
     <string name="auth_error_network">No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="session_expired">Tu sesión expiró, vuelve a ingresar.</string>
 
     <string name="validation_required">Este campo es obligatorio.</string>
     <plurals name="validation_name_too_short">

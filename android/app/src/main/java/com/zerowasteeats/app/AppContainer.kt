@@ -8,7 +8,13 @@ import com.zerowasteeats.app.data.auth.TokenStore
 import com.zerowasteeats.app.data.auth.supabase.SupabaseAuth
 import com.zerowasteeats.app.data.auth.supabase.SupabaseAuthClient
 import com.zerowasteeats.app.data.remote.ApiConfig
+import com.zerowasteeats.app.data.remote.AuthTokenInterceptor
+import com.zerowasteeats.app.data.remote.TokenAuthenticator
+import com.zerowasteeats.app.data.remote.createAuthenticatedHttpClient
 import com.zerowasteeats.app.data.remote.createHttpClient
+import com.zerowasteeats.app.data.remote.createRetrofit
+import com.zerowasteeats.app.data.remote.tokenRefresher
+import retrofit2.Retrofit
 import com.zerowasteeats.app.data.merchant.FakeMerchantData
 import com.zerowasteeats.app.data.merchant.MerchantRepositories
 import com.zerowasteeats.app.data.session.PrefsSessionStore
@@ -50,7 +56,26 @@ class AppContainer(context: Context) {
         SharedPreferencesKeyValueStore(context, PrefsSessionStore.FILE_NAME)
     )
 
-    val sessionManager = SessionManager(authRepository, sessionStore)
+    val sessionManager = SessionManager(authRepository, sessionStore, tokenStore)
+
+    /**
+     * Retrofit for the backend, with the access token on every call and one renewal on a 401.
+     * A renewal Supabase refuses ends the session. Null without a backend URL or a project.
+     */
+    val backendRetrofit: Retrofit? by lazy {
+        val supabase = supabaseAuth
+        if (apiConfig.apiBaseUrl.isBlank() || supabase == null) return@lazy null
+        val client = createAuthenticatedHttpClient(
+            base = httpClient,
+            interceptor = AuthTokenInterceptor(tokenStore),
+            authenticator = TokenAuthenticator(
+                tokenStore = tokenStore,
+                refresh = supabase.tokenRefresher(),
+                onSessionExpired = sessionManager::expireSession
+            )
+        )
+        createRetrofit(apiConfig.apiBaseUrl, client)
+    }
 
     private val merchantRepositories = mutableMapOf<String, MerchantRepositories>()
 
