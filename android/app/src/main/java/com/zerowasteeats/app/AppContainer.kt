@@ -8,6 +8,8 @@ import com.zerowasteeats.app.data.auth.SupabaseAuthRepository
 import com.zerowasteeats.app.data.settings.DataMode
 import com.zerowasteeats.app.data.settings.DataModeController
 import com.zerowasteeats.app.data.settings.DataModeStore
+import com.zerowasteeats.app.data.settings.LiveSetup
+import com.zerowasteeats.app.data.settings.buildLiveSetup
 import com.zerowasteeats.app.data.users.UsersApi
 import com.zerowasteeats.app.data.auth.TokenStore
 import com.zerowasteeats.app.data.auth.supabase.SupabaseAuth
@@ -43,25 +45,21 @@ class AppContainer(context: Context) {
         SharedPreferencesKeyValueStore(context, PrefsTokenStore.FILE_NAME)
     )
 
-    /** Null when local.properties names no Supabase project: then only demo data can work. */
-    val supabaseAuth: SupabaseAuth? =
-        if (apiConfig.supabaseUrl.isNotBlank() && apiConfig.supabasePublishableKey.isNotBlank()) {
-            SupabaseAuthClient.create(
-                apiConfig.supabaseUrl,
-                apiConfig.supabasePublishableKey,
-                httpClient
-            )
-        } else {
-            null
-        }
+    /** Live data needs both: Supabase for the account, the backend for everything else. */
+    private class LiveClients(val supabase: SupabaseAuth, val backend: Retrofit)
 
     /**
-     * Retrofit for the backend, with the access token on every call and one renewal on a 401.
-     * A renewal Supabase refuses ends the session. Null without a backend URL or a project.
+     * The live clients, or why there are none: no endpoints in local.properties, or endpoints
+     * the clients refused. Either way only the demo exists, and the app still starts.
      */
-    val backendRetrofit: Retrofit? by lazy {
-        val supabase = supabaseAuth
-        if (apiConfig.apiBaseUrl.isBlank() || supabase == null) return@lazy null
+    private val liveSetup: LiveSetup<LiveClients> = buildLiveSetup(apiConfig.isComplete) {
+        val supabase = SupabaseAuthClient.create(
+            apiConfig.supabaseUrl,
+            apiConfig.supabasePublishableKey,
+            httpClient
+        )
+        // The backend gets the access token on every call and one renewal on a 401;
+        // a renewal Supabase refuses ends the session
         val client = createAuthenticatedHttpClient(
             base = httpClient,
             interceptor = AuthTokenInterceptor(tokenStore),
@@ -72,11 +70,13 @@ class AppContainer(context: Context) {
                 onSessionExpired = { sessionManager.expireSession() }
             )
         )
-        createRetrofit(apiConfig.apiBaseUrl, client)
+        LiveClients(supabase, createRetrofit(apiConfig.apiBaseUrl, client))
     }
 
-    /** Live data needs Supabase and the backend; without them only the demo exists. */
-    private val liveAvailable: Boolean = supabaseAuth != null && backendRetrofit != null
+    /** True when the endpoints were set but unusable, so the app fell back to the demo. */
+    val liveSetupInvalid: Boolean = liveSetup == LiveSetup.Invalid
+
+    private val liveAvailable: Boolean = liveSetup is LiveSetup.Ready
 
     val sessionStore: SessionStore = PrefsSessionStore(
         SharedPreferencesKeyValueStore(context, PrefsSessionStore.FILE_NAME)
@@ -100,10 +100,9 @@ class AppContainer(context: Context) {
     private val merchantRepositories = mutableMapOf<String, MerchantRepositories>()
 
     private fun buildAuthRepository(mode: DataMode): AuthRepository {
-        val supabase = supabaseAuth
-        val backend = backendRetrofit
-        return if (mode == DataMode.LIVE && supabase != null && backend != null) {
-            SupabaseAuthRepository(supabase, backend.create(UsersApi::class.java), tokenStore)
+        val live = liveSetup.clientsOrNull
+        return if (mode == DataMode.LIVE && live != null) {
+            SupabaseAuthRepository(live.supabase, live.backend.create(UsersApi::class.java), tokenStore)
         } else {
             FakeAuthRepository()
         }

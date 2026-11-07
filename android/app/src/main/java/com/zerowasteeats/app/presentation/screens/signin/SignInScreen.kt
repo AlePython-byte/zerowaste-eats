@@ -121,6 +121,7 @@ fun SignInScreen(
         onSignUp = onSignUp,
         modifier = modifier,
         dataModeSwitch = dataModeSwitch,
+        demoFallbackNotice = container.liveSetupInvalid,
         debugTools = debugTools
     )
 }
@@ -145,6 +146,8 @@ fun SignInContent(
     onSignUp: () -> Unit,
     modifier: Modifier = Modifier,
     dataModeSwitch: DataModeSwitch? = null,
+    /** Says the app fell back to the demo because the connection settings were unusable. */
+    demoFallbackNotice: Boolean = false,
     debugTools: SignInDebugTools? = null
 ) {
     val emailFocus = remember { FocusRequester() }
@@ -244,6 +247,15 @@ fun SignInContent(
             }
         }
 
+        if (demoFallbackNotice) {
+            Text(
+                text = stringResource(R.string.signin_demo_fallback_notice),
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
         if (debugTools != null) {
             Spacer(modifier = Modifier.height(AppSpacing.large))
             DebugTools(debugTools, isLoading)
@@ -334,6 +346,8 @@ private fun SignInPreviewContent(
             onSubmit = { form.validate() },
             onForgotPassword = {},
             onSignUp = {},
+            dataModeSwitch = DataModeSwitch(isDemo = withErrors, enabled = !withErrors, onChange = {}),
+            demoFallbackNotice = withErrors,
             debugTools = if (withErrors) {
                 SignInDebugTools(
                     simulateNetworkError = true,

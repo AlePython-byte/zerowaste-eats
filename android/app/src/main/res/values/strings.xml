@@ -170,6 +170,7 @@
     <string name="signin_forgot_password">¿Olvidaste tu contraseña?</string>
     <string name="signin_to_sign_up">¿No tienes cuenta? Crea una</string>
     <string name="signin_use_demo_data">Usar datos de demostración</string>
+    <string name="signin_demo_fallback_notice">Modo demostración: la configuración de conexión no es válida.</string>
     <string name="signin_debug_title">Solo depuración</string>
     <string name="signin_debug_as_customer">Entrar como comprador</string>
     <string name="signin_debug_as_merchant">Entrar como negocio</string>
