@@ -77,6 +77,38 @@ describe('User profile DTO validation', () => {
     },
   );
 
+  it('accepts and trims a business name for a merchant', async () => {
+    await expect(
+      create({
+        displayName: 'Alejandro',
+        role: UserRole.MERCHANT,
+        businessName: '  Panadería La Esquina  ',
+      }),
+    ).resolves.toMatchObject({ businessName: 'Panadería La Esquina' });
+  });
+
+  it.each([undefined, UserRole.CUSTOMER])(
+    'rejects a business name when the role is %s',
+    async (role) => {
+      await expect(
+        create({ displayName: 'Alejandro', role, businessName: 'Tienda' }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    },
+  );
+
+  it.each([null, '', '   ', 'A', 'a'.repeat(81), 123])(
+    'rejects invalid merchant business name (%j)',
+    async (businessName) => {
+      await expect(
+        create({
+          displayName: 'Alejandro',
+          role: UserRole.MERCHANT,
+          businessName,
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    },
+  );
+
   it.each([
     'id',
     'email',
@@ -119,6 +151,7 @@ describe('User profile DTO validation', () => {
     'id',
     'email',
     'role',
+    'businessName',
     'avatarUrl',
     'createdAt',
     'updatedAt',

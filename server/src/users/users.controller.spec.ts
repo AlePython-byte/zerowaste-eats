@@ -1,3 +1,4 @@
+import type { Response } from 'express';
 import {
   authenticatedUser,
   publicUserProfile,
@@ -18,16 +19,32 @@ describe('UsersController', () => {
       method.mockReset().mockResolvedValue(publicUserProfile);
   });
 
-  it('passes the authenticated identity and create DTO to the service', async () => {
-    const dto = { displayName: 'Alejandro', city: 'Pasto' };
-    await expect(
-      controller.createCurrentProfile(authenticatedUser, dto),
-    ).resolves.toEqual(publicUserProfile);
-    expect(service.createCurrentProfile).toHaveBeenCalledWith(
-      authenticatedUser,
-      dto,
-    );
-  });
+  it.each([
+    [true, 201],
+    [false, 200],
+  ])(
+    'passes identity and DTO to the service; created=%s answers %i',
+    async (created, status) => {
+      service.createCurrentProfile.mockResolvedValue({
+        profile: publicUserProfile,
+        created,
+      });
+      const response = { status: jest.fn() };
+      const dto = { displayName: 'Alejandro', city: 'Pasto' };
+      await expect(
+        controller.createCurrentProfile(
+          authenticatedUser,
+          dto,
+          response as unknown as Response,
+        ),
+      ).resolves.toEqual(publicUserProfile);
+      expect(service.createCurrentProfile).toHaveBeenCalledWith(
+        authenticatedUser,
+        dto,
+      );
+      expect(response.status).toHaveBeenCalledWith(status);
+    },
+  );
 
   it('retrieves the current identity without another user selector', async () => {
     await expect(
