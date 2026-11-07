@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="es">
     <string name="app_name">ZeroWaste Eats</string>
 
     <string name="category_all">Todo</string>
