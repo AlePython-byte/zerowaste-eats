@@ -16,6 +16,10 @@ val localProperties = Properties().apply {
 fun localProperty(name: String, default: String = ""): String =
     localProperties.getProperty(name)?.let(LocalProperties::clean) ?: default
 
+/** A URL from local.properties. A malformed one stops the build instead of crashing the app. */
+fun endpointProperty(name: String, default: String = "", trailingSlash: Boolean = false): String =
+    LocalProperties.requireEndpoint(name, localProperty(name, default), trailingSlash)
+
 /** A Kotlin string literal for a BuildConfig field. */
 fun stringField(value: String): String =
     "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
@@ -38,7 +42,7 @@ android {
 
         // The publishable key is public by design (Supabase pairs it with row level
         // security), but it still stays out of the repository
-        buildConfigField("String", "SUPABASE_URL", stringField(localProperty("SUPABASE_URL")))
+        buildConfigField("String", "SUPABASE_URL", stringField(endpointProperty("SUPABASE_URL")))
         buildConfigField(
             "String",
             "SUPABASE_PUBLISHABLE_KEY",
@@ -52,7 +56,13 @@ android {
             buildConfigField(
                 "String",
                 "API_BASE_URL",
-                stringField(localProperty("API_BASE_URL_DEBUG", "http://10.0.2.2:3000/api/v1/"))
+                stringField(
+                    endpointProperty(
+                        "API_BASE_URL_DEBUG",
+                        default = "http://10.0.2.2:3000/api/v1/",
+                        trailingSlash = true
+                    )
+                )
             )
         }
         release {
@@ -60,7 +70,7 @@ android {
             buildConfigField(
                 "String",
                 "API_BASE_URL",
-                stringField(localProperty("API_BASE_URL_RELEASE"))
+                stringField(endpointProperty("API_BASE_URL_RELEASE", trailingSlash = true))
             )
             optimization {
                 enable = false
