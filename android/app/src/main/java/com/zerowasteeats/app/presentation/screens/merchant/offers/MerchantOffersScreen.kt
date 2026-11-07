@@ -266,10 +266,10 @@ private fun previewOffer(
 )
 
 private val previewOffers = listOf(
-    previewOffer("1", "Croissants del día", MerchantOfferStatus.ACTIVE, 6, OfferPhoto.CROISSANT),
-    previewOffer("2", "Caja de postres surtidos", MerchantOfferStatus.ACTIVE, 3, OfferPhoto.DESSERTS),
-    previewOffer("3", "Sándwich artesanal", MerchantOfferStatus.PAUSED, 4, OfferPhoto.BURGER),
-    previewOffer("4", "Caja de verduras", MerchantOfferStatus.SOLD_OUT, 0, OfferPhoto.VEGETABLES)
+    previewOffer("1", "Croissants del día", MerchantOfferStatus.ACTIVE, 6, OfferPhoto.Stock.CROISSANT),
+    previewOffer("2", "Caja de postres surtidos", MerchantOfferStatus.ACTIVE, 3, OfferPhoto.Stock.DESSERTS),
+    previewOffer("3", "Sándwich artesanal", MerchantOfferStatus.PAUSED, 4, OfferPhoto.Stock.BURGER),
+    previewOffer("4", "Caja de verduras", MerchantOfferStatus.SOLD_OUT, 0, OfferPhoto.Stock.VEGETABLES)
 )
 
 @Composable

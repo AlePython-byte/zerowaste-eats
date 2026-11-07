@@ -30,7 +30,7 @@ class MerchantDashboardStateTest {
         pickupStart = base,
         pickupEnd = base.plusSeconds(3600),
         status = status,
-        photo = OfferPhoto.CROISSANT
+        photo = OfferPhoto.Stock.CROISSANT
     )
 
     private fun reservation(

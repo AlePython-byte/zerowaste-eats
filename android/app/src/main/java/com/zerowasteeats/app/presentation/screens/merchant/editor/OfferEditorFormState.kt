@@ -43,7 +43,12 @@ data class OfferEditorValues(
     val discountedPrice: String = "",
     val quantity: String = OfferEditorFormState.MIN_QUANTITY.toString(),
     val pickupStartMinutes: Int? = null,
-    val pickupEndMinutes: Int? = null
+    val pickupEndMinutes: Int? = null,
+    /**
+     * The last photo picked from the device, kept even while one of the app's photos is
+     * chosen, so the merchant can go back to it.
+     */
+    val devicePhoto: OfferPhoto.Device? = null
 )
 
 /**
@@ -97,6 +102,12 @@ class OfferEditorFormState(
 
     fun onPhotoSelected(value: OfferPhoto) {
         update { copy(photo = value) }
+        show(OfferField.PHOTO)
+    }
+
+    /** A photo from the device is ready: it becomes the offer's photo. */
+    fun onDevicePhotoPrepared(value: OfferPhoto.Device) {
+        update { copy(photo = value, devicePhoto = value) }
         show(OfferField.PHOTO)
     }
 
@@ -291,7 +302,8 @@ class OfferEditorFormState(
                 discountedPrice = offer.discountedPrice.toString(),
                 quantity = offer.quantity.toString(),
                 pickupStartMinutes = minutesOf(offer.pickupStart.atZone(zone).toLocalTime()),
-                pickupEndMinutes = minutesOf(offer.pickupEnd.atZone(zone).toLocalTime())
+                pickupEndMinutes = minutesOf(offer.pickupEnd.atZone(zone).toLocalTime()),
+                devicePhoto = offer.photo as? OfferPhoto.Device
             ),
             isNewOffer = false
         )
@@ -322,23 +334,25 @@ class OfferEditorFormState(
         private fun OfferEditorValues.toSavedList(): ArrayList<Any> = arrayListOf(
             title,
             category?.name.orEmpty(),
-            photo?.name.orEmpty(),
+            photo?.let(OfferPhoto::encode).orEmpty(),
             originalPrice,
             discountedPrice,
             quantity,
             pickupStartMinutes ?: NO_TIME,
-            pickupEndMinutes ?: NO_TIME
+            pickupEndMinutes ?: NO_TIME,
+            devicePhoto?.let(OfferPhoto::encode).orEmpty()
         )
 
         private fun valuesFrom(list: List<*>) = OfferEditorValues(
             title = list[0] as String,
             category = (list[1] as String).takeIf { it.isNotEmpty() }?.let(OfferCategory::valueOf),
-            photo = (list[2] as String).takeIf { it.isNotEmpty() }?.let(OfferPhoto::valueOf),
+            photo = OfferPhoto.decode(list[2] as String),
             originalPrice = list[3] as String,
             discountedPrice = list[4] as String,
             quantity = list[5] as String,
             pickupStartMinutes = (list[6] as Int).takeIf { it != NO_TIME },
-            pickupEndMinutes = (list[7] as Int).takeIf { it != NO_TIME }
+            pickupEndMinutes = (list[7] as Int).takeIf { it != NO_TIME },
+            devicePhoto = OfferPhoto.decode(list[8] as String) as? OfferPhoto.Device
         )
 
         private const val NO_TIME = -1

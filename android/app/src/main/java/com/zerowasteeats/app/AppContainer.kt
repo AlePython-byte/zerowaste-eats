@@ -24,6 +24,8 @@ import com.zerowasteeats.app.data.remote.tokenRefresher
 import retrofit2.Retrofit
 import com.zerowasteeats.app.data.merchant.FakeMerchantData
 import com.zerowasteeats.app.data.merchant.MerchantRepositories
+import com.zerowasteeats.app.data.photos.OfferPhotoPreparer
+import com.zerowasteeats.app.data.photos.OfferPhotoProcessor
 import com.zerowasteeats.app.data.session.PrefsSessionStore
 import com.zerowasteeats.app.data.session.Session
 import com.zerowasteeats.app.data.session.SessionManager
@@ -98,6 +100,9 @@ class AppContainer(context: Context) {
         private set
 
     private val merchantRepositories = mutableMapOf<String, MerchantRepositories>()
+
+    /** Readies a photo picked for an offer: upright, at most 1280 px, JPEG under 2 MB. */
+    val offerPhotoPreparer: OfferPhotoPreparer = OfferPhotoProcessor(context.applicationContext)
 
     private fun buildAuthRepository(mode: DataMode): AuthRepository {
         val live = liveSetup.clientsOrNull

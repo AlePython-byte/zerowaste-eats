@@ -265,6 +265,11 @@
     <string name="offer_field_pickup_start">Desde</string>
     <string name="offer_field_pickup_end">Hasta</string>
     <string name="offer_pickup_choose_time">Elegir hora</string>
+    <string name="offer_photo_device">Tu foto</string>
+    <string name="offer_photo_pick_cd">Elegir una foto de tu galería</string>
+    <string name="offer_photo_change_cd">Elegir otra foto de tu galería</string>
+    <string name="offer_photo_preparing">Preparando la foto…</string>
+    <string name="offer_photo_failed">No pudimos usar esa foto. Prueba con otra.</string>
     <string name="offer_photo_croissant">Croissants</string>
     <string name="offer_photo_salmon_bowl">Bowl de salmón</string>
     <string name="offer_photo_desserts">Postres</string>

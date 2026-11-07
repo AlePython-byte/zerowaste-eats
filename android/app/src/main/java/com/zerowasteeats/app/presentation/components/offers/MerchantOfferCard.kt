@@ -72,14 +72,12 @@ fun MerchantOfferCard(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(AppSpacing.medium)
         ) {
-            Image(
-                painter = painterResource(offer.photo.drawableRes),
-                // Decorative: the title next to it says what the offer is
-                contentDescription = null,
+            // Decorative: the title next to it says what the offer is
+            OfferPhotoImage(
+                photo = offer.photo,
                 modifier = Modifier
                     .size(72.dp)
-                    .clip(RoundedCornerShape(AppRadius.medium)),
-                contentScale = ContentScale.Crop
+                    .clip(RoundedCornerShape(AppRadius.medium))
             )
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -258,22 +256,22 @@ private fun MerchantOfferCardPreviewContent(themeMode: ThemeMode) {
                 verticalArrangement = Arrangement.spacedBy(AppSpacing.small)
             ) {
                 MerchantOfferCard(
-                    offer = previewOffer("Croissants del día", MerchantOfferStatus.ACTIVE, 6, OfferPhoto.CROISSANT),
+                    offer = previewOffer("Croissants del día", MerchantOfferStatus.ACTIVE, 6, OfferPhoto.Stock.CROISSANT),
                     onEditClick = {},
                     onToggleStatusClick = {}
                 )
                 MerchantOfferCard(
-                    offer = previewOffer("Sándwich artesanal con un nombre muy largo", MerchantOfferStatus.PAUSED, 4, OfferPhoto.BURGER),
+                    offer = previewOffer("Sándwich artesanal con un nombre muy largo", MerchantOfferStatus.PAUSED, 4, OfferPhoto.Stock.BURGER),
                     onEditClick = {},
                     onToggleStatusClick = {}
                 )
                 MerchantOfferCard(
-                    offer = previewOffer("Caja de verduras", MerchantOfferStatus.SOLD_OUT, 0, OfferPhoto.VEGETABLES),
+                    offer = previewOffer("Caja de verduras", MerchantOfferStatus.SOLD_OUT, 0, OfferPhoto.Stock.VEGETABLES),
                     onEditClick = {},
                     onToggleStatusClick = null
                 )
                 MerchantOfferCard(
-                    offer = previewOffer("Postres del lunes", MerchantOfferStatus.EXPIRED, 2, OfferPhoto.DESSERTS),
+                    offer = previewOffer("Postres del lunes", MerchantOfferStatus.EXPIRED, 2, OfferPhoto.Stock.DESSERTS),
                     onEditClick = {},
                     onToggleStatusClick = null
                 )

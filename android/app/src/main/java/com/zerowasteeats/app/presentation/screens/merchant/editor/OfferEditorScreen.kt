@@ -3,6 +3,11 @@ package com.zerowasteeats.app.presentation.screens.merchant.editor
 import android.content.res.Configuration
 import android.text.format.DateFormat
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.CircularProgressIndicator
+import com.zerowasteeats.app.presentation.components.offers.OfferPhotoImage
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -131,10 +136,19 @@ fun OfferEditorScreen(
     val container =
         (LocalContext.current.applicationContext as ZeroWasteEatsApplication).container
     val viewModel: OfferEditorViewModel = viewModel(
-        factory = OfferEditorViewModelFactory(container.merchantRepositories(session).offers, offerId)
+        factory = OfferEditorViewModelFactory(
+            container.merchantRepositories(session).offers,
+            offerId,
+            container.offerPhotoPreparer
+        )
     )
 
     LaunchedEffect(viewModel) { viewModel.saved.collect(onSaved) }
+
+    // The system photo picker: no storage permission, the person chooses exactly one image
+    val pickPhoto = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri -> if (uri != null) viewModel.preparePhoto(uri) }
 
     val existingOffer = viewModel.existingOffer
     if (offerId != null && existingOffer == null) {
@@ -149,11 +163,22 @@ fun OfferEditorScreen(
             ?: OfferEditorFormState.newOffer(clock)
     }
 
+    LaunchedEffect(viewModel, form) { viewModel.prepared.collect(form::onDevicePhotoPrepared) }
+
     OfferEditorContent(
         form = form,
         isNew = offerId == null,
         isSaving = viewModel.isSaving,
         saveFailed = viewModel.notFound,
+        photoPicking = PhotoPicking(
+            onPick = {
+                pickPhoto.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
+            },
+            isPreparing = viewModel.isPreparingPhoto,
+            failed = viewModel.photoFailed
+        ),
         onClose = onClose,
         // The pickup window is for today, for now
         onSave = { viewModel.save(form.toDraft(LocalDate.now(clock), zone, existingOffer)) },
@@ -161,6 +186,14 @@ fun OfferEditorScreen(
         nowMinutes = { OfferEditorFormState.minutesOf(LocalTime.now(clock)) }
     )
 }
+
+/** Picking a photo from the device, and how that is going. */
+class PhotoPicking(
+    val onPick: () -> Unit = {},
+    val isPreparing: Boolean = false,
+    /** The last picked photo could not be used. */
+    val failed: Boolean = false
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -170,6 +203,7 @@ fun OfferEditorContent(
     isSaving: Boolean,
     saveFailed: Boolean,
     onClose: () -> Unit,
+    photoPicking: PhotoPicking = PhotoPicking(),
     /** Called with a form that already passed validation. */
     onSave: () -> Unit,
     modifier: Modifier = Modifier,
@@ -242,7 +276,11 @@ fun OfferEditorContent(
 
                 CategorySection(form = form, modifier = fieldModifier(OfferField.CATEGORY))
 
-                PhotoSection(form = form, modifier = fieldModifier(OfferField.PHOTO))
+                PhotoSection(
+                    form = form,
+                    picking = photoPicking,
+                    modifier = fieldModifier(OfferField.PHOTO)
+                )
 
                 PriceSection(form = form, fieldModifier = ::fieldModifier)
 
@@ -427,9 +465,12 @@ private fun CategorySection(form: OfferEditorFormState, modifier: Modifier) {
     }
 }
 
-// TEMPORARY: picking one of the app's photos stands in for uploading a real one.
+/**
+ * The merchant's own photo comes first: a tile that opens the system photo picker, then shows
+ * the picked photo. The app's photos stay as an alternative for an offer without one.
+ */
 @Composable
-private fun PhotoSection(form: OfferEditorFormState, modifier: Modifier) {
+private fun PhotoSection(form: OfferEditorFormState, picking: PhotoPicking, modifier: Modifier) {
     ChoiceSection(
         labelRes = R.string.offer_field_photo,
         error = form.errorOf(OfferField.PHOTO)?.let { stringResource(R.string.offer_error_choose) },
@@ -441,11 +482,71 @@ private fun PhotoSection(form: OfferEditorFormState, modifier: Modifier) {
                 .selectableGroup(),
             horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
         ) {
-            OfferPhoto.entries.forEach { photo ->
+            val devicePhoto = form.values.devicePhoto
+            if (devicePhoto != null) {
+                PhotoOption(
+                    photo = devicePhoto,
+                    description = stringResource(R.string.offer_photo_device),
+                    isSelected = form.values.photo == devicePhoto,
+                    onClick = { form.onPhotoSelected(devicePhoto) }
+                )
+            }
+            PickPhotoTile(
+                hasPhoto = devicePhoto != null,
+                isPreparing = picking.isPreparing,
+                onClick = picking.onPick
+            )
+            OfferPhoto.Stock.entries.forEach { photo ->
                 PhotoOption(
                     photo = photo,
+                    description = stringResource(photoNameRes(photo)),
                     isSelected = form.values.photo == photo,
                     onClick = { form.onPhotoSelected(photo) }
+                )
+            }
+        }
+        if (picking.failed) {
+            FieldError(stringResource(R.string.offer_photo_failed))
+        }
+    }
+}
+
+/** Opens the photo picker; shows a quiet progress ring while a picked photo is prepared. */
+@Composable
+private fun PickPhotoTile(hasPhoto: Boolean, isPreparing: Boolean, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(AppRadius.medium)
+    val description = stringResource(
+        when {
+            isPreparing -> R.string.offer_photo_preparing
+            hasPhoto -> R.string.offer_photo_change_cd
+            else -> R.string.offer_photo_pick_cd
+        }
+    )
+    Surface(
+        modifier = Modifier
+            .size(84.dp)
+            .clip(shape)
+            .clickable(enabled = !isPreparing, role = Role.Button, onClick = onClick)
+            .semantics {
+                contentDescription = description
+                if (isPreparing) liveRegion = LiveRegionMode.Polite
+            },
+        shape = shape,
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            if (isPreparing) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+            } else {
+                Icon(
+                    painter = painterResource(R.drawable.ic_add),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -453,9 +554,13 @@ private fun PhotoSection(form: OfferEditorFormState, modifier: Modifier) {
 }
 
 @Composable
-private fun PhotoOption(photo: OfferPhoto, isSelected: Boolean, onClick: () -> Unit) {
+private fun PhotoOption(
+    photo: OfferPhoto,
+    description: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
     val shape = RoundedCornerShape(AppRadius.medium)
-    val description = stringResource(photoNameRes(photo))
     Surface(
         modifier = Modifier
             .size(84.dp)
@@ -466,12 +571,7 @@ private fun PhotoOption(photo: OfferPhoto, isSelected: Boolean, onClick: () -> U
         border = if (isSelected) BorderStroke(3.dp, MaterialTheme.colorScheme.primary) else null
     ) {
         Box {
-            Image(
-                painter = painterResource(photo.drawableRes),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
+            OfferPhotoImage(photo = photo, modifier = Modifier.fillMaxSize())
             if (isSelected) {
                 // Plain butter is too faint on cream to mark the choice alone
                 Surface(
@@ -773,12 +873,12 @@ private fun OfferFieldError.message(): String = when (this) {
     OfferFieldError.END_IN_PAST -> stringResource(R.string.offer_error_end_in_past)
 }
 
-private fun photoNameRes(photo: OfferPhoto): Int = when (photo) {
-    OfferPhoto.CROISSANT -> R.string.offer_photo_croissant
-    OfferPhoto.SALMON_BOWL -> R.string.offer_photo_salmon_bowl
-    OfferPhoto.DESSERTS -> R.string.offer_photo_desserts
-    OfferPhoto.BURGER -> R.string.offer_photo_burger
-    OfferPhoto.VEGETABLES -> R.string.offer_photo_vegetables
+private fun photoNameRes(photo: OfferPhoto.Stock): Int = when (photo) {
+    OfferPhoto.Stock.CROISSANT -> R.string.offer_photo_croissant
+    OfferPhoto.Stock.SALMON_BOWL -> R.string.offer_photo_salmon_bowl
+    OfferPhoto.Stock.DESSERTS -> R.string.offer_photo_desserts
+    OfferPhoto.Stock.BURGER -> R.string.offer_photo_burger
+    OfferPhoto.Stock.VEGETABLES -> R.string.offer_photo_vegetables
 }
 
 private const val DEFAULT_START_MINUTES = 18 * 60
@@ -799,7 +899,7 @@ private fun EditorPreviewContent(themeMode: ThemeMode, withErrors: Boolean) {
                 } else {
                     onTitleChange("Croissants del día")
                     onCategorySelected(OfferCategory.BAKERY)
-                    onPhotoSelected(OfferPhoto.CROISSANT)
+                    onPhotoSelected(OfferPhoto.Stock.CROISSANT)
                     onOriginalPriceChange("15000")
                     onDiscountedPriceChange("8900")
                     onPickupStartSelected(18 * 60)

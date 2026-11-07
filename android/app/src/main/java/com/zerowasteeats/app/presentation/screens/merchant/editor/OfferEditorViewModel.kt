@@ -1,6 +1,10 @@
 package com.zerowasteeats.app.presentation.screens.merchant.editor
 
+import android.net.Uri
 import androidx.compose.runtime.getValue
+import com.zerowasteeats.app.data.merchant.OfferPhoto
+import com.zerowasteeats.app.data.photos.OfferPhotoPreparer
+import com.zerowasteeats.app.data.photos.PhotoPreparation
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -21,8 +25,34 @@ import kotlinx.coroutines.launch
 class OfferEditorViewModel(
     private val repository: MerchantOfferRepository,
     /** Null when creating a new offer. */
-    val offerId: String?
+    val offerId: String?,
+    private val photoPreparer: OfferPhotoPreparer
 ) : ViewModel() {
+
+    var isPreparingPhoto by mutableStateOf(false)
+        private set
+
+    /** Set when the last picked photo could not be used. */
+    var photoFailed by mutableStateOf(false)
+        private set
+
+    // Like [saved]: a photo that finishes during a rotation still reaches the form
+    private val preparedPhotos = Channel<OfferPhoto.Device>(Channel.BUFFERED)
+    val prepared: Flow<OfferPhoto.Device> = preparedPhotos.receiveAsFlow()
+
+    /** Decodes, turns upright and compresses the picked photo, off the main thread. */
+    fun preparePhoto(uri: Uri) {
+        if (isPreparingPhoto) return
+        isPreparingPhoto = true
+        photoFailed = false
+        viewModelScope.launch {
+            when (val result = photoPreparer.prepare(uri)) {
+                is PhotoPreparation.Ready -> preparedPhotos.send(result.photo)
+                PhotoPreparation.Unreadable -> photoFailed = true
+            }
+            isPreparingPhoto = false
+        }
+    }
 
     /** The offer being edited as it is saved now, or null when creating or if it is gone. */
     val existingOffer: MerchantOffer? =
@@ -54,7 +84,8 @@ class OfferEditorViewModel(
 
 class OfferEditorViewModelFactory(
     private val repository: MerchantOfferRepository,
-    private val offerId: String?
+    private val offerId: String?,
+    private val photoPreparer: OfferPhotoPreparer
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
@@ -62,6 +93,6 @@ class OfferEditorViewModelFactory(
         require(modelClass == OfferEditorViewModel::class.java) {
             "Unknown ViewModel class: ${modelClass.name}"
         }
-        return OfferEditorViewModel(repository, offerId) as T
+        return OfferEditorViewModel(repository, offerId, photoPreparer) as T
     }
 }
