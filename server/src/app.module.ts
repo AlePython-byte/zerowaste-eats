@@ -4,6 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { createObserveModule } from '@nestjs/observe';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AiModule } from './ai/ai.module';
+import { ClaudeOfferSuggester } from './ai/claude-offer-suggester';
 import { AuthModule } from './auth/auth.module';
 import { AuthService } from './auth/auth.service';
 import { SupabaseAuthGuard } from './auth/guards/supabase-auth.guard';
@@ -23,7 +24,9 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule({
     instance instanceof ConfigService ||
     instance instanceof DatabaseService ||
     instance instanceof AuthService ||
-    instance instanceof SupabaseAuthGuard,
+    instance instanceof SupabaseAuthGuard ||
+    // Holds the model API key and receives merchants' photos
+    instance instanceof ClaudeOfferSuggester,
 });
 
 /** Stands in for telemetry when it has no credentials: nothing runs and nothing is sent. */

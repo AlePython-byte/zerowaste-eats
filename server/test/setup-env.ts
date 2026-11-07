@@ -4,3 +4,6 @@ process.env.PORT = '3000';
 process.env.DATABASE_URL = 'postgresql://test:test@127.0.0.1:5432/test';
 process.env.SUPABASE_URL = 'https://auth.example.invalid';
 process.env.SUPABASE_PUBLISHABLE_KEY = 'test-publishable-placeholder';
+// A key in the developer's shell must never turn tests into real model calls
+delete process.env.ANTHROPIC_API_KEY;
+delete process.env.ANTHROPIC_AUTH_TOKEN;
