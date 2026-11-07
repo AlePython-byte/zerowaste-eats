@@ -158,6 +158,7 @@
     <string name="signin_submit">Sign in</string>
     <string name="signin_forgot_password">Forgot your password?</string>
     <string name="signin_to_sign_up">No account yet? Create one</string>
+    <string name="signin_use_demo_data">Use demo data</string>
     <string name="signin_debug_title">Debug only</string>
     <string name="signin_debug_as_customer">Sign in as buyer</string>
     <string name="signin_debug_as_merchant">Sign in as business</string>

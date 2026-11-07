@@ -37,6 +37,11 @@ class SignInViewModel(private val sessionManager: SessionManager) : ViewModel() 
         error = null
     }
 
+    /** After switching between live and demo data, an old error no longer applies. */
+    fun clearError() {
+        error = null
+    }
+
     /** Sends the form. Returns the first invalid field, to focus it, or null if it was sent. */
     fun submit(): SignInField? {
         if (isLoading) return null

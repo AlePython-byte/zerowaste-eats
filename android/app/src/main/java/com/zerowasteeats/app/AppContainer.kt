@@ -5,6 +5,9 @@ import com.zerowasteeats.app.data.auth.AuthRepository
 import com.zerowasteeats.app.data.auth.FakeAuthRepository
 import com.zerowasteeats.app.data.auth.PrefsTokenStore
 import com.zerowasteeats.app.data.auth.SupabaseAuthRepository
+import com.zerowasteeats.app.data.settings.DataMode
+import com.zerowasteeats.app.data.settings.DataModeController
+import com.zerowasteeats.app.data.settings.DataModeStore
 import com.zerowasteeats.app.data.users.UsersApi
 import com.zerowasteeats.app.data.auth.TokenStore
 import com.zerowasteeats.app.data.auth.supabase.SupabaseAuth
@@ -72,24 +75,44 @@ class AppContainer(context: Context) {
         createRetrofit(apiConfig.apiBaseUrl, client)
     }
 
-    /** Supabase plus the backend when both are configured; the demo accounts otherwise. */
-    val authRepository: AuthRepository = run {
+    /** Live data needs Supabase and the backend; without them only the demo exists. */
+    private val liveAvailable: Boolean = supabaseAuth != null && backendRetrofit != null
+
+    val sessionStore: SessionStore = PrefsSessionStore(
+        SharedPreferencesKeyValueStore(context, PrefsSessionStore.FILE_NAME)
+    )
+
+    val sessionManager = SessionManager({ authRepository }, sessionStore, tokenStore)
+
+    /** Live or demo data. Changes only while signed out, and rebuilds the repositories. */
+    val dataMode = DataModeController(
+        store = DataModeStore(SharedPreferencesKeyValueStore(context, DataModeStore.FILE_NAME)),
+        liveAvailable = liveAvailable,
+        isSignedIn = { sessionManager.isSignedIn },
+        onChanged = { mode -> rebuildRepositories(mode) }
+    )
+
+    /** The account source of the current mode: Supabase plus the backend, or the demo accounts. */
+    @Volatile
+    var authRepository: AuthRepository = buildAuthRepository(dataMode.mode.value)
+        private set
+
+    private val merchantRepositories = mutableMapOf<String, MerchantRepositories>()
+
+    private fun buildAuthRepository(mode: DataMode): AuthRepository {
         val supabase = supabaseAuth
         val backend = backendRetrofit
-        if (supabase != null && backend != null) {
+        return if (mode == DataMode.LIVE && supabase != null && backend != null) {
             SupabaseAuthRepository(supabase, backend.create(UsersApi::class.java), tokenStore)
         } else {
             FakeAuthRepository()
         }
     }
 
-    val sessionStore: SessionStore = PrefsSessionStore(
-        SharedPreferencesKeyValueStore(context, PrefsSessionStore.FILE_NAME)
-    )
-
-    val sessionManager = SessionManager(authRepository, sessionStore, tokenStore)
-
-    private val merchantRepositories = mutableMapOf<String, MerchantRepositories>()
+    private fun rebuildRepositories(mode: DataMode) {
+        authRepository = buildAuthRepository(mode)
+        synchronized(merchantRepositories) { merchantRepositories.clear() }
+    }
 
     /**
      * The repositories of a signed-in business. Asking needs a [Session.Merchant], so the

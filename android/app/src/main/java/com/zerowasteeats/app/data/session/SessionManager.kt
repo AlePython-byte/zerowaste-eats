@@ -25,12 +25,26 @@ enum class SessionNotice {
  * [signOut] erases it, so what the person sees on the next launch matches the last state.
  */
 class SessionManager(
-    private val authRepository: AuthRepository,
+    /** Asked on every call, so switching between live and demo data takes effect at once. */
+    private val authRepositoryProvider: () -> AuthRepository,
     private val sessionStore: SessionStore,
     private val tokenStore: TokenStore,
     /** Runs the server side of a sign out after the local one; outlives any screen. */
     private val backgroundScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 ) {
+    constructor(
+        authRepository: AuthRepository,
+        sessionStore: SessionStore,
+        tokenStore: TokenStore,
+        backgroundScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    ) : this({ authRepository }, sessionStore, tokenStore, backgroundScope)
+
+    private val authRepository: AuthRepository get() = authRepositoryProvider()
+
+    /** True while a customer or a business is signed in. */
+    val isSignedIn: Boolean
+        get() = sessionState.value.let { it is Session.Customer || it is Session.Merchant }
+
     private val sessionState = mutableStateOf<Session>(Session.Loading)
     private val noticeState = mutableStateOf<SessionNotice?>(null)
 
@@ -63,12 +77,14 @@ class SessionManager(
      */
     fun signOut() {
         val accessToken = tokenStore.load()?.accessToken
+        // The repository that holds this session, even if the mode changes right after
+        val repository = authRepository
         tokenStore.clear()
         sessionStore.clear()
         sessionState.value = Session.SignedOut
         backgroundScope.launch {
             try {
-                authRepository.signOut(accessToken)
+                repository.signOut(accessToken)
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {
