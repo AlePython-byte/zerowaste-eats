@@ -10,6 +10,7 @@ import { MockOfferSuggester } from './mock-offer-suggester';
 import { OfferSuggester } from './offer-suggestion';
 import { OfferSuggestionsService } from './offer-suggestions.service';
 import { PhotoUploadInterceptor } from './photo-upload.interceptor';
+import { SuggestionQuotaService } from './suggestion-quota.service';
 
 /**
  * Claude when ANTHROPIC_API_KEY is set (validated and trimmed at startup), the simulated
@@ -31,6 +32,7 @@ export function createOfferSuggester(config: ConfigService): OfferSuggester {
   controllers: [AiController],
   providers: [
     OfferSuggestionsService,
+    SuggestionQuotaService,
     PhotoUploadInterceptor,
     {
       provide: OfferSuggester,

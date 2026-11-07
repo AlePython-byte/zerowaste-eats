@@ -65,12 +65,29 @@ model MerchantProfile {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  establishments Establishment[]
+  establishments    Establishment[]
+  aiSuggestionUsage AiSuggestionUsage[]
 
   createdAt DateTime @default(now()) @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @db.Timestamptz(3)
 
   @@map("merchant_profiles")
+}
+
+/// How many offer suggestions a business asked for on a given day (Bogotá time).
+/// One row per business and day; the count is raised atomically against AI_DAILY_LIMIT.
+model AiSuggestionUsage {
+  merchantProfileId String   @db.Uuid
+  day               DateTime @db.Date
+  count             Int      @default(0)
+
+  merchantProfile MerchantProfile @relation(fields: [merchantProfileId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  @@id([merchantProfileId, day])
+  @@map("ai_suggestion_usage")
 }
 
 model Establishment {

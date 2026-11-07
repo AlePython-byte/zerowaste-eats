@@ -1,9 +1,20 @@
 import {
   BadRequestException,
+  HttpException,
+  HttpStatus,
+  ServiceUnavailableException,
   UnsupportedMediaTypeException,
 } from '@nestjs/common';
 import { OfferCategory } from '../generated/prisma/enums';
 import { jpegBytes, pngBytes, webpBytes } from '../../test/fixtures/images';
+import {
+  RESERVATION,
+  USER_ID,
+  quota,
+  release,
+  reserve,
+  resetQuota,
+} from '../../test/fixtures/quota';
 import { MockOfferSuggester } from './mock-offer-suggester';
 import {
   OfferSuggester,
@@ -34,15 +45,52 @@ const draft = (overrides: Partial<SuggestionDraft> = {}): SuggestionDraft => ({
 describe('OfferSuggestionsService', () => {
   const suggest = jest.fn<Promise<SuggestionDraft>, unknown[]>();
   const suggester = { source: 'claude', suggest } as unknown as OfferSuggester;
-  const service = new OfferSuggestionsService(suggester);
+  const service = new OfferSuggestionsService(suggester, quota);
 
   beforeEach(() => {
+    resetQuota();
     suggest.mockReset().mockResolvedValue(draft());
+  });
+
+  it('counts the suggestion against the caller business and keeps it on success', async () => {
+    await service.suggest(USER_ID, photo(jpegBytes()), 12000);
+
+    expect(reserve).toHaveBeenCalledWith(USER_ID);
+    expect(release).not.toHaveBeenCalled();
+  });
+
+  it('gives the suggestion back when the suggester fails', async () => {
+    const failure = new ServiceUnavailableException('El asistente no responde');
+    suggest.mockRejectedValue(failure);
+
+    await expect(
+      service.suggest(USER_ID, photo(jpegBytes()), 12000),
+    ).rejects.toBe(failure);
+    expect(release).toHaveBeenCalledWith(RESERVATION);
+  });
+
+  it('does not ask the suggester once the quota is used up', async () => {
+    reserve.mockRejectedValue(
+      new HttpException('Llegaste al límite', HttpStatus.TOO_MANY_REQUESTS),
+    );
+
+    await expect(
+      service.suggest(USER_ID, photo(jpegBytes()), 12000),
+    ).rejects.toMatchObject({ status: 429 });
+    expect(suggest).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['no photo', undefined],
+    ['a PNG', photo(pngBytes())],
+  ])('does not count a bad upload (%s)', async (_label, upload) => {
+    await expect(service.suggest(USER_ID, upload)).rejects.toBeDefined();
+    expect(reserve).not.toHaveBeenCalled();
   });
 
   it('passes the photo, its detected type and the price to the suggester', async () => {
     const bytes = webpBytes();
-    await service.suggest(photo(bytes), 12000);
+    await service.suggest(USER_ID, photo(bytes), 12000);
 
     expect(suggest).toHaveBeenCalledWith({
       bytes,
@@ -52,7 +100,9 @@ describe('OfferSuggestionsService', () => {
   });
 
   it('answers with the finished suggestion and its source', async () => {
-    await expect(service.suggest(photo(jpegBytes()), 12000)).resolves.toEqual({
+    await expect(
+      service.suggest(USER_ID, photo(jpegBytes()), 12000),
+    ).resolves.toEqual({
       title: 'Pan del día',
       category: OfferCategory.BAKERY,
       description: 'Pan fresco de esta mañana.',
@@ -67,7 +117,7 @@ describe('OfferSuggestionsService', () => {
   it.each([undefined, photo(Buffer.alloc(0))])(
     'asks for a photo when none arrives (%#)',
     async (missing) => {
-      await expect(service.suggest(missing)).rejects.toMatchObject({
+      await expect(service.suggest(USER_ID, missing)).rejects.toMatchObject({
         response: {
           statusCode: 400,
           message: 'Debes enviar una foto del producto.',
@@ -78,7 +128,7 @@ describe('OfferSuggestionsService', () => {
   );
 
   it('rejects other formats by their bytes, whatever the file is called', async () => {
-    const result = service.suggest(photo(pngBytes()));
+    const result = service.suggest(USER_ID, photo(pngBytes()));
 
     await expect(result).rejects.toBeInstanceOf(UnsupportedMediaTypeException);
     await expect(result).rejects.toMatchObject({
@@ -92,7 +142,7 @@ describe('OfferSuggestionsService', () => {
   });
 
   it('is a BadRequestException for a missing photo', async () => {
-    await expect(service.suggest(undefined)).rejects.toBeInstanceOf(
+    await expect(service.suggest(USER_ID, undefined)).rejects.toBeInstanceOf(
       BadRequestException,
     );
   });
@@ -201,13 +251,19 @@ describe('finalizeSuggestion', () => {
 
 describe('MockOfferSuggester', () => {
   const suggester = new MockOfferSuggester();
-  const service = new OfferSuggestionsService(suggester);
+  const service = new OfferSuggestionsService(suggester, quota);
+
+  beforeEach(resetQuota);
 
   it('is deterministic: the same photo always gets the same suggestion', async () => {
     const bytes = jpegBytes(512, 7);
 
-    const first = await service.suggest(photo(bytes), 15000);
-    const second = await service.suggest(photo(Buffer.from(bytes)), 15000);
+    const first = await service.suggest(USER_ID, photo(bytes), 15000);
+    const second = await service.suggest(
+      USER_ID,
+      photo(Buffer.from(bytes)),
+      15000,
+    );
 
     expect(second).toEqual(first);
     expect(first.source).toBe('mock');
@@ -216,7 +272,11 @@ describe('MockOfferSuggester', () => {
   it('stays within the rules for many different photos', async () => {
     const categories = new Set<string>();
     for (let seed = 0; seed < 64; seed++) {
-      const result = await service.suggest(photo(jpegBytes(300, seed)), 10000);
+      const result = await service.suggest(
+        USER_ID,
+        photo(jpegBytes(300, seed)),
+        10000,
+      );
       categories.add(result.category);
       expect(Object.values(OfferCategory)).toContain(result.category);
       expect(result.suggestedDiscountPercent % 5).toBe(0);

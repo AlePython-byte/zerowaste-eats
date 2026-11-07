@@ -3,6 +3,7 @@ import { ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OfferCategory } from '../generated/prisma/enums';
 import { jpegBytes, webpBytes } from '../../test/fixtures/images';
+import { USER_ID, quota, resetQuota } from '../../test/fixtures/quota';
 import { createOfferSuggester } from './ai.module';
 import {
   CLAUDE_TIMEOUT_MS,
@@ -30,7 +31,7 @@ describe('ClaudeOfferSuggester', () => {
   const parse = jest.fn();
   const client = { messages: { parse } } as unknown as Anthropic;
   const suggester = new ClaudeOfferSuggester(client, 'claude-haiku-5-5');
-  const service = new OfferSuggestionsService(suggester);
+  const service = new OfferSuggestionsService(suggester, quota);
   let fetchSpy: jest.SpyInstance;
   let outputRead: boolean;
 
@@ -51,6 +52,7 @@ describe('ClaudeOfferSuggester', () => {
     fetchSpy = jest
       .spyOn(globalThis, 'fetch')
       .mockRejectedValue(new Error('Network disabled in tests'));
+    resetQuota();
     parse.mockReset();
     respond('end_turn');
   });
@@ -97,7 +99,7 @@ describe('ClaudeOfferSuggester', () => {
 
   it('returns the validated answer, finished by the service as source claude', async () => {
     await expect(
-      service.suggest({ buffer: jpegBytes(), size: 256 }, 12345),
+      service.suggest(USER_ID, { buffer: jpegBytes(), size: 256 }, 12345),
     ).resolves.toEqual({
       title: 'Bolsa de pan del día',
       category: OfferCategory.BAKERY,
@@ -122,6 +124,7 @@ describe('ClaudeOfferSuggester', () => {
     });
 
     const result = await service.suggest(
+      USER_ID,
       { buffer: jpegBytes(), size: 256 },
       10000,
     );
@@ -144,6 +147,7 @@ describe('ClaudeOfferSuggester', () => {
     });
 
     const result = await service.suggest(
+      USER_ID,
       { buffer: jpegBytes(), size: 256 },
       10000,
     );

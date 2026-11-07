@@ -6,6 +6,7 @@ import {
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { App } from 'supertest/types';
+import { SUGGESTIONS_PER_MINUTE } from '../src/ai/ai.controller';
 import { MAX_PHOTO_BYTES } from '../src/ai/photo-upload.interceptor';
 import { AppModule } from './../src/app.module';
 import { AuthService } from './../src/auth/auth.service';
@@ -17,11 +18,20 @@ import { jpegBytes, pngBytes, webpBytes } from './fixtures/images';
 describe('Offer suggestions (e2e)', () => {
   let app: INestApplication<App>;
   const findUnique = jest.fn();
+  const findMerchant = jest.fn();
+  const queryRaw = jest.fn();
+  const executeRaw = jest.fn();
   const verifyAccessToken = jest.fn<Promise<AuthenticatedUser>, [string]>();
   const path = '/api/v1/ai/offer-suggestions';
 
   beforeEach(async () => {
     findUnique.mockReset().mockResolvedValue({ role: 'MERCHANT' });
+    findMerchant
+      .mockReset()
+      .mockResolvedValue({ id: '5d0c7a3e-3f43-4c58-9a57-1f1f3f0b7c11' });
+    // The daily quota still has room: the counting statement returns the day
+    queryRaw.mockReset().mockResolvedValue([{ day: '2026-11-07' }]);
+    executeRaw.mockReset().mockResolvedValue(1);
     verifyAccessToken.mockReset().mockResolvedValue(authenticatedUser);
     const moduleFixture = await Test.createTestingModule({
       imports: [AppModule],
@@ -29,7 +39,12 @@ describe('Offer suggestions (e2e)', () => {
       .overrideProvider(DatabaseService)
       .useValue({
         checkConnection: jest.fn(),
-        client: { user: { findUnique } },
+        client: {
+          user: { findUnique },
+          merchantProfile: { findUnique: findMerchant },
+          $queryRaw: queryRaw,
+          $executeRaw: executeRaw,
+        },
       })
       .overrideProvider(AuthService)
       .useValue({ verifyAccessToken })
@@ -203,5 +218,37 @@ describe('Offer suggestions (e2e)', () => {
       error: 'Solicitud inválida',
       message: 'Los datos enviados no son válidos.',
     });
+  });
+
+  it('answers 429 in Spanish when the business used up its suggestions for the day', async () => {
+    queryRaw.mockResolvedValue([]);
+
+    await post().attach('foto', jpegBytes(), 'pan.jpg').expect(429).expect({
+      statusCode: 429,
+      error: 'Demasiadas solicitudes',
+      message:
+        'Llegaste al límite de 20 sugerencias de hoy. Vuelve a intentarlo mañana.',
+    });
+  });
+
+  it('does not count a rejected upload against the day', async () => {
+    await post().attach('foto', pngBytes(), 'pan.jpg').expect(415);
+
+    expect(queryRaw).not.toHaveBeenCalled();
+  });
+
+  it('allows five suggestions a minute and answers the sixth with a Spanish 429', async () => {
+    for (let i = 0; i < SUGGESTIONS_PER_MINUTE; i++) {
+      await post().attach('foto', jpegBytes(256, i), 'pan.jpg').expect(200);
+    }
+    const response = await post()
+      .attach('foto', jpegBytes(), 'pan.jpg')
+      .expect(429);
+
+    expect(response.body.message).toBe(
+      'Demasiadas solicitudes. Intenta de nuevo en un momento.',
+    );
+    // Throttled before anything is read or counted
+    expect(queryRaw).toHaveBeenCalledTimes(SUGGESTIONS_PER_MINUTE);
   });
 });

@@ -11,6 +11,7 @@ import {
   type OfferSuggestion,
   type SuggestionDraft,
 } from './offer-suggestion';
+import { SuggestionQuotaService } from './suggestion-quota.service';
 
 /** The part of an uploaded file the service reads. */
 export interface UploadedPhoto {
@@ -33,9 +34,17 @@ const MAX_WARNINGS = 5;
  */
 @Injectable()
 export class OfferSuggestionsService {
-  constructor(private readonly suggester: OfferSuggester) {}
+  constructor(
+    private readonly suggester: OfferSuggester,
+    private readonly quota: SuggestionQuotaService,
+  ) {}
 
+  /**
+   * The photo is checked before anything is counted, so a bad upload costs nothing; a
+   * suggestion that fails on our side is given back to the day's quota.
+   */
   async suggest(
+    userId: string,
     photo: UploadedPhoto | undefined,
     originalPrice?: number,
   ): Promise<OfferSuggestion> {
@@ -53,11 +62,18 @@ export class OfferSuggestionsService {
       );
     }
 
-    const draft = await this.suggester.suggest({
-      bytes: photo.buffer,
-      mediaType,
-      originalPrice,
-    });
+    const reservation = await this.quota.reserve(userId);
+    let draft: SuggestionDraft;
+    try {
+      draft = await this.suggester.suggest({
+        bytes: photo.buffer,
+        mediaType,
+        originalPrice,
+      });
+    } catch (error) {
+      await this.quota.release(reservation);
+      throw error;
+    }
     return finalizeSuggestion(draft, originalPrice, this.suggester.source);
   }
 }
