@@ -214,11 +214,11 @@ fun OfferEditorContent(
     isSaving: Boolean,
     saveFailed: Boolean,
     onClose: () -> Unit,
-    photoPicking: PhotoPicking = PhotoPicking(),
-    suggestionPanel: SuggestionPanel = SuggestionPanel(),
     /** Called with a form that already passed validation. */
     onSave: () -> Unit,
     modifier: Modifier = Modifier,
+    photoPicking: PhotoPicking = PhotoPicking(),
+    suggestionPanel: SuggestionPanel = SuggestionPanel(),
     /** The time of day now, in minutes, so a pickup that already ended today is caught. */
     nowMinutes: () -> Int = { OfferEditorFormState.minutesOf(LocalTime.now()) }
 ) {
@@ -912,8 +912,9 @@ private fun OfferFieldError.message(): String = when (this) {
         OfferEditorFormState.MAX_TITLE_LENGTH,
         OfferEditorFormState.MAX_TITLE_LENGTH
     )
-    OfferFieldError.DESCRIPTION_TOO_LONG -> stringResource(
-        R.string.offer_error_description_too_long,
+    OfferFieldError.DESCRIPTION_TOO_LONG -> pluralStringResource(
+        R.plurals.offer_error_description_too_long,
+        OfferEditorFormState.MAX_DESCRIPTION_LENGTH,
         OfferEditorFormState.MAX_DESCRIPTION_LENGTH
     )
     OfferFieldError.PRICE_NOT_POSITIVE -> stringResource(R.string.offer_error_price_not_positive)

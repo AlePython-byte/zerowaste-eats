@@ -271,7 +271,11 @@
     <string name="offer_photo_preparing">Preparando la foto…</string>
     <string name="offer_photo_failed">No pudimos usar esa foto. Prueba con otra.</string>
     <string name="offer_field_description">Descripción (opcional)</string>
-    <string name="offer_error_description_too_long">Máximo %1$d caracteres.</string>
+    <plurals name="offer_error_description_too_long">
+        <item quantity="one">Usa %1$d carácter como máximo.</item>
+        <item quantity="many">Usa %1$d caracteres como máximo.</item>
+        <item quantity="other">Usa %1$d caracteres como máximo.</item>
+    </plurals>
     <string name="ai_suggest_button">Sugerir con IA</string>
     <string name="ai_suggest_hint">Usa tu foto para rellenar el título, la categoría, la descripción y el descuento.</string>
     <string name="ai_suggest_loading">Analizando la foto…</string>

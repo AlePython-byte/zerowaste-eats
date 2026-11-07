@@ -8,6 +8,7 @@ import android.graphics.Matrix
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.core.graphics.scale
 import androidx.exifinterface.media.ExifInterface
 import com.zerowasteeats.app.data.merchant.OfferPhoto
 import java.io.ByteArrayOutputStream
@@ -127,7 +128,7 @@ class OfferPhotoProcessor(
 
     private fun scaleTo(bitmap: Bitmap, size: PhotoScaling.Size): Bitmap {
         if (bitmap.width == size.width && bitmap.height == size.height) return bitmap
-        val scaled = Bitmap.createScaledBitmap(bitmap, size.width, size.height, true)
+        val scaled = bitmap.scale(size.width, size.height)
         if (scaled !== bitmap) bitmap.recycle()
         return scaled
     }
@@ -137,7 +138,7 @@ class OfferPhotoProcessor(
             val source = if (size.width == bitmap.width && size.height == bitmap.height) {
                 bitmap
             } else {
-                Bitmap.createScaledBitmap(bitmap, size.width, size.height, true)
+                bitmap.scale(size.width, size.height)
             }
             try {
                 ByteArrayOutputStream().use { out ->
