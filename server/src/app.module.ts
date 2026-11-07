@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { createObserveModule } from '@nestjs/observe';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { AiModule } from './ai/ai.module';
 import { AuthModule } from './auth/auth.module';
 import { AuthService } from './auth/auth.service';
 import { SupabaseAuthGuard } from './auth/guards/supabase-auth.guard';
@@ -69,6 +70,7 @@ async function telemetryModule(): Promise<DynamicModule> {
     MerchantsModule,
     OffersModule,
     ReservationsModule,
+    AiModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
