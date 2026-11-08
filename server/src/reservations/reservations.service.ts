@@ -20,6 +20,7 @@ import {
 
 /** Fresh codes tried when the drawn one already belongs to another reservation. */
 const CODE_ATTEMPTS = 5;
+const MAX_LISTED = 100;
 
 const isUniqueViolation = (error: unknown) =>
   error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -63,6 +64,24 @@ export class ReservationsService {
         if (isUniqueViolation(error) && attempt < CODE_ATTEMPTS) continue;
         throw this.safe(error);
       }
+    }
+  }
+
+  /** The customer's own reservations, newest first. */
+  async listForCustomer(
+    customerId: string,
+  ): Promise<CustomerReservationView[]> {
+    const now = this.clock();
+    try {
+      const rows = (await this.db.reservation.findMany({
+        where: { customerId },
+        include: WITH_OFFER_AND_BUSINESS,
+        orderBy: { createdAt: 'desc' },
+        take: MAX_LISTED,
+      })) as ReservationWithOffer[];
+      return rows.map((row) => presentCustomerReservation(row, now));
+    } catch (error) {
+      throw this.safe(error);
     }
   }
 

@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -14,6 +14,11 @@ import { ReservationsService } from './reservations.service';
 @Roles(UserRole.CUSTOMER)
 export class ReservationsController {
   constructor(private readonly reservations: ReservationsService) {}
+
+  @Get()
+  list(@CurrentUser() user: AuthenticatedUser) {
+    return this.reservations.listForCustomer(user.id);
+  }
 
   @Post()
   reserve(

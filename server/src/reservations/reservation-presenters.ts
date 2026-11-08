@@ -61,3 +61,46 @@ export function presentCustomerReservation(
 export type CustomerReservationView = ReturnType<
   typeof presentCustomerReservation
 >;
+
+export type ReservationForBusiness = Reservation & {
+  offer: Offer;
+  customer: { displayName: string };
+};
+
+/** How the include for [ReservationForBusiness] is spelled in queries. */
+export const WITH_OFFER_AND_CUSTOMER = {
+  offer: true,
+  customer: { select: { displayName: true } },
+} as const;
+
+/**
+ * What the business sees of a reservation. Never the pickup code: the customer shows it at
+ * pickup and the business types it in, which is what proves the customer came.
+ */
+export function presentBusinessReservation(
+  reservation: ReservationForBusiness,
+  now: Date,
+) {
+  const { offer } = reservation;
+  return {
+    id: reservation.id,
+    status: reservation.status,
+    quantity: reservation.quantity,
+    unitPrice: pesos(reservation.unitPrice),
+    totalPrice: pesos(reservation.totalPrice),
+    createdAt: reservation.createdAt.toISOString(),
+    completedAt: reservation.completedAt?.toISOString() ?? null,
+    customer: { displayName: reservation.customer.displayName },
+    offer: {
+      id: offer.id,
+      title: offer.title,
+      pickupStart: offer.pickupStart.toISOString(),
+      pickupEnd: offer.pickupEnd.toISOString(),
+      status: effectiveStatus(offer.status, offer.pickupEnd, now),
+    },
+  };
+}
+
+export type BusinessReservationView = ReturnType<
+  typeof presentBusinessReservation
+>;
