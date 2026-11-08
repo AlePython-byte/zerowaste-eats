@@ -6,6 +6,8 @@ services:
     name: zerowaste-eats-api
     runtime: node
     plan: free
+    # Next to the Supabase project (us-east-1), so every query stays a short hop
+    region: virginia
     rootDir: server
     # Dev dependencies are needed to build (Nest CLI, TypeScript, Prisma CLI) and to run the
     # migrations on start; NODE_ENV=production would otherwise make `npm ci` skip them.
