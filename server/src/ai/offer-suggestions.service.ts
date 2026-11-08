@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   UnsupportedMediaTypeException,
 } from '@nestjs/common';
 import { OfferCategory } from '../generated/prisma/enums';
@@ -34,6 +35,8 @@ const MAX_WARNINGS = 5;
  */
 @Injectable()
 export class OfferSuggestionsService {
+  private readonly logger = new Logger(OfferSuggestionsService.name);
+
   constructor(
     private readonly suggester: OfferSuggester,
     private readonly quota: SuggestionQuotaService,
@@ -64,6 +67,7 @@ export class OfferSuggestionsService {
 
     const reservation = await this.quota.reserve(userId);
     let draft: SuggestionDraft;
+    const startedAt = performance.now();
     try {
       draft = await this.suggester.suggest({
         bytes: photo.buffer,
@@ -74,6 +78,11 @@ export class OfferSuggestionsService {
       await this.quota.release(reservation);
       throw error;
     }
+    // Only where the suggestion came from and how long it took: no user, photo, price or text
+    const elapsedMs = Math.round(performance.now() - startedAt);
+    this.logger.log(
+      `Offer suggestion served: source=${this.suggester.source}, ms=${elapsedMs}`,
+    );
     return finalizeSuggestion(draft, originalPrice, this.suggester.source);
   }
 }

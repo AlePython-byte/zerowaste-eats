@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthModule } from '../auth/auth.module';
 import { AiController } from './ai.controller';
@@ -17,14 +17,16 @@ import { SuggestionQuotaService } from './suggestion-quota.service';
  * suggester otherwise. The model comes from AI_MODEL.
  */
 export function createOfferSuggester(config: ConfigService): OfferSuggester {
+  const logger = new Logger('OfferSuggester');
   const apiKey = config.get<string>('ANTHROPIC_API_KEY');
   if (!apiKey) {
+    logger.log('Offer suggestions: mock (no ANTHROPIC_API_KEY)');
     return new MockOfferSuggester();
   }
-  return new ClaudeOfferSuggester(
-    createAnthropicClient(apiKey),
-    config.getOrThrow<string>('AI_MODEL'),
-  );
+  const model = config.getOrThrow<string>('AI_MODEL');
+  // Only the mode and the model: the key never reaches the log
+  logger.log(`Offer suggestions: claude (model ${model})`);
+  return new ClaudeOfferSuggester(createAnthropicClient(apiKey), model);
 }
 
 @Module({

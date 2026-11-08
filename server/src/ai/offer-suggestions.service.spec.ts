@@ -2,6 +2,7 @@ import {
   BadRequestException,
   HttpException,
   HttpStatus,
+  Logger,
   ServiceUnavailableException,
   UnsupportedMediaTypeException,
 } from '@nestjs/common';
@@ -57,6 +58,36 @@ describe('OfferSuggestionsService', () => {
 
     expect(reserve).toHaveBeenCalledWith(USER_ID);
     expect(release).not.toHaveBeenCalled();
+  });
+
+  describe('log', () => {
+    let log: jest.SpyInstance;
+
+    beforeEach(() => {
+      log = jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {});
+    });
+
+    afterEach(() => log.mockRestore());
+
+    it('records the source and duration of each suggestion, and nothing about the request', async () => {
+      await service.suggest(USER_ID, photo(jpegBytes()), 12000);
+
+      expect(log).toHaveBeenCalledTimes(1);
+      const line = String(log.mock.calls[0][0]);
+      expect(line).toMatch(/^Offer suggestion served: source=claude, ms=\d+$/);
+      expect(line).not.toContain(USER_ID);
+      expect(line).not.toContain('12000');
+      expect(line).not.toContain(draft().title);
+    });
+
+    it('records nothing when the suggester fails', async () => {
+      suggest.mockRejectedValue(new ServiceUnavailableException());
+
+      await expect(
+        service.suggest(USER_ID, photo(jpegBytes()), 12000),
+      ).rejects.toThrow();
+      expect(log).not.toHaveBeenCalled();
+    });
   });
 
   it('gives the suggestion back when the suggester fails', async () => {

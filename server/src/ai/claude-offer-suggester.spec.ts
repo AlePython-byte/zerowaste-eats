@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { ServiceUnavailableException } from '@nestjs/common';
+import { Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OfferCategory } from '../generated/prisma/enums';
 import { jpegBytes, webpBytes } from '../../test/fixtures/images';
@@ -258,6 +258,39 @@ describe('ClaudeOfferSuggester', () => {
 
 describe('createOfferSuggester', () => {
   const config = (values: Record<string, string>) => new ConfigService(values);
+  let log: jest.SpyInstance;
+
+  beforeEach(() => {
+    log = jest.spyOn(Logger.prototype, 'log').mockImplementation(() => {});
+  });
+
+  afterEach(() => log.mockRestore());
+
+  it('logs the simulated mode at startup', () => {
+    createOfferSuggester(config({ AI_MODEL: 'claude-haiku-5-5' }));
+
+    expect(log).toHaveBeenCalledTimes(1);
+    expect(log).toHaveBeenCalledWith(
+      'Offer suggestions: mock (no ANTHROPIC_API_KEY)',
+    );
+  });
+
+  it('logs the Claude mode and model at startup, never the key', () => {
+    createOfferSuggester(
+      config({
+        ANTHROPIC_API_KEY: 'test-key-placeholder',
+        AI_MODEL: 'claude-haiku-5-5',
+      }),
+    );
+
+    expect(log).toHaveBeenCalledTimes(1);
+    expect(log).toHaveBeenCalledWith(
+      'Offer suggestions: claude (model claude-haiku-5-5)',
+    );
+    expect(JSON.stringify(log.mock.calls)).not.toContain(
+      'test-key-placeholder',
+    );
+  });
 
   it('runs the simulated suggester without an API key', () => {
     expect(
