@@ -235,14 +235,14 @@ fun OfferEditorContent(
     isNew: Boolean,
     isSaving: Boolean,
     saveFailed: Boolean,
-    /** Why the photo could not be published on the last save, if it could not. */
-    uploadError: PhotoUploadError? = null,
-    /** Why the offer could not be saved on the server on the last try, if it could not. */
-    saveError: MerchantDataError? = null,
     onClose: () -> Unit,
     /** Called with a form that already passed validation. */
     onSave: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Why the photo could not be published on the last save, if it could not. */
+    uploadError: PhotoUploadError? = null,
+    /** Why the offer could not be saved on the server on the last try, if it could not. */
+    saveError: MerchantDataError? = null,
     photoPicking: PhotoPicking = PhotoPicking(),
     suggestionPanel: SuggestionPanel = SuggestionPanel(),
     /** The time of day now, in minutes, so a pickup that already ended today is caught. */
