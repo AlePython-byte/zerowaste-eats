@@ -235,7 +235,71 @@ export function createFakeOffersDb(seed: Partial<FakeTables> = {}) {
         return rows[0] ? { ...rows[0] } : null;
       },
     ),
+    update: jest.fn(
+      async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Record<string, any>;
+      }) => {
+        const row = t.establishments.find((e) => e.id === where.id);
+        if (!row) throw new Error('Record to update not found');
+        Object.assign(row, data);
+        return { ...row };
+      },
+    ),
+    create: jest.fn(async ({ data }: { data: Record<string, any> }) => {
+      const row = {
+        id: randomUUID(),
+        createdAt: new Date(),
+        ...data,
+      } as unknown as FakeEstablishment;
+      t.establishments.push(row);
+      return { ...row };
+    }),
   };
+
+  const merchantProfile = {
+    findUnique: jest.fn(async ({ where }: { where: { userId: string } }) => {
+      const found = t.merchantProfiles.find((m) => m.userId === where.userId);
+      return found ? { ...found } : null;
+    }),
+    update: jest.fn(
+      async ({
+        where,
+        data,
+      }: {
+        where: { id: string };
+        data: Record<string, any>;
+      }) => {
+        const row = t.merchantProfiles.find((m) => m.id === where.id);
+        if (!row) throw new Error('Record to update not found');
+        Object.assign(row, data);
+        return { ...row };
+      },
+    ),
+  };
+
+  /**
+   * Runs the callback against the same tables and, if it throws, puts every table back as
+   * it was, like a rolled-back transaction.
+   */
+  const $transaction = jest.fn(
+    async (callback: (tx: unknown) => Promise<unknown>): Promise<unknown> => {
+      const snapshot = (Object.keys(t) as (keyof FakeTables)[]).map(
+        (key) => [key, t[key].map((row) => ({ ...row }))] as const,
+      );
+      try {
+        return await callback(client);
+      } catch (error) {
+        snapshot.forEach(([key, rows]) => {
+          (t as unknown as Record<string, unknown>)[key] = rows;
+        });
+        throw error;
+      }
+    },
+  );
 
   const reservation = {
     count: jest.fn(
@@ -252,7 +316,14 @@ export function createFakeOffersDb(seed: Partial<FakeTables> = {}) {
     }),
   };
 
-  const client = { offer, establishment, reservation, user };
+  const client = {
+    offer,
+    establishment,
+    reservation,
+    user,
+    merchantProfile,
+    $transaction,
+  };
   return {
     tables: t,
     client,
