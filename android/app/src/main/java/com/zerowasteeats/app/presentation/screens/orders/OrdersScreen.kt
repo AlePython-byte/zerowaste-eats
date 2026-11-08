@@ -35,8 +35,14 @@ import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.components.common.EmptyStateIcon
 import com.zerowasteeats.app.presentation.components.orders.OrderCard
-import com.zerowasteeats.app.presentation.data.MockOrders
 import com.zerowasteeats.app.presentation.model.OrderStatus
+import com.zerowasteeats.app.presentation.model.toOrderUiModel
+import com.zerowasteeats.app.ZeroWasteEatsApplication
+import com.zerowasteeats.app.data.session.Session
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import java.time.Clock
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.navigation.LocalBottomBarInset
 import com.zerowasteeats.app.presentation.theme.AppSpacing
@@ -47,11 +53,15 @@ enum class OrdersTab(@StringRes val labelRes: Int) {
     HISTORY(R.string.orders_tab_history)
 }
 
+/** The customer's reservations: to pick up, and picked up or cancelled. */
 @Composable
-fun OrdersScreen() {
+fun OrdersScreen(session: Session.Customer) {
     var selectedTab by rememberSaveable { mutableStateOf(OrdersTab.ACTIVE) }
 
-    val allOrders = MockOrders.getList()
+    val container = (LocalContext.current.applicationContext as ZeroWasteEatsApplication).container
+    val reservations by container.customerReservations(session).reservations.collectAsState()
+    val clock = remember { Clock.systemDefaultZone() }
+    val allOrders = reservations.map { it.toOrderUiModel(clock) }
     val displayedOrders = allOrders.filter { order ->
         when (selectedTab) {
             OrdersTab.ACTIVE -> order.status == OrderStatus.RESERVED || order.status == OrderStatus.READY_FOR_PICKUP

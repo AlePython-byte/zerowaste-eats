@@ -95,7 +95,7 @@ private fun CustomerNavHost(
                     )
                 }
                 composable(CustomerDestination.ORDERS.route) {
-                    OrdersScreen()
+                    OrdersScreen(session = session)
                 }
                 composable(CustomerDestination.PROFILE.route) {
                     ProfileScreen(
@@ -109,8 +109,11 @@ private fun CustomerNavHost(
                         session = session,
                         offerId = backStackEntry.arguments?.getString("offerId").orEmpty(),
                         onBackClick = { navController.popBackStack() },
-                        // Reserving comes with the reservations
-                        onReserveClick = {}
+                        onViewOrders = {
+                            // Leave the detail first, so Home does not reopen on it later
+                            navController.popBackStack()
+                            navController.navigateToTab(CustomerDestination.ORDERS)
+                        }
                     )
                 }
             }

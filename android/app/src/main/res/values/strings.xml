@@ -68,6 +68,26 @@
     <string name="order_day_yesterday">Ayer</string>
     <string name="offer_detail_pickup_title">Recogida</string>
     <string name="offer_detail_reserve">Reservar</string>
+    <string name="offer_detail_quantity_label">Cantidad</string>
+    <string name="offer_detail_quantity_decrease_cd">Una unidad menos</string>
+    <string name="offer_detail_quantity_increase_cd">Una unidad más</string>
+    <plurals name="offer_detail_quantity_cd">
+        <item quantity="one">%1$d unidad seleccionada</item>
+        <item quantity="many">%1$d unidades seleccionadas</item>
+        <item quantity="other">%1$d unidades seleccionadas</item>
+    </plurals>
+    <string name="offer_detail_reserve_total">Reservar · %1$s</string>
+    <string name="reserve_failed_not_enough_units">Ya no quedan unidades suficientes de esta oferta. La actualizamos.</string>
+    <string name="reserve_failed_network">No pudimos hacer la reserva. Revisa tu conexión.</string>
+    <string name="reserve_failed_session">Tu sesión expiró. Cierra sesión y vuelve a ingresar para reservar.</string>
+    <string name="reserve_failed">No pudimos hacer la reserva. Inténtalo de nuevo.</string>
+    <string name="reserved_title">¡Reservado!</string>
+    <string name="reserved_code_label">Tu código de recogida</string>
+    <string name="reserved_code_cd">Código de recogida: %1$s</string>
+    <string name="reserved_code_hint">Muéstralo en el negocio al recoger. También lo encuentras en Pedidos.</string>
+    <string name="reserved_total">Total: %1$s</string>
+    <string name="reserved_view_orders">Ver mis pedidos</string>
+    <string name="reserved_done">Listo</string>
 
     <string name="orders_title">Pedidos</string>
     <string name="orders_subtitle">Gestiona tus reservas y recogidas.</string>

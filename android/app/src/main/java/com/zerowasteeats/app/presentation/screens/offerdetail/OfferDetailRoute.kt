@@ -20,6 +20,11 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarResult
+import kotlinx.coroutines.flow.Flow
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -58,7 +63,7 @@ fun OfferDetailScreen(
     session: Session.Customer,
     offerId: String,
     onBackClick: () -> Unit,
-    onReserveClick: () -> Unit
+    onViewOrders: () -> Unit
 ) {
     val container =
         (LocalContext.current.applicationContext as ZeroWasteEatsApplication).container
@@ -66,6 +71,7 @@ fun OfferDetailScreen(
         factory = OfferDetailViewModelFactory(
             offerId,
             container.offerCatalog(session),
+            container.customerReservations(session),
             container.customerLocation
         )
     )
@@ -91,20 +97,75 @@ fun OfferDetailScreen(
         onRetry = { _, favorite -> viewModel.setFavorite(favorite) }
     )
 
+    ReserveProblemSnackbar(
+        problems = viewModel.reserveFailures,
+        snackbarHostState = snackbarHostState,
+        onRetry = viewModel::reserve
+    )
+
     val offer = state.offer
     when {
         state.showNotAvailable -> OfferNotAvailable(onBackClick = onBackClick)
         offer != null -> OfferDetailContent(
             offer = offer,
+            reserve = state.toPanel(),
             onBackClick = onBackClick,
             onFavoriteClick = viewModel::toggleFavorite,
-            onReserveClick = onReserveClick,
+            onDecreaseQuantity = viewModel::decreaseQuantity,
+            onIncreaseQuantity = viewModel::increaseQuantity,
+            onReserveClick = viewModel::reserve,
             snackbarHost = { SnackbarHost(snackbarHostState) }
         )
         else -> OfferDetailSkeleton(
             onBackClick = onBackClick,
             snackbarHost = { SnackbarHost(snackbarHostState) }
         )
+    }
+
+    state.reserve.reserved?.let { reservation ->
+        ReservedSheet(
+            reservation = reservation,
+            onViewOrders = {
+                viewModel.dismissReserved()
+                onViewOrders()
+            },
+            onDismiss = viewModel::dismissReserved
+        )
+    }
+}
+
+/**
+ * Says why a reservation was not made. Running out of units needs no action (the offer was
+ * loaded again); a network or server failure offers to try again; an ended session only says
+ * to sign in again.
+ */
+@Composable
+private fun ReserveProblemSnackbar(
+    problems: Flow<ReserveProblem>,
+    snackbarHostState: SnackbarHostState,
+    onRetry: () -> Unit
+) {
+    val messages = mapOf(
+        ReserveProblem.NOT_ENOUGH_UNITS to stringResource(R.string.reserve_failed_not_enough_units),
+        ReserveProblem.NETWORK to stringResource(R.string.reserve_failed_network),
+        ReserveProblem.SESSION to stringResource(R.string.reserve_failed_session),
+        ReserveProblem.UNEXPECTED to stringResource(R.string.reserve_failed)
+    )
+    val retryLabel = stringResource(R.string.auth_retry)
+    val currentMessages by rememberUpdatedState(messages)
+    val currentOnRetry by rememberUpdatedState(onRetry)
+
+    LaunchedEffect(problems) {
+        problems.collect { problem ->
+            snackbarHostState.currentSnackbarData?.dismiss()
+            val canRetry = problem == ReserveProblem.NETWORK || problem == ReserveProblem.UNEXPECTED
+            val result = snackbarHostState.showSnackbar(
+                message = currentMessages.getValue(problem),
+                actionLabel = if (canRetry) retryLabel else null,
+                duration = SnackbarDuration.Long
+            )
+            if (result == SnackbarResult.ActionPerformed) currentOnRetry()
+        }
     }
 }
 

@@ -65,6 +65,25 @@
     <string name="order_day_yesterday">Yesterday</string>
     <string name="offer_detail_pickup_title">Pickup</string>
     <string name="offer_detail_reserve">Reserve</string>
+    <string name="offer_detail_quantity_label">Quantity</string>
+    <string name="offer_detail_quantity_decrease_cd">One unit less</string>
+    <string name="offer_detail_quantity_increase_cd">One unit more</string>
+    <plurals name="offer_detail_quantity_cd">
+        <item quantity="one">%1$d unit selected</item>
+        <item quantity="other">%1$d units selected</item>
+    </plurals>
+    <string name="offer_detail_reserve_total">Reserve · %1$s</string>
+    <string name="reserve_failed_not_enough_units">There are no longer enough units of this offer. We updated it.</string>
+    <string name="reserve_failed_network">We couldn\'t make the reservation. Check your connection.</string>
+    <string name="reserve_failed_session">Your session expired. Sign out and sign in again to reserve.</string>
+    <string name="reserve_failed">We couldn\'t make the reservation. Please try again.</string>
+    <string name="reserved_title">Reserved!</string>
+    <string name="reserved_code_label">Your pickup code</string>
+    <string name="reserved_code_cd">Pickup code: %1$s</string>
+    <string name="reserved_code_hint">Show it at the business when you pick up. You can also find it in Orders.</string>
+    <string name="reserved_total">Total: %1$s</string>
+    <string name="reserved_view_orders">View my orders</string>
+    <string name="reserved_done">Done</string>
 
     <string name="orders_title">Orders</string>
     <string name="orders_subtitle">Manage your reservations and pickups.</string>

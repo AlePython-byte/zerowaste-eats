@@ -41,6 +41,7 @@ import com.zerowasteeats.app.data.catalog.RemoteOfferCatalogRepository
 import com.zerowasteeats.app.data.ai.DemoOfferSuggestionRepository
 import com.zerowasteeats.app.data.ai.OfferSuggestionRepository
 import com.zerowasteeats.app.data.ai.RemoteOfferSuggestionRepository
+import java.time.Clock
 import java.util.concurrent.TimeUnit
 import okhttp3.OkHttpClient
 import com.zerowasteeats.app.data.photos.LocalOfferPhotoUploader
@@ -53,6 +54,11 @@ import com.zerowasteeats.app.data.session.Session
 import com.zerowasteeats.app.data.session.SessionManager
 import com.zerowasteeats.app.data.session.SharedPreferencesKeyValueStore
 import com.zerowasteeats.app.data.session.SessionStore
+import com.zerowasteeats.app.data.reservations.CustomerReservationRepository
+import com.zerowasteeats.app.data.reservations.FakeCustomerReservationRepository
+import com.zerowasteeats.app.data.reservations.RemoteCustomerReservationRepository
+import com.zerowasteeats.app.data.reservations.ReservationsApi
+import kotlinx.coroutines.flow.first
 
 /**
  * Builds the app's long-lived objects by hand. Swapping the fake repositories for the real
@@ -125,6 +131,8 @@ class AppContainer(context: Context) {
 
     private val offerCatalogs = mutableMapOf<String, OfferCatalogRepository>()
 
+    private val customerReservations = mutableMapOf<String, CustomerReservationRepository>()
+
     private val deviceLocation: CustomerLocationSource = DeviceLocationSource(context)
 
     /** Readies a photo picked for an offer: upright, at most 1280 px, JPEG under 2 MB. */
@@ -192,6 +200,7 @@ class AppContainer(context: Context) {
         authRepository = buildAuthRepository(mode)
         synchronized(merchantRepositories) { merchantRepositories.clear() }
         synchronized(offerCatalogs) { offerCatalogs.clear() }
+        synchronized(customerReservations) { customerReservations.clear() }
     }
 
     /**
@@ -206,6 +215,35 @@ class AppContainer(context: Context) {
                     RemoteOfferCatalogRepository(backend.create(OfferCatalogApi::class.java))
                 } else {
                     FakeOfferCatalogRepository()
+                }
+            }
+        }
+
+    /**
+     * The reservations of a signed-in customer: the backend in live mode, memory in demo mode,
+     * where the demo account starts with a few past orders. Kept per account while the process
+     * lives, so the detail and the orders share them.
+     */
+    fun customerReservations(session: Session.Customer): CustomerReservationRepository =
+        synchronized(customerReservations) {
+            customerReservations.getOrPut(session.userId) {
+                val backend = liveSetup.clientsOrNull?.backend
+                if (dataMode.mode.value == DataMode.LIVE && backend != null) {
+                    RemoteCustomerReservationRepository(backend.create(ReservationsApi::class.java))
+                } else {
+                    val catalog = offerCatalog(session)
+                    val isDemo = session.email.equals(
+                        FakeAuthRepository.DEMO_CUSTOMER_EMAIL,
+                        ignoreCase = true
+                    )
+                    FakeCustomerReservationRepository(
+                        initialReservations = if (isDemo) {
+                            FakeCustomerReservationRepository.demoReservations(Clock.systemDefaultZone())
+                        } else {
+                            emptyList()
+                        },
+                        offerLookup = { id -> catalog.observe(id).first() }
+                    )
                 }
             }
         }
