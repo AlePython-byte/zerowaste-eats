@@ -259,6 +259,9 @@
     <string name="offer_photo_change_cd">Choose another photo from your gallery</string>
     <string name="offer_photo_preparing">Preparing the photo…</string>
     <string name="offer_photo_failed">We couldn\'t use that photo. Try another one.</string>
+    <string name="offer_photo_upload_network">We couldn\'t upload the photo, so nothing was published. Check your connection and try again.</string>
+    <string name="offer_photo_upload_rejected">We couldn\'t upload the photo, so nothing was published. Sign out, sign in again and try again.</string>
+    <string name="offer_photo_upload_unexpected">We couldn\'t upload the photo, so nothing was published. Choose the photo again and try again.</string>
     <string name="offer_field_description">Description (optional)</string>
     <plurals name="offer_error_description_too_long">
         <item quantity="one">Use %1$d character at most.</item>

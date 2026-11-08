@@ -94,6 +94,8 @@ import com.zerowasteeats.app.data.merchant.OfferPhoto
 import com.zerowasteeats.app.data.merchant.PhotoSelection
 import com.zerowasteeats.app.data.merchant.PickedPhoto
 import com.zerowasteeats.app.data.settings.DataMode
+import com.zerowasteeats.app.data.photos.PhotoUploadError
+import com.zerowasteeats.app.presentation.screens.auth.AuthLinkButton
 import com.zerowasteeats.app.data.session.Session
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppTextField
@@ -145,7 +147,7 @@ fun OfferEditorScreen(
             offerId,
             container.offerPhotoPreparer,
             container.offerSuggestions(),
-            container.offerPhotoUploader()
+            container.offerPhotoUploader(session.userId)
         )
     )
 
@@ -177,6 +179,7 @@ fun OfferEditorScreen(
         isNew = offerId == null,
         isSaving = viewModel.isSaving,
         saveFailed = viewModel.notFound,
+        uploadError = viewModel.uploadError,
         photoPicking = PhotoPicking(
             onPick = {
                 pickPhoto.launch(
@@ -230,6 +233,8 @@ fun OfferEditorContent(
     isNew: Boolean,
     isSaving: Boolean,
     saveFailed: Boolean,
+    /** Why the photo could not be published on the last save, if it could not. */
+    uploadError: PhotoUploadError? = null,
     onClose: () -> Unit,
     /** Called with a form that already passed validation. */
     onSave: () -> Unit,
@@ -373,6 +378,15 @@ fun OfferEditorContent(
                 FormErrorBanner(
                     message = if (saveFailed) stringResource(R.string.offer_editor_not_found_message) else null
                 )
+                // Nothing was saved and the form is as it was: sending again retries the upload
+                FormErrorBanner(message = uploadError?.message())
+                if (uploadError != null) {
+                    AuthLinkButton(
+                        text = stringResource(R.string.auth_retry),
+                        onClick = ::submit,
+                        enabled = !isSaving
+                    )
+                }
                 AppButton(
                     text = stringResource(
                         if (isNew) R.string.merchant_publish_offer else R.string.offer_editor_save_changes
@@ -956,6 +970,15 @@ private fun OfferFieldError.message(): String = when (this) {
     OfferFieldError.END_NOT_AFTER_START -> stringResource(R.string.offer_error_end_not_after_start)
     OfferFieldError.END_IN_PAST -> stringResource(R.string.offer_error_end_in_past)
 }
+
+@Composable
+private fun PhotoUploadError.message(): String = stringResource(
+    when (this) {
+        PhotoUploadError.NETWORK -> R.string.offer_photo_upload_network
+        PhotoUploadError.REJECTED -> R.string.offer_photo_upload_rejected
+        PhotoUploadError.UNEXPECTED -> R.string.offer_photo_upload_unexpected
+    }
+)
 
 private fun photoNameRes(photo: OfferPhoto.Bundled): Int = when (photo) {
     OfferPhoto.Bundled.CROISSANT -> R.string.offer_photo_croissant

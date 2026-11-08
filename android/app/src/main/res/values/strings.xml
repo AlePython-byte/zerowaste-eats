@@ -271,6 +271,9 @@
     <string name="offer_photo_change_cd">Elegir otra foto de tu galería</string>
     <string name="offer_photo_preparing">Preparando la foto…</string>
     <string name="offer_photo_failed">No pudimos usar esa foto. Prueba con otra.</string>
+    <string name="offer_photo_upload_network">No pudimos subir la foto y no se publicó nada. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="offer_photo_upload_rejected">No pudimos subir la foto y no se publicó nada. Cierra sesión, vuelve a ingresar e inténtalo de nuevo.</string>
+    <string name="offer_photo_upload_unexpected">No pudimos subir la foto y no se publicó nada. Elige la foto otra vez e inténtalo de nuevo.</string>
     <string name="offer_field_description">Descripción (opcional)</string>
     <plurals name="offer_error_description_too_long">
         <item quantity="one">Usa %1$d carácter como máximo.</item>

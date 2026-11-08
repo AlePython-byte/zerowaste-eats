@@ -33,6 +33,7 @@ import okhttp3.OkHttpClient
 import com.zerowasteeats.app.data.photos.LocalOfferPhotoUploader
 import com.zerowasteeats.app.data.photos.OfferPhotoPreparer
 import com.zerowasteeats.app.data.photos.OfferPhotoUploader
+import com.zerowasteeats.app.data.photos.SupabaseOfferPhotoUploader
 import com.zerowasteeats.app.data.photos.OfferPhotoProcessor
 import com.zerowasteeats.app.data.session.PrefsSessionStore
 import com.zerowasteeats.app.data.session.Session
@@ -114,8 +115,31 @@ class AppContainer(context: Context) {
 
     private val localPhotoUploader: OfferPhotoUploader = LocalOfferPhotoUploader()
 
-    /** Publishes a picked offer photo. For now it stays on the device in every mode. */
-    fun offerPhotoUploader(): OfferPhotoUploader = localPhotoUploader
+    /**
+     * Publishes a picked offer photo of the business [userId]: to Supabase Storage in live
+     * mode, nowhere in demo mode (the offer keeps the file on the device).
+     */
+    fun offerPhotoUploader(userId: String): OfferPhotoUploader {
+        val backend = liveSetup.clientsOrNull?.backend
+        if (dataMode.mode.value != DataMode.LIVE || backend == null) return localPhotoUploader
+        val users = backend.create(UsersApi::class.java)
+        return SupabaseOfferPhotoUploader(
+            // The backend's client: it carries the user's token and renews it on a 401
+            client = backend.callFactory() as OkHttpClient,
+            supabaseUrl = apiConfig.supabaseUrl,
+            publishableKey = apiConfig.supabasePublishableKey,
+            userId = userId,
+            beforeUpload = {
+                // A token about to expire is renewed through the backend, which answers it
+                // with a 401 the authenticator handles; Storage might not
+                val tokens = tokenStore.load()
+                val nowSeconds = System.currentTimeMillis() / 1000
+                if (tokens != null && tokens.expiresAtEpochSeconds - nowSeconds < TOKEN_MARGIN_SECONDS) {
+                    runCatching { users.me() }
+                }
+            }
+        )
+    }
 
     private val demoSuggestions: OfferSuggestionRepository by lazy { DemoOfferSuggestionRepository() }
 
@@ -167,3 +191,6 @@ class AppContainer(context: Context) {
 
 /** Above the server's 30 s wait for the model, so a slow suggestion still arrives. */
 private const val SUGGESTION_READ_TIMEOUT_SECONDS = 45L
+
+/** A token closer than this to expiring is renewed before uploading a photo. */
+private const val TOKEN_MARGIN_SECONDS = 60L
