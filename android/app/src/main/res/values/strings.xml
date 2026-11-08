@@ -245,6 +245,8 @@
     <string name="profile_sign_out_title">¿Cerrar sesión?</string>
     <string name="profile_sign_out_message">Tendrás que ingresar de nuevo para ver tus pedidos.</string>
     <string name="mode_badge_merchant">Negocio</string>
+    <string name="demo_badge">Modo demo</string>
+    <string name="demo_badge_cd">Modo demostración: los datos son de ejemplo y no se guardan en el servidor.</string>
     <string name="merchant_nav_dashboard">Panel</string>
     <string name="merchant_nav_offers">Ofertas</string>
     <string name="merchant_nav_reservations">Reservas</string>
