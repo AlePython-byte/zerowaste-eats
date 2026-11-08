@@ -95,6 +95,7 @@ import com.zerowasteeats.app.data.merchant.PhotoSelection
 import com.zerowasteeats.app.data.merchant.PickedPhoto
 import com.zerowasteeats.app.data.settings.DataMode
 import com.zerowasteeats.app.data.photos.PhotoUploadError
+import com.zerowasteeats.app.data.merchant.MerchantDataError
 import com.zerowasteeats.app.presentation.screens.auth.AuthLinkButton
 import com.zerowasteeats.app.data.session.Session
 import com.zerowasteeats.app.presentation.components.common.AppButton
@@ -180,6 +181,7 @@ fun OfferEditorScreen(
         isSaving = viewModel.isSaving,
         saveFailed = viewModel.notFound,
         uploadError = viewModel.uploadError,
+        saveError = viewModel.saveError,
         photoPicking = PhotoPicking(
             onPick = {
                 pickPhoto.launch(
@@ -235,6 +237,8 @@ fun OfferEditorContent(
     saveFailed: Boolean,
     /** Why the photo could not be published on the last save, if it could not. */
     uploadError: PhotoUploadError? = null,
+    /** Why the offer could not be saved on the server on the last try, if it could not. */
+    saveError: MerchantDataError? = null,
     onClose: () -> Unit,
     /** Called with a form that already passed validation. */
     onSave: () -> Unit,
@@ -379,8 +383,8 @@ fun OfferEditorContent(
                     message = if (saveFailed) stringResource(R.string.offer_editor_not_found_message) else null
                 )
                 // Nothing was saved and the form is as it was: sending again retries the upload
-                FormErrorBanner(message = uploadError?.message())
-                if (uploadError != null) {
+                FormErrorBanner(message = uploadError?.message() ?: saveError?.saveMessage())
+                if (uploadError != null || saveError != null) {
                     AuthLinkButton(
                         text = stringResource(R.string.auth_retry),
                         onClick = ::submit,
@@ -970,6 +974,15 @@ private fun OfferFieldError.message(): String = when (this) {
     OfferFieldError.END_NOT_AFTER_START -> stringResource(R.string.offer_error_end_not_after_start)
     OfferFieldError.END_IN_PAST -> stringResource(R.string.offer_error_end_in_past)
 }
+
+@Composable
+private fun MerchantDataError.saveMessage(): String = stringResource(
+    when (this) {
+        MerchantDataError.NETWORK -> R.string.offer_save_failed_network
+        MerchantDataError.SESSION -> R.string.merchant_data_session_failed
+        MerchantDataError.UNEXPECTED -> R.string.offer_save_failed
+    }
+)
 
 @Composable
 private fun PhotoUploadError.message(): String = stringResource(

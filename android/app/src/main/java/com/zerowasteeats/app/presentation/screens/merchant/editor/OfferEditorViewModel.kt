@@ -10,6 +10,8 @@ import androidx.lifecycle.viewModelScope
 import com.zerowasteeats.app.data.ai.OfferSuggestion
 import com.zerowasteeats.app.data.ai.OfferSuggestionRepository
 import com.zerowasteeats.app.data.ai.SuggestionResult
+import com.zerowasteeats.app.data.merchant.MerchantDataError
+import com.zerowasteeats.app.data.merchant.MerchantDataException
 import com.zerowasteeats.app.data.merchant.MerchantOffer
 import com.zerowasteeats.app.data.merchant.MerchantOfferDraft
 import com.zerowasteeats.app.data.merchant.MerchantOfferRepository
@@ -121,6 +123,10 @@ class OfferEditorViewModel(
     var uploadError by mutableStateOf<PhotoUploadError?>(null)
         private set
 
+    /** Set when the offer could not be saved on the server: the form is intact. */
+    var saveError by mutableStateOf<MerchantDataError?>(null)
+        private set
+
     // Sent once, so the screen leaves only after a save, and a save that finishes during a
     // rotation is still seen when the screen comes back
     private val savedResults = Channel<OfferSaveResult>(Channel.BUFFERED)
@@ -135,12 +141,18 @@ class OfferEditorViewModel(
         isSaving = true
         notFound = false
         uploadError = null
+        saveError = null
         viewModelScope.launch {
             when (val published = publishPhoto(photo, photoUploader)) {
                 is PhotoPublish.Failed -> uploadError = published.error
                 is PhotoPublish.Ready -> {
-                    val result = saveOffer(repository, offerId, draftWith(published.photo))
-                    if (result == OfferSaveResult.NOT_FOUND) notFound = true else savedResults.send(result)
+                    try {
+                        val result = saveOffer(repository, offerId, draftWith(published.photo))
+                        if (result == OfferSaveResult.NOT_FOUND) notFound = true else savedResults.send(result)
+                    } catch (e: MerchantDataException) {
+                        // The form stays as it is; sending again retries
+                        saveError = e.error
+                    }
                 }
             }
             isSaving = false

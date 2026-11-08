@@ -24,6 +24,9 @@ import com.zerowasteeats.app.data.remote.tokenRefresher
 import retrofit2.Retrofit
 import com.zerowasteeats.app.data.merchant.FakeMerchantData
 import com.zerowasteeats.app.data.merchant.MerchantRepositories
+import com.zerowasteeats.app.data.merchant.FakeMerchantReservationRepository
+import com.zerowasteeats.app.data.merchant.MerchantOffersApi
+import com.zerowasteeats.app.data.merchant.RemoteMerchantOfferRepository
 import com.zerowasteeats.app.data.ai.AiSuggestionApi
 import com.zerowasteeats.app.data.ai.DemoOfferSuggestionRepository
 import com.zerowasteeats.app.data.ai.OfferSuggestionRepository
@@ -184,9 +187,30 @@ class AppContainer(context: Context) {
     fun merchantRepositories(session: Session.Merchant): MerchantRepositories =
         synchronized(merchantRepositories) {
             merchantRepositories.getOrPut(session.userId) {
-                FakeMerchantData.repositoriesFor(session)
+                val backend = liveSetup.clientsOrNull?.backend
+                if (dataMode.mode.value == DataMode.LIVE && backend != null) {
+                    liveMerchantRepositories(session, backend)
+                } else {
+                    FakeMerchantData.repositoriesFor(session)
+                }
             }
         }
+
+    /**
+     * Offers come from the backend. Reservations start empty: the backend does not serve a
+     * business's reservations yet, and the demo ones must not appear on a real account.
+     */
+    private fun liveMerchantRepositories(
+        session: Session.Merchant,
+        backend: Retrofit
+    ): MerchantRepositories {
+        val demoShaped = FakeMerchantData.repositoriesFor(session)
+        return MerchantRepositories(
+            offers = RemoteMerchantOfferRepository(backend.create(MerchantOffersApi::class.java)),
+            reservations = FakeMerchantReservationRepository(emptyList()),
+            profile = demoShaped.profile
+        )
+    }
 }
 
 /** Above the server's 30 s wait for the model, so a slow suggestion still arrives. */

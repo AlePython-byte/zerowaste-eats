@@ -18,7 +18,12 @@ data class MerchantOffer(
     val status: MerchantOfferStatus,
     val photo: OfferPhoto?,
     /** Optional; empty when the merchant wrote none. */
-    val description: String = ""
+    val description: String = "",
+    /**
+     * Units customers already reserved, on top of [quantity] (the ones still free). Kept so an
+     * edit sends the server the right total.
+     */
+    val quantityReserved: Int = 0
 ) {
     /** Whole percent off, rounded down. */
     val discountPercent: Int

@@ -239,6 +239,13 @@
     <string name="merchant_offer_paused_message">Oferta pausada</string>
     <string name="merchant_offer_resumed_message">Oferta reanudada</string>
     <string name="merchant_offers_empty_active_title">No tienes ofertas activas</string>
+    <string name="merchant_offers_loading">Cargando tus ofertas…</string>
+    <string name="merchant_offers_load_failed">No pudimos cargar tus ofertas.</string>
+    <string name="merchant_offers_load_failed_network">No pudimos cargar tus ofertas. Revisa tu conexión.</string>
+    <string name="merchant_data_session_failed">Tu sesión ya no es válida. Cierra sesión y vuelve a ingresar.</string>
+    <string name="merchant_offer_change_failed">No pudimos cambiar el estado de la oferta.</string>
+    <string name="offer_save_failed_network">No pudimos guardar la oferta. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="offer_save_failed">No pudimos guardar la oferta. Inténtalo de nuevo.</string>
     <string name="merchant_offers_empty_active_message">Publica una oferta para que otros puedan rescatarla.</string>
     <string name="merchant_offers_empty_paused_title">No tienes ofertas pausadas</string>
     <string name="merchant_offers_empty_paused_message">Las ofertas que pauses aparecerán aquí, listas para reanudar.</string>

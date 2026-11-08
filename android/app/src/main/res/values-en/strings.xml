@@ -227,6 +227,13 @@
     <string name="merchant_offer_paused_message">Offer paused</string>
     <string name="merchant_offer_resumed_message">Offer resumed</string>
     <string name="merchant_offers_empty_active_title">You have no active offers</string>
+    <string name="merchant_offers_loading">Loading your offers…</string>
+    <string name="merchant_offers_load_failed">We couldn\'t load your offers.</string>
+    <string name="merchant_offers_load_failed_network">We couldn\'t load your offers. Check your connection.</string>
+    <string name="merchant_data_session_failed">Your session is no longer valid. Sign out and sign in again.</string>
+    <string name="merchant_offer_change_failed">We couldn\'t change the offer\'s status.</string>
+    <string name="offer_save_failed_network">We couldn\'t save the offer. Check your connection and try again.</string>
+    <string name="offer_save_failed">We couldn\'t save the offer. Please try again.</string>
     <string name="merchant_offers_empty_active_message">Publish an offer so others can rescue it.</string>
     <string name="merchant_offers_empty_paused_title">You have no paused offers</string>
     <string name="merchant_offers_empty_paused_message">Offers you pause will show up here, ready to resume.</string>
