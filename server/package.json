@@ -5,6 +5,9 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "prisma:generate": "prisma generate",
     "prebuild": "npm run prisma:generate",

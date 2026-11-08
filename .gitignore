@@ -12,6 +12,8 @@ captures/
 node_modules/
 dist/
 coverage/
+# Incremental build state: a stale one makes a clean build emit nothing
+*.tsbuildinfo
 
 # Environment
 .env

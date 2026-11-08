@@ -1,0 +1,33 @@
+# Render Blueprint for the ZeroWaste Eats API.
+# No secrets here: every sensitive variable uses `sync: false`, so Render asks for its value
+# when the Blueprint is created and never reads it from this file.
+services:
+  - type: web
+    name: zerowaste-eats-api
+    runtime: node
+    plan: free
+    rootDir: server
+    # Dev dependencies are needed to build (Nest CLI, TypeScript, Prisma CLI) and to run the
+    # migrations on start; NODE_ENV=production would otherwise make `npm ci` skip them.
+    # `npm run build` generates the Prisma client first (prebuild).
+    buildCommand: npm ci --include=dev && npm run build
+    # Pending migrations are applied before the API starts; a failed migration stops the deploy
+    startCommand: npx prisma migrate deploy && npm run start:prod
+    healthCheckPath: /api/v1/salud
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Supabase session pooler (port 5432): Render only reaches IPv4 addresses
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      # Optional: without it, offer suggestions run in simulated mode
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: AI_MODEL
+        value: claude-haiku-5-5
+      - key: AI_DAILY_LIMIT
+        value: "20"

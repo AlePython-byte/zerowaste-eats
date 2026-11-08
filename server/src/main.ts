@@ -33,6 +33,10 @@ async function bootstrap() {
     }),
   );
   app.enableShutdownHooks();
-  await app.listen(app.get(ConfigService).getOrThrow<number>('PORT'));
+  // The port the host assigns (Render sets PORT), on every interface so its proxy reaches it
+  await app.listen(
+    app.get(ConfigService).getOrThrow<number>('PORT'),
+    '0.0.0.0',
+  );
 }
 bootstrap();
