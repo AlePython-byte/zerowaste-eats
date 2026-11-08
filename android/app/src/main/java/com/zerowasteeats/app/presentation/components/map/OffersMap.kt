@@ -109,7 +109,11 @@ fun OffersMap(
                 isMyLocationEnabled = userLocation.hasPermission,
                 mapStyleOptions = mapStyle
             ),
-            uiSettings = MapUiSettings(myLocationButtonEnabled = false), // We use custom UI
+            // Custom location button; the zoom buttons go, pinch and double tap still zoom
+            uiSettings = MapUiSettings(
+                myLocationButtonEnabled = false,
+                zoomControlsEnabled = false
+            ),
             contentPadding = contentPadding,
             onMapLoaded = onMapLoaded,
             onMapClick = { onSelectOffer(null) }
