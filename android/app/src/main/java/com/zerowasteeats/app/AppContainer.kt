@@ -24,7 +24,8 @@ import com.zerowasteeats.app.data.remote.tokenRefresher
 import retrofit2.Retrofit
 import com.zerowasteeats.app.data.merchant.FakeMerchantData
 import com.zerowasteeats.app.data.merchant.MerchantRepositories
-import com.zerowasteeats.app.data.merchant.FakeMerchantReservationRepository
+import com.zerowasteeats.app.data.merchant.MerchantReservationsApi
+import com.zerowasteeats.app.data.merchant.RemoteMerchantReservationRepository
 import com.zerowasteeats.app.data.merchant.MerchantOffersApi
 import com.zerowasteeats.app.data.merchant.RemoteMerchantOfferRepository
 import com.zerowasteeats.app.data.merchant.MerchantProfile
@@ -273,17 +274,16 @@ class AppContainer(context: Context) {
             }
         }
 
-    /**
-     * Offers come from the backend. Reservations start empty: the backend does not serve a
-     * business's reservations yet, and the demo ones must not appear on a real account.
-     */
+    /** Offers, reservations and the profile all come from the backend. */
     private fun liveMerchantRepositories(
         session: Session.Merchant,
         backend: Retrofit
     ): MerchantRepositories {
         return MerchantRepositories(
             offers = RemoteMerchantOfferRepository(backend.create(MerchantOffersApi::class.java)),
-            reservations = FakeMerchantReservationRepository(emptyList()),
+            reservations = RemoteMerchantReservationRepository(
+                backend.create(MerchantReservationsApi::class.java)
+            ),
             profile = RemoteMerchantProfileRepository(
                 backend.create(MerchantProfileApi::class.java),
                 // What the session knows, shown until the backend answers

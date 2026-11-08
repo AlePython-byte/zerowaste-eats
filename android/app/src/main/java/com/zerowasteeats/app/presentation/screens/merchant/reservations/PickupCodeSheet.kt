@@ -64,10 +64,12 @@ import kotlin.math.ceil
 import kotlinx.coroutines.delay
 
 private const val SECOND_MILLIS = 1_000L
+private const val SECONDS_PER_MINUTE = 60
 
 /**
  * The sheet where the business types the code the customer shows. [debugCode] is the right
- * code, shown as a hint only in debug builds. [onFinished] runs once a confirmed pickup has
+ * code, shown as a hint only in debug builds and only when the app knows it (demo mode: the
+ * server never sends it). [onFinished] runs once a confirmed pickup has
  * played its check and the sheet has slid away.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -233,6 +235,9 @@ private fun CodeEntry(
             pluralStringResource(R.plurals.merchant_code_wrong, state.attemptsLeft, state.attemptsLeft)
         state.error == PickupCodeError.ALREADY_COMPLETED ->
             stringResource(R.string.merchant_code_already_completed)
+        state.error == PickupCodeError.NETWORK -> stringResource(R.string.merchant_code_failed_network)
+        state.error == PickupCodeError.SESSION -> stringResource(R.string.merchant_code_failed_session)
+        state.error == PickupCodeError.UNEXPECTED -> stringResource(R.string.merchant_code_failed)
         else -> null
     }
 
@@ -260,14 +265,20 @@ private fun CodeEntry(
     )
     if (isLocked) {
         Text(
-            text = pluralStringResource(R.plurals.merchant_code_locked, secondsLeft, secondsLeft),
+            // A lock set by the server can last minutes: say them, not hundreds of seconds
+            text = if (secondsLeft > SECONDS_PER_MINUTE) {
+                val minutesLeft = (secondsLeft + SECONDS_PER_MINUTE - 1) / SECONDS_PER_MINUTE
+                pluralStringResource(R.plurals.merchant_code_locked_minutes, minutesLeft, minutesLeft)
+            } else {
+                pluralStringResource(R.plurals.merchant_code_locked, secondsLeft, secondsLeft)
+            },
             modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.error
         )
     }
-    if (debugCode != null) {
+    if (!debugCode.isNullOrBlank()) {
         Text(
             text = stringResource(R.string.merchant_code_debug_hint, debugCode),
             style = MaterialTheme.typography.labelSmall,

@@ -32,7 +32,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zerowasteeats.app.R
 import com.zerowasteeats.app.ZeroWasteEatsApplication
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.runtime.rememberUpdatedState
+import com.zerowasteeats.app.data.merchant.MerchantDataError
 import com.zerowasteeats.app.data.merchant.MerchantReservation
+import com.zerowasteeats.app.presentation.components.offers.MerchantOfferCardSkeleton
 import com.zerowasteeats.app.data.merchant.MerchantReservationStatus
 import com.zerowasteeats.app.data.session.Session
 import com.zerowasteeats.app.presentation.components.common.EmptyState
@@ -73,6 +78,22 @@ fun MerchantReservationsScreen(
     // A hint with the right code, so the flow can be tried without looking it up
     val isDebuggable = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
 
+    LaunchedEffect(Unit) { viewModel.refresh() }
+
+    val refreshMessages = mapOf(
+        MerchantDataError.NETWORK to stringResource(R.string.merchant_reservations_refresh_failed_network),
+        MerchantDataError.SESSION to stringResource(R.string.catalog_session_failed),
+        MerchantDataError.UNEXPECTED to stringResource(R.string.merchant_reservations_refresh_failed)
+    )
+    // With reservations on screen a failure only gets a snackbar; without them, the list says it
+    MerchantLoadFailureSnackbar(
+        error = state.loadError.takeIf { !state.showError },
+        snackbarHostState = snackbarHostState,
+        messageFor = refreshMessages::getValue,
+        retryLabel = stringResource(R.string.auth_retry),
+        onRetry = viewModel::refresh
+    )
+
     // A short vibration for each wrong code
     LaunchedEffect(viewModel) {
         viewModel.wrongCode.collect { haptics.performHapticFeedback(HapticFeedbackType.Reject) }
@@ -84,6 +105,7 @@ fun MerchantReservationsScreen(
         snackbarHostState = snackbarHostState,
         onTabSelected = viewModel::selectTab,
         onConfirmClick = viewModel::openSheet,
+        onRetry = viewModel::refresh,
         modifier = modifier
     )
 
@@ -116,7 +138,8 @@ fun MerchantReservationsContent(
     snackbarHostState: SnackbarHostState,
     onTabSelected: (ReservationTab) -> Unit,
     onConfirmClick: (reservationId: String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onRetry: () -> Unit = {}
 ) {
     // Ids already shown, so a card that only moves between tabs does not enter again
     val seenIds = remember { mutableSetOf<String>() }
@@ -163,7 +186,14 @@ fun MerchantReservationsContent(
                 )
             }
 
-            if (state.visibleReservations.isEmpty()) {
+            val loadError = state.loadError
+            if (state.showSkeleton) {
+                items(SKELETON_CARDS, key = { "skeleton-$it" }) {
+                    MerchantOfferCardSkeleton()
+                }
+            } else if (state.showError && loadError != null) {
+                item(key = "error") { ReservationsLoadError(loadError, onRetry) }
+            } else if (state.visibleReservations.isEmpty()) {
                 item(key = "empty-${state.tab}") { EmptyReservations(state.tab) }
             } else {
                 items(state.visibleReservations, key = { it.id }) { reservation ->
@@ -182,6 +212,53 @@ fun MerchantReservationsContent(
         }
     }
 }
+
+/** The reservations could not be loaded and there is nothing to show instead. */
+@Composable
+private fun ReservationsLoadError(error: MerchantDataError, onRetry: () -> Unit) {
+    val message = when (error) {
+        MerchantDataError.NETWORK -> stringResource(R.string.merchant_reservations_load_failed_network)
+        MerchantDataError.SESSION -> stringResource(R.string.catalog_session_failed)
+        MerchantDataError.UNEXPECTED -> stringResource(R.string.merchant_reservations_load_failed)
+    }
+    // Trying again does not help an ended session: only signing in again does
+    val canRetry = error != MerchantDataError.SESSION
+    EmptyState(
+        icon = R.drawable.ic_empty_calendar,
+        title = stringResource(R.string.merchant_reservations_load_failed_title),
+        message = message,
+        actionText = if (canRetry) stringResource(R.string.auth_retry) else null,
+        onActionClick = if (canRetry) onRetry else null
+    )
+}
+
+/**
+ * Says that loading failed, with a way to try again, the way the customer screens do. A new
+ * failure after a retry is said again, since the error goes away while the retry runs.
+ */
+@Composable
+private fun MerchantLoadFailureSnackbar(
+    error: MerchantDataError?,
+    snackbarHostState: SnackbarHostState,
+    messageFor: (MerchantDataError) -> String,
+    retryLabel: String,
+    onRetry: () -> Unit
+) {
+    val currentMessageFor by rememberUpdatedState(messageFor)
+    val currentOnRetry by rememberUpdatedState(onRetry)
+    LaunchedEffect(error) {
+        if (error == null) return@LaunchedEffect
+        snackbarHostState.currentSnackbarData?.dismiss()
+        val result = snackbarHostState.showSnackbar(
+            message = currentMessageFor(error),
+            actionLabel = retryLabel,
+            duration = SnackbarDuration.Long
+        )
+        if (result == SnackbarResult.ActionPerformed) currentOnRetry()
+    }
+}
+
+private const val SKELETON_CARDS = 3
 
 @Composable
 private fun EmptyReservations(tab: ReservationTab) {

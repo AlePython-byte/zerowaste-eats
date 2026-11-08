@@ -377,6 +377,19 @@
         <item quantity="many">Demasiados intentos. Vuelve a intentarlo en %1$d segundos.</item>
         <item quantity="other">Demasiados intentos. Vuelve a intentarlo en %1$d segundos.</item>
     </plurals>
+    <plurals name="merchant_code_locked_minutes">
+        <item quantity="one">Demasiados intentos. Vuelve a intentarlo en %1$d minuto.</item>
+        <item quantity="many">Demasiados intentos. Vuelve a intentarlo en %1$d minutos.</item>
+        <item quantity="other">Demasiados intentos. Vuelve a intentarlo en %1$d minutos.</item>
+    </plurals>
+    <string name="merchant_code_failed_network">No pudimos comprobar el código. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="merchant_code_failed_session">Tu sesión expiró. Cierra sesión y vuelve a ingresar.</string>
+    <string name="merchant_code_failed">No pudimos comprobar el código. Inténtalo de nuevo.</string>
+    <string name="merchant_reservations_load_failed_title">No pudimos cargar las reservas</string>
+    <string name="merchant_reservations_load_failed">Inténtalo de nuevo en un momento.</string>
+    <string name="merchant_reservations_load_failed_network">Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="merchant_reservations_refresh_failed">No pudimos actualizar las reservas.</string>
+    <string name="merchant_reservations_refresh_failed_network">No pudimos actualizar las reservas. Revisa tu conexión.</string>
     <string name="merchant_reservations_empty_pending_title">Nada pendiente por ahora</string>
     <string name="merchant_reservations_empty_pending_message">Cuando alguien reserve una de tus ofertas, aparecerá aquí.</string>
     <string name="merchant_reservations_empty_completed_title">Aún no has entregado pedidos</string>

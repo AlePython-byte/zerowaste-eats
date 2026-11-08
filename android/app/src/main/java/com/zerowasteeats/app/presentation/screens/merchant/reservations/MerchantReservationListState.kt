@@ -1,5 +1,7 @@
 package com.zerowasteeats.app.presentation.screens.merchant.reservations
 
+import com.zerowasteeats.app.data.merchant.LoadState
+import com.zerowasteeats.app.data.merchant.MerchantDataError
 import com.zerowasteeats.app.data.merchant.MerchantReservation
 import com.zerowasteeats.app.data.merchant.MerchantReservationRepository
 import com.zerowasteeats.app.data.merchant.MerchantReservationStatus
@@ -10,11 +12,21 @@ enum class ReservationTab(val status: MerchantReservationStatus) {
     COMPLETED(MerchantReservationStatus.COMPLETED)
 }
 
-/** The reservations, the chosen tab, and what the list shows from them. */
+/** The reservations, the chosen tab, what the list shows from them, and how loading went. */
 data class MerchantReservationListState(
     val reservations: List<MerchantReservation>,
-    val tab: ReservationTab
+    val tab: ReservationTab,
+    val loadState: LoadState = LoadState.Loaded
 ) {
+    val loadError: MerchantDataError? = (loadState as? LoadState.Failed)?.error
+
+    /** Nothing to show yet and the first load is on its way. */
+    val showSkeleton: Boolean = reservations.isEmpty() &&
+        (loadState == LoadState.Idle || loadState == LoadState.Loading)
+
+    /** Nothing to show because the load failed: the error takes the place of the list. */
+    val showError: Boolean = reservations.isEmpty() && loadError != null
+
     val counts: Map<ReservationTab, Int> =
         ReservationTab.entries.associateWith { tab -> reservations.count { it.status == tab.status } }
 
@@ -29,12 +41,13 @@ data class MerchantReservationListState(
 }
 
 /**
- * Wrong pickup codes per reservation. After [maxFailures] wrong codes in a row on one
- * reservation it locks for [lockMillis], like the limit the backend will apply; the count
- * starts over once the lock is over, and a right code clears it. [nowMillis] is the clock.
+ * Wrong pickup codes per reservation, counted on the device. After [maxFailures] wrong codes in
+ * a row on one reservation it locks for [lockMillis]; the count starts over once the lock is
+ * over, and a right code clears it. [nowMillis] is the clock. The server keeps its own count
+ * and its answer wins; this one only applies when the server gives none (demo mode).
  */
 class PickupCodeAttempts(
-    private val nowMillis: () -> Long,
+    val nowMillis: () -> Long,
     val maxFailures: Int = DEFAULT_MAX_FAILURES,
     private val lockMillis: Long = DEFAULT_LOCK_MILLIS
 ) {
@@ -60,6 +73,12 @@ class PickupCodeAttempts(
         }
     }
 
+    /** Locks [reservationId] until [untilMillis], as the server said; the local count starts over. */
+    fun lockUntil(reservationId: String, untilMillis: Long) {
+        failures.remove(reservationId)
+        lockedUntil[reservationId] = untilMillis
+    }
+
     fun recordSuccess(reservationId: String) {
         failures.remove(reservationId)
         lockedUntil.remove(reservationId)
@@ -76,11 +95,16 @@ sealed interface PickupConfirmResult {
     data class WrongCode(val attemptsLeft: Int) : PickupConfirmResult
     data class Locked(val untilMillis: Long) : PickupConfirmResult
     data object AlreadyCompleted : PickupConfirmResult
+
+    /** The code did not reach the server, or the server failed: nothing was counted. */
+    data class Failed(val error: MerchantDataError) : PickupConfirmResult
 }
 
 /**
- * Checks the code the customer shows against one reservation, counting wrong codes in
- * [attempts]. While locked, nothing reaches the repository.
+ * Checks the code the customer shows against one reservation. When the server says how many
+ * tries are left, or how long the reservation is locked, that is what the person sees; when it
+ * says nothing, wrong codes are counted in [attempts]. While locked, nothing reaches the
+ * repository.
  */
 class PickupConfirmation(
     private val repository: MerchantReservationRepository,
@@ -95,6 +119,13 @@ class PickupConfirmation(
                 PickupConfirmResult.Confirmed(result.reservation)
             }
             RedeemResult.AlreadyRedeemed -> PickupConfirmResult.AlreadyCompleted
+            is RedeemResult.WrongCode -> PickupConfirmResult.WrongCode(result.attemptsLeft)
+            is RedeemResult.Locked -> {
+                val until = attempts.nowMillis() + result.retryAfterMillis
+                attempts.lockUntil(reservationId, until)
+                PickupConfirmResult.Locked(until)
+            }
+            is RedeemResult.Failed -> PickupConfirmResult.Failed(result.error)
             RedeemResult.InvalidCode -> {
                 val lockedUntil = attempts.recordFailure(reservationId)
                 if (lockedUntil != null) {

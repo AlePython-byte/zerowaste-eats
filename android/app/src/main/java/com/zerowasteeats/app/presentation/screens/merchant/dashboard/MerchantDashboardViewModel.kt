@@ -15,9 +15,11 @@ import kotlinx.coroutines.flow.stateIn
 class MerchantDashboardViewModel(repositories: MerchantRepositories) : ViewModel() {
 
     init {
-        // In live mode the offers come from the backend: the dashboard is often the first
-        // screen, so it starts the load. Errors are told on the offers tab.
+        // In live mode the offers and reservations come from the backend: the dashboard is
+        // often the first screen, so it starts the loads, and its numbers follow what they
+        // bring. Errors are told on the offers and reservations tabs.
         viewModelScope.launch { repositories.offers.loadIfNeeded() }
+        viewModelScope.launch { repositories.reservations.refresh() }
     }
 
     val state: StateFlow<MerchantDashboardState> = combine(
