@@ -18,10 +18,22 @@ fun interface CustomerLocationSource {
 /** Always the centre of Pasto: for demo mode, whose sample offers are there. */
 val PastoLocationSource = CustomerLocationSource { PASTO_CENTER }
 
+/** How far from the centre of Pasto the service reaches. */
+const val SERVICE_RADIUS_KM = 50.0
+
+/**
+ * [point] when it is within [SERVICE_RADIUS_KM] of the centre of Pasto, the centre otherwise:
+ * there are no offers farther away, so a person elsewhere (or an emulator placed in another
+ * country) still sees Pasto's.
+ */
+fun withinServiceArea(point: GeoPoint): GeoPoint =
+    if (distanceKm(point, PASTO_CENTER) > SERVICE_RADIUS_KM) PASTO_CENTER else point
+
 /**
  * The device's last known location when the person already allowed it, the centre of Pasto
  * otherwise. It never asks for the permission: that only happens when they tap "my location"
- * on the map. A location that takes too long, or none at all, also falls back to Pasto.
+ * on the map. A location that takes too long, none at all, or one outside the service area
+ * also falls back to Pasto.
  */
 class DeviceLocationSource(context: Context) : CustomerLocationSource {
 
@@ -31,15 +43,16 @@ class DeviceLocationSource(context: Context) : CustomerLocationSource {
     @SuppressLint("MissingPermission") // checked just before
     override suspend fun current(): GeoPoint {
         if (!hasPermission()) return PASTO_CENTER
-        return withTimeoutOrNull(TIMEOUT_MILLIS) {
-            suspendCancellableCoroutine { continuation ->
+        val found = withTimeoutOrNull(TIMEOUT_MILLIS) {
+            suspendCancellableCoroutine<GeoPoint?> { continuation ->
                 client.lastLocation
                     .addOnSuccessListener { location ->
                         continuation.resume(location?.let { GeoPoint(it.latitude, it.longitude) })
                     }
                     .addOnFailureListener { continuation.resume(null) }
             }
-        } ?: PASTO_CENTER
+        } ?: return PASTO_CENTER
+        return withinServiceArea(found)
     }
 
     private fun hasPermission(): Boolean =

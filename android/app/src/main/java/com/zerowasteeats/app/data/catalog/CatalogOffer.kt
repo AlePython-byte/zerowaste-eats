@@ -3,12 +3,29 @@ package com.zerowasteeats.app.data.catalog
 import com.zerowasteeats.app.data.merchant.OfferPhoto
 import com.zerowasteeats.app.presentation.model.OfferCategory
 import java.time.Instant
+import kotlin.math.asin
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 /** A place on the map, in degrees. */
 data class GeoPoint(val latitude: Double, val longitude: Double)
 
 /** The centre of Pasto: where offers are looked for when the person's location is unknown. */
 val PASTO_CENTER = GeoPoint(1.2136, -77.2811)
+
+private const val EARTH_RADIUS_KM = 6371.0
+
+/** Haversine distance in kilometres, as the server measures it. */
+internal fun distanceKm(from: GeoPoint, to: GeoPoint): Double {
+    val dLat = Math.toRadians(to.latitude - from.latitude)
+    val dLng = Math.toRadians(to.longitude - from.longitude)
+    val a = sin(dLat / 2).pow(2) +
+        cos(Math.toRadians(from.latitude)) * cos(Math.toRadians(to.latitude)) *
+        sin(dLng / 2).pow(2)
+    return 2 * EARTH_RADIUS_KM * asin(sqrt(a))
+}
 
 /** The business behind an offer, and where to pick it up. */
 data class CatalogBusiness(

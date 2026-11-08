@@ -60,7 +60,7 @@ class FakeOfferCatalogRepositoryTest {
     @Test
     fun distance_matchesTheServersHaversine() {
         // About 1.1 km per hundredth of a degree of latitude
-        val km = FakeOfferCatalogRepository.distanceKm(GeoPoint(1.20, -77.28), GeoPoint(1.21, -77.28))
+        val km = distanceKm(GeoPoint(1.20, -77.28), GeoPoint(1.21, -77.28))
 
         assertEquals(1.11, km, 0.01)
     }
