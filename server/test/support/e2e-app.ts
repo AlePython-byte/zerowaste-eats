@@ -59,6 +59,7 @@ export function as(app: INestApplication<App>, userId: string) {
     get: (path: string) => auth(request(server).get(path)),
     post: (path: string) => auth(request(server).post(path)),
     patch: (path: string) => auth(request(server).patch(path)),
+    put: (path: string) => auth(request(server).put(path)),
     delete: (path: string) => auth(request(server).delete(path)),
   };
 }

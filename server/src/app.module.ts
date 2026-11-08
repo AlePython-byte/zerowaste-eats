@@ -12,6 +12,7 @@ import { validateEnvironment } from './config/environment.validation';
 import { readObserveCredentials } from './config/telemetry';
 import { DatabaseModule } from './database/database.module';
 import { DatabaseService } from './database/database.service';
+import { FavoritesModule } from './favorites/favorites.module';
 import { HealthModule } from './health/health.module';
 import { MerchantsModule } from './merchants/merchants.module';
 import { OffersModule } from './offers/offers.module';
@@ -73,6 +74,7 @@ async function telemetryModule(): Promise<DynamicModule> {
     MerchantsModule,
     OffersModule,
     ReservationsModule,
+    FavoritesModule,
     AiModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

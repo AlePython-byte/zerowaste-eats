@@ -316,12 +316,56 @@ export function createFakeOffersDb(seed: Partial<FakeTables> = {}) {
     }),
   };
 
+  /** Favorites: one row per user and offer, like the composite key in the schema. */
+  const favorite = {
+    upsert: jest.fn(
+      async ({
+        where,
+        create,
+      }: {
+        where: { userId_offerId: { userId: string; offerId: string } };
+        create: { userId: string; offerId: string };
+      }) => {
+        const { userId, offerId } = where.userId_offerId;
+        let row = t.favorites.find(
+          (f) => f.userId === userId && f.offerId === offerId,
+        );
+        if (!row) {
+          row = { ...create, createdAt: new Date() };
+          t.favorites.push(row);
+        }
+        return { ...row };
+      },
+    ),
+    deleteMany: jest.fn(async ({ where }: { where: Where }) => {
+      const before = t.favorites.length;
+      t.favorites = t.favorites.filter((f) => !matchRecord(f, where));
+      return { count: before - t.favorites.length };
+    }),
+    findMany: jest.fn(
+      async ({
+        where,
+        include,
+        orderBy,
+      }: { where?: Where; include?: Where; orderBy?: Where } = {}) =>
+        sortBy(
+          t.favorites.filter((f) => matchRecord(f, where)),
+          orderBy,
+        ).map((f) => {
+          if (!include?.offer) return { ...f };
+          const found = t.offers.find((o) => o.id === f.offerId)!;
+          return { ...f, offer: withIncludes(found, include.offer.include) };
+        }),
+    ),
+  };
+
   const client = {
     offer,
     establishment,
     reservation,
     user,
     merchantProfile,
+    favorite,
     $transaction,
   };
   return {
