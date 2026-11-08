@@ -67,7 +67,6 @@
     <string name="order_day_tomorrow">Mañana</string>
     <string name="order_day_yesterday">Ayer</string>
     <string name="offer_detail_pickup_title">Recogida</string>
-    <string name="offer_detail_reserve">Reservar</string>
     <string name="offer_detail_quantity_label">Cantidad</string>
     <string name="offer_detail_quantity_decrease_cd">Una unidad menos</string>
     <string name="offer_detail_quantity_increase_cd">Una unidad más</string>

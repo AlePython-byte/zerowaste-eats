@@ -64,7 +64,6 @@
     <string name="order_day_tomorrow">Tomorrow</string>
     <string name="order_day_yesterday">Yesterday</string>
     <string name="offer_detail_pickup_title">Pickup</string>
-    <string name="offer_detail_reserve">Reserve</string>
     <string name="offer_detail_quantity_label">Quantity</string>
     <string name="offer_detail_quantity_decrease_cd">One unit less</string>
     <string name="offer_detail_quantity_increase_cd">One unit more</string>
