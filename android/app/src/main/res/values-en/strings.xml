@@ -234,6 +234,7 @@
     <string name="mode_badge_merchant">Business</string>
     <string name="demo_badge">Demo mode</string>
     <string name="demo_badge_cd">Demo mode: the data is sample data and is not saved on the server.</string>
+    <string name="server_waking">Waking up the server… this can take up to a minute.</string>
     <string name="merchant_nav_dashboard">Overview</string>
     <string name="merchant_nav_offers">Offers</string>
     <string name="merchant_nav_reservations">Bookings</string>

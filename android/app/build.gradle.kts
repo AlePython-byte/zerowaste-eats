@@ -24,8 +24,27 @@ fun endpointProperty(name: String, default: String = "", trailingSlash: Boolean 
 fun stringField(value: String): String =
     "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
 
+/**
+ * The release keystore, when local.properties names one. Without it the release build is
+ * signed with the debug key: good enough for a demo APK to install, never for a store.
+ */
+val releaseKeystore: File? = localProperty("RELEASE_STORE_FILE")
+    .takeIf { it.isNotEmpty() }
+    ?.let { rootProject.file(it) }
+
 android {
     namespace = "com.zerowasteeats.app"
+
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = releaseKeystore
+                storePassword = localProperty("RELEASE_STORE_PASSWORD")
+                keyAlias = localProperty("RELEASE_KEY_ALIAS")
+                keyPassword = localProperty("RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
 
     compileSdk {
         version = release(37)
@@ -66,15 +85,19 @@ android {
             )
         }
         release {
-            // Empty until the backend is deployed; the app then offers demo data only
+            // The deployed backend (HTTPS: release builds refuse cleartext). Empty means the
+            // app offers demo data only
             buildConfigField(
                 "String",
                 "API_BASE_URL",
                 stringField(endpointProperty("API_BASE_URL_RELEASE", trailingSlash = true))
             )
+            // R8 shrinks and obfuscates; src/main/keepRules keeps what Retrofit and
+            // kotlinx.serialization reach by reflection
             optimization {
-                enable = false
+                enable = true
             }
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
 

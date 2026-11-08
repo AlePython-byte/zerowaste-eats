@@ -21,6 +21,12 @@ import com.zerowasteeats.app.data.remote.createAuthenticatedHttpClient
 import com.zerowasteeats.app.data.remote.createHttpClient
 import com.zerowasteeats.app.data.remote.createRetrofit
 import com.zerowasteeats.app.data.remote.tokenRefresher
+import com.zerowasteeats.app.data.remote.HealthApi
+import com.zerowasteeats.app.data.remote.ServerWakeUp
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import retrofit2.Retrofit
 import com.zerowasteeats.app.data.merchant.FakeMerchantData
 import com.zerowasteeats.app.data.merchant.MerchantRepositories
@@ -77,7 +83,11 @@ class AppContainer(context: Context) {
     )
 
     /** Live data needs both: Supabase for the account, the backend for everything else. */
-    private class LiveClients(val supabase: SupabaseAuth, val backend: Retrofit)
+    private class LiveClients(
+        val supabase: SupabaseAuth,
+        val backend: Retrofit,
+        val wakeUp: ServerWakeUp
+    )
 
     /**
      * The live clients, or why there are none: no endpoints in local.properties, or endpoints
@@ -89,9 +99,11 @@ class AppContainer(context: Context) {
             apiConfig.supabasePublishableKey,
             httpClient
         )
+        // A sleeping deployed backend gets a minute to answer its first call
+        val wakeUp = ServerWakeUp(apiHost = apiConfig.apiBaseUrl.toHttpUrl().host)
         // The backend gets the access token on every call and one renewal on a 401;
         // a renewal Supabase refuses ends the session
-        val client = createAuthenticatedHttpClient(
+        val authenticated = createAuthenticatedHttpClient(
             base = httpClient,
             interceptor = AuthTokenInterceptor(tokenStore),
             authenticator = TokenAuthenticator(
@@ -101,13 +113,37 @@ class AppContainer(context: Context) {
                 onSessionExpired = { sessionManager.expireSession() }
             )
         )
-        LiveClients(supabase, createRetrofit(apiConfig.apiBaseUrl, client))
+        val client = authenticated.newBuilder().addInterceptor(wakeUp).build()
+        LiveClients(supabase, createRetrofit(apiConfig.apiBaseUrl, client), wakeUp)
     }
 
     /** True when the endpoints were set but unusable, so the app fell back to the demo. */
     val liveSetupInvalid: Boolean = liveSetup == LiveSetup.Invalid
 
     private val liveAvailable: Boolean = liveSetup is LiveSetup.Ready
+
+    /**
+     * When the oldest backend call still waiting for the server's first answer started; null
+     * once it answered, and always null without live clients.
+     */
+    val serverWaitingSince: StateFlow<Long?> =
+        liveSetup.clientsOrNull?.wakeUp?.waitingSince ?: MutableStateFlow(null)
+
+    /**
+     * Asks the backend for its health so a sleeping server starts while the person signs in.
+     * Only in live mode; a failure changes nothing, the next call tries again.
+     */
+    suspend fun wakeServer() {
+        val backend = liveSetup.clientsOrNull?.backend ?: return
+        if (dataMode.mode.value != DataMode.LIVE) return
+        try {
+            backend.create(HealthApi::class.java).health()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
+            // Offline or still starting: the screens say so when they need the server
+        }
+    }
 
     val sessionStore: SessionStore = PrefsSessionStore(
         SharedPreferencesKeyValueStore(context, PrefsSessionStore.FILE_NAME)

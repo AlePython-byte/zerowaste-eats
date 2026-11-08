@@ -20,6 +20,10 @@ import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.data.session.Session
 import com.zerowasteeats.app.data.settings.DataMode
 import com.zerowasteeats.app.presentation.components.common.DemoModeBadge
+import com.zerowasteeats.app.presentation.components.common.ServerWakingBanner
+import com.zerowasteeats.app.data.remote.ServerWakeUp
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import com.zerowasteeats.app.ZeroWasteEatsApplication
 import com.zerowasteeats.app.presentation.components.common.ENTRANCE_MILLIS
@@ -36,6 +40,10 @@ fun ZeroWasteEatsApp() {
     val sessionManager = container.sessionManager
     val session by sessionManager.session
     val dataMode by container.dataMode.mode
+    val serverWaitingSince by container.serverWaitingSince.collectAsState()
+
+    // A sleeping deployed server starts while the person signs in, not after
+    LaunchedEffect(dataMode) { container.wakeServer() }
     val animationsEnabled = rememberAnimationsEnabled()
 
     // Behind every space, so the fade between two never shows anything but the theme
@@ -77,6 +85,17 @@ fun ZeroWasteEatsApp() {
                         .padding(top = 4.dp)
                 )
             }
+
+            // Live mode only: demo data never waits for a server
+            ServerWakingBanner(
+                waitingSince = serverWaitingSince,
+                slowAfterMillis = ServerWakeUp.SLOW_AFTER_MILLIS,
+                nowMillis = System::currentTimeMillis,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .statusBarsPadding()
+                    .padding(top = 4.dp)
+            )
         }
     }
 }
