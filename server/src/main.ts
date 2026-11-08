@@ -1,14 +1,25 @@
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule, ObserveInstrument } from './app.module';
+import { readObserveCredentials } from './config/telemetry';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    instrument: ObserveInstrument,
-  });
+  await ConfigModule.envVariablesLoaded;
+  // Instrumented only when telemetry has credentials, like the module itself
+  const telemetryEnabled = readObserveCredentials(process.env) !== null;
+  const app = await NestFactory.create(
+    AppModule,
+    telemetryEnabled ? { instrument: ObserveInstrument } : {},
+  );
   app.setGlobalPrefix('api/v1');
-  app.enableCors();
+  const corsOrigins = app
+    .get(ConfigService)
+    .getOrThrow<string[]>('CORS_ORIGINS');
+  // The mobile app does not need CORS; browsers get it only for listed origins
+  if (corsOrigins.length > 0) {
+    app.enableCors({ origin: corsOrigins });
+  }
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -22,6 +33,10 @@ async function bootstrap() {
     }),
   );
   app.enableShutdownHooks();
-  await app.listen(app.get(ConfigService).getOrThrow<number>('PORT'));
+  // The port the host assigns (Render sets PORT), on every interface so its proxy reaches it
+  await app.listen(
+    app.get(ConfigService).getOrThrow<number>('PORT'),
+    '0.0.0.0',
+  );
 }
 bootstrap();

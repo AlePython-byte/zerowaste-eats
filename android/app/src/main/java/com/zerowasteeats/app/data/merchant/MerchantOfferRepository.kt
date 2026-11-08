@@ -7,10 +7,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
-/** The merchant's own offers. Today a fake in memory; later the backend, screens unchanged. */
+/**
+ * The merchant's own offers: the backend in live mode ([RemoteMerchantOfferRepository]), memory
+ * in demo mode. Writes that cannot reach the server throw [MerchantDataException].
+ */
 interface MerchantOfferRepository {
     /** Newest first. */
     val offers: StateFlow<List<MerchantOffer>>
+
+    /** Whether [offers] has been loaded, is loading, or failed to load. */
+    val loadState: StateFlow<LoadState>
+
+    /** Loads the offers again; on failure the ones already loaded stay. */
+    suspend fun refresh()
 
     suspend fun createOffer(draft: MerchantOfferDraft): MerchantOffer
 
@@ -22,6 +31,18 @@ interface MerchantOfferRepository {
 
     /** Only a paused offer can be resumed. Returns whether it was. */
     suspend fun resumeOffer(id: String): Boolean
+
+    /** Deletes an offer nobody reserved. Returns false when it has reservations and stays. */
+    suspend fun deleteOffer(id: String): Boolean
+}
+
+/**
+ * Loads [MerchantOfferRepository.offers] if nothing asked for them yet, or if the last try
+ * failed: opening a screen again is a natural moment to retry.
+ */
+suspend fun MerchantOfferRepository.loadIfNeeded() {
+    val state = loadState.value
+    if (state == LoadState.Idle || state is LoadState.Failed) refresh()
 }
 
 /** In-memory offers. Every call waits [latencyMillis] to look like a real request. */
@@ -35,6 +56,17 @@ class FakeMerchantOfferRepository(
 
     override val offers: StateFlow<List<MerchantOffer>> = state
 
+    /** Memory is always there. */
+    override val loadState: StateFlow<LoadState> = MutableStateFlow(LoadState.Loaded)
+
+    override suspend fun refresh() = Unit
+
+    override suspend fun deleteOffer(id: String): Boolean {
+        delay(latencyMillis)
+        state.update { offers -> offers.filterNot { it.id == id } }
+        return true
+    }
+
     override suspend fun createOffer(draft: MerchantOfferDraft): MerchantOffer {
         delay(latencyMillis)
         val offer = MerchantOffer(
@@ -47,7 +79,8 @@ class FakeMerchantOfferRepository(
             pickupStart = draft.pickupStart,
             pickupEnd = draft.pickupEnd,
             status = resolveOfferStatus(draft.quantity, draft.pickupEnd, clock.instant(), null),
-            photo = draft.photo
+            photo = draft.photo,
+            description = draft.description.trim()
         )
         state.update { listOf(offer) + it }
         return offer
@@ -72,6 +105,7 @@ class FakeMerchantOfferRepository(
                         pickupStart = draft.pickupStart,
                         pickupEnd = draft.pickupEnd,
                         photo = draft.photo,
+                        description = draft.description.trim(),
                         status = resolveOfferStatus(
                             draft.quantity,
                             draft.pickupEnd,

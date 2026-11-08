@@ -1,5 +1,9 @@
 package com.zerowasteeats.app.presentation.components.map
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,29 +18,39 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppCard
-import com.zerowasteeats.app.presentation.data.MockMapCoordinates
+import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
+import com.zerowasteeats.app.data.catalog.PASTO_CENTER
+import com.zerowasteeats.app.presentation.format.distanceText
+import com.zerowasteeats.app.presentation.format.formatPesos
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.theme.AppSpacing
+import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
+import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
 /**
@@ -54,7 +68,7 @@ fun OffersMap(
     onLocationMessage: (String) -> Unit,
     modifier: Modifier = Modifier,
     cameraPositionState: CameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(MockMapCoordinates.pastoCenter, 14f)
+        position = CameraPosition.fromLatLngZoom(PastoLatLng, DEFAULT_MAP_ZOOM)
     },
     contentPadding: PaddingValues = PaddingValues(),
     onMapLoaded: () -> Unit = {}
@@ -75,31 +89,65 @@ fun OffersMap(
     }
 
     val selectedOffer = offers.find { it.id == selectedOfferId }
+    val animationsEnabled = rememberAnimationsEnabled()
+    // Follows the app's theme, not the system's. It is part of the map's properties, so a
+    // change is applied to the live map without rebuilding it.
+    val context = LocalContext.current
+    val isDark = isAppInDarkTheme()
+    val mapStyle = remember(isDark) {
+        MapStyleOptions.loadRawResourceStyle(
+            context,
+            if (isDark) R.raw.map_style_dark else R.raw.map_style_light
+        )
+    }
 
     Box(modifier = modifier) {
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
-            properties = MapProperties(isMyLocationEnabled = userLocation.hasPermission),
+            properties = MapProperties(
+                isMyLocationEnabled = userLocation.hasPermission,
+                mapStyleOptions = mapStyle
+            ),
             uiSettings = MapUiSettings(myLocationButtonEnabled = false), // We use custom UI
             contentPadding = contentPadding,
             onMapLoaded = onMapLoaded,
             onMapClick = { onSelectOffer(null) }
         ) {
             offers.forEach { offer ->
-                // Keyed so a marker's state stays with its offer when the list changes
-                key(offer.id) {
-                    val position = MockMapCoordinates.getCoordinatesForOffer(offer.id)
+                // Keyed so a marker's state stays with its offer when the list changes, and is
+                // placed again if the business moves
+                key(offer.id, offer.latitude, offer.longitude) {
+                    val position = LatLng(offer.latitude, offer.longitude)
                     val markerState = rememberMarkerState(position = position)
-                    Marker(
+                    val selected = offer.id == selectedOfferId
+                    val pinScale by animateFloatAsState(
+                        targetValue = if (selected) SELECTED_PIN_SCALE else 1f,
+                        animationSpec = if (animationsEnabled) {
+                            spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium)
+                        } else {
+                            snap()
+                        },
+                        label = "pinScale"
+                    )
+                    // The pin is redrawn into a bitmap whenever a key changes, so the scale is
+                    // rounded to hundredths: a few redraws, only for the selected pin
+                    val scaleStep = (pinScale * 100).roundToInt()
+                    val price = formatPesos(offer.discountedPrice)
+                    val pinTitle = stringResource(R.string.map_pin_title, offer.title, price)
+                    MarkerComposable(
+                        offer.id, price, selected, scaleStep,
                         state = markerState,
-                        title = offer.merchantName,
-                        snippet = offer.title,
+                        title = pinTitle,
+                        // Above the others, so the selected pin is never hidden under a neighbour
+                        zIndex = if (selected) 1f else 0f,
                         onClick = {
                             onSelectOffer(offer.id)
                             true // consume the event to show custom UI
                         }
-                    )
+                    ) {
+                        PricePin(price = price, selected = selected, scale = scaleStep / 100f)
+                    }
                 }
             }
         }
@@ -162,11 +210,13 @@ private fun MapOfferCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Text(
-                    text = offer.distance,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                distanceText(offer.distanceKm)?.let { distance ->
+                    Text(
+                        text = distance,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
@@ -187,7 +237,7 @@ private fun MapOfferCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = offer.discountedPrice,
+                    text = formatPesos(offer.discountedPrice),
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = AppSpacing.small),
@@ -205,3 +255,9 @@ private fun MapOfferCard(
         }
     }
 }
+
+/** The centre of Pasto, where the map opens. */
+val PastoLatLng = LatLng(PASTO_CENTER.latitude, PASTO_CENTER.longitude)
+
+/** Close enough to tell the streets of the centre apart. */
+const val DEFAULT_MAP_ZOOM = 14f

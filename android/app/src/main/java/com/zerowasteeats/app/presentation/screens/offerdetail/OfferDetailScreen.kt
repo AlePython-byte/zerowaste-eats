@@ -4,7 +4,6 @@ import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.format.formatted
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,21 +38,33 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.Animatable
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.ui.graphics.graphicsLayer
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
-import com.zerowasteeats.app.presentation.data.offerPhotoRes
+import com.zerowasteeats.app.presentation.components.offers.OfferPhotoImage
+import com.zerowasteeats.app.presentation.format.formatPesos
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.navigation.sharedOfferImage
 import com.zerowasteeats.app.presentation.theme.AppSpacing
@@ -62,14 +73,18 @@ import com.zerowasteeats.app.presentation.theme.RescateCoral
 import com.zerowasteeats.app.presentation.theme.RescateCream
 import kotlinx.coroutines.launch
 
+/** The offer's page, filled in from the catalog: the hero photo, what it is, and where to pick it up. */
 @Composable
-fun OfferDetailScreen(
+internal fun OfferDetailContent(
     offer: OfferUiModel,
+    reserve: ReservePanelState,
     onBackClick: () -> Unit,
     onFavoriteClick: () -> Unit,
+    onDecreaseQuantity: () -> Unit,
+    onIncreaseQuantity: () -> Unit,
     onReserveClick: () -> Unit,
+    snackbarHost: @Composable () -> Unit = {}
 ) {
-    val photo = offerPhotoRes(offer)
     val discountText = stringResource(R.string.offer_discount_off, offer.discountPercent)
     val remainingText = pluralStringResource(R.plurals.offer_remaining_count, offer.remainingQuantity, offer.remainingQuantity)
     val heartScale = remember { Animatable(1f) }
@@ -80,9 +95,13 @@ fun OfferDetailScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = snackbarHost,
         bottomBar = {
             ReservationPanel(
                 offer = offer,
+                reserve = reserve,
+                onDecreaseQuantity = onDecreaseQuantity,
+                onIncreaseQuantity = onIncreaseQuantity,
                 onReserveClick = onReserveClick
             )
         }
@@ -102,11 +121,10 @@ fun OfferDetailScreen(
                     .clipToBounds() // the photo is shifted below, keep it inside the hero
                     .background(MaterialTheme.colorScheme.surface)
             ) {
-                if (photo != null) {
-                    Image(
-                        painter = painterResource(id = photo),
+                if (offer.photo != null) {
+                    OfferPhotoImage(
+                        photo = offer.photo,
                         contentDescription = offer.title,
-                        contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxSize()
                             .sharedOfferImage(offer.id)
@@ -155,17 +173,35 @@ fun OfferDetailScreen(
                     color = MaterialTheme.colorScheme.onBackground
                 )
 
+                if (!offer.isAvailable) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.favorite_not_available),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+
+                offer.description?.takeIf { it.isNotBlank() }?.let { description ->
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(
-                        text = offer.discountedPrice,
+                        text = formatPesos(offer.discountedPrice),
                         style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.ExtraBold),
                         color = MaterialTheme.colorScheme.tertiary
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = offer.originalPrice,
+                        text = formatPesos(offer.originalPrice),
                         style = MaterialTheme.typography.titleMedium.copy(textDecoration = TextDecoration.LineThrough),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(bottom = 6.dp)
@@ -226,16 +262,18 @@ fun OfferDetailScreen(
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = MaterialTheme.colorScheme.tertiary
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Cra. 27 #18-45, Pasto", // Temporary location text
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    if (offer.address.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = offer.address,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
                 // Space so the floating reservation panel does not cover the content
-                Spacer(modifier = Modifier.height(160.dp))
+                Spacer(modifier = Modifier.height(220.dp))
             }
         }
 
@@ -283,7 +321,7 @@ fun OfferDetailScreen(
                     haptics.performHapticFeedback(
                         if (offer.isFavorite) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn
                     )
-                    scope.launch {
+                    if (animationsEnabled) scope.launch {
                         heartScale.animateTo(
                             1.35f,
                             spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium)
@@ -330,9 +368,31 @@ private fun CircleControl(
     }
 }
 
+/** What the reservation panel shows: the units chosen, what they cost, and what can be done. */
+internal data class ReservePanelState(
+    val quantity: Int,
+    val totalPrice: Long,
+    val canDecrease: Boolean,
+    val canIncrease: Boolean,
+    val canReserve: Boolean,
+    val isReserving: Boolean
+)
+
+internal fun OfferDetailState.toPanel() = ReservePanelState(
+    quantity = quantity,
+    totalPrice = totalPrice,
+    canDecrease = canDecrease,
+    canIncrease = canIncrease,
+    canReserve = canReserve,
+    isReserving = reserve.isReserving
+)
+
 @Composable
 private fun ReservationPanel(
     offer: OfferUiModel,
+    reserve: ReservePanelState,
+    onDecreaseQuantity: () -> Unit,
+    onIncreaseQuantity: () -> Unit,
     onReserveClick: () -> Unit
 ) {
     val remainingText = pluralStringResource(R.plurals.offer_remaining_count, offer.remainingQuantity, offer.remainingQuantity)
@@ -342,33 +402,151 @@ private fun ReservationPanel(
             .navigationBarsPadding()
             .padding(AppSpacing.regular)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(32.dp))
                 .background(MaterialTheme.colorScheme.surface)
                 .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
-                .padding(horizontal = 20.dp, vertical = 14.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 20.dp, vertical = 14.dp)
         ) {
-            Column {
-                Text(
-                    text = offer.discountedPrice,
-                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
-                    color = MaterialTheme.colorScheme.tertiary
-                )
-                Text(
-                    text = remainingText,
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.secondary
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = formatPesos(offer.discountedPrice),
+                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                    Text(
+                        text = remainingText,
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+
+                QuantityStepper(
+                    quantity = reserve.quantity,
+                    canDecrease = reserve.canDecrease,
+                    canIncrease = reserve.canIncrease,
+                    onDecrease = onDecreaseQuantity,
+                    onIncrease = onIncreaseQuantity
                 )
             }
 
+            Spacer(modifier = Modifier.height(12.dp))
+
             AppButton(
-                text = stringResource(R.string.offer_detail_reserve),
-                onClick = onReserveClick
+                text = stringResource(R.string.offer_detail_reserve_total, formatPesos(reserve.totalPrice)),
+                onClick = onReserveClick,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = reserve.canReserve || reserve.isReserving,
+                isLoading = reserve.isReserving
             )
         }
+    }
+}
+
+/**
+ * Minus, the count, plus. The count slides up when it grows and down when it shrinks, unless
+ * the system animations are off. Screen readers hear the label and the count as one thing.
+ */
+@Composable
+private fun QuantityStepper(
+    quantity: Int,
+    canDecrease: Boolean,
+    canIncrease: Boolean,
+    onDecrease: () -> Unit,
+    onIncrease: () -> Unit
+) {
+    val animationsEnabled = rememberAnimationsEnabled()
+    val haptics = LocalHapticFeedback.current
+    val countDescription = pluralStringResource(R.plurals.offer_detail_quantity_cd, quantity, quantity)
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = stringResource(R.string.offer_detail_quantity_label),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.clearAndSetSemantics {}
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            StepperButton(
+                text = "−",
+                contentDescription = stringResource(R.string.offer_detail_quantity_decrease_cd),
+                enabled = canDecrease,
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                    onDecrease()
+                }
+            )
+            AnimatedContent(
+                targetState = quantity,
+                transitionSpec = {
+                    if (!animationsEnabled) {
+                        EnterTransition.None togetherWith ExitTransition.None
+                    } else {
+                        val up = targetState > initialState
+                        (slideInVertically { if (up) it else -it } + fadeIn()) togetherWith
+                            (slideOutVertically { if (up) -it else it } + fadeOut())
+                    }
+                },
+                modifier = Modifier
+                    .width(40.dp)
+                    .semantics {
+                        contentDescription = countDescription
+                        liveRegion = LiveRegionMode.Polite
+                    },
+                contentAlignment = Alignment.Center,
+                label = "quantity"
+            ) { value ->
+                Text(
+                    text = value.toString(),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            StepperButton(
+                text = "+",
+                contentDescription = stringResource(R.string.offer_detail_quantity_increase_cd),
+                enabled = canIncrease,
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.SegmentTick)
+                    onIncrease()
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun StepperButton(
+    text: String,
+    contentDescription: String,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = if (enabled) 0.15f else 0.06f))
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .semantics { this.contentDescription = contentDescription },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.tertiary.copy(alpha = if (enabled) 1f else 0.35f),
+            modifier = Modifier.clearAndSetSemantics {}
+        )
     }
 }

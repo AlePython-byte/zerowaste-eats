@@ -4,6 +4,7 @@
    Everything is backed up by default; only what is listed here is left out.
 -->
 <full-backup-content>
-    <!-- Who is signed in belongs to this device: a restored copy must not log anyone in -->
+    <!-- Who is signed in, and their tokens, belong to this device: a restored copy must not log anyone in -->
     <exclude domain="sharedpref" path="session_prefs.xml" />
+    <exclude domain="sharedpref" path="auth_tokens.xml" />
 </full-backup-content>

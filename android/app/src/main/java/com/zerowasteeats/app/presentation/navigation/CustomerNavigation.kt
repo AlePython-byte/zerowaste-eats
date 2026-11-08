@@ -1,26 +1,19 @@
 package com.zerowasteeats.app.presentation.navigation
 
 import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.zerowasteeats.app.R
 import com.zerowasteeats.app.data.session.Session
-import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.screens.explore.ExploreScreen
 import com.zerowasteeats.app.presentation.screens.explore.ExploreViewMode
 import com.zerowasteeats.app.presentation.screens.explore.ExploreViewRequest
@@ -51,18 +44,15 @@ fun CustomerNavigation(
         currentRoute = currentRoute,
         onTabClick = { tab -> navController.navigateToTab(tab.route) },
         accent = MaterialTheme.colorScheme.tertiary
-    ) { innerPadding ->
-        // innerPadding reserves the bottom bar's height, so content ends above it
-        // instead of flowing underneath. Screens only add a small trailing gap.
+    ) {
+        // The content fills the area and runs under the bar; scrolling screens add
+        // LocalBottomBarInset to their bottom padding so the last item can clear it.
         CustomerNavHost(
             navController = navController,
             exploreViewRequest = exploreViewRequest,
             session = session,
             onSignOut = onSignOut,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .consumeWindowInsets(innerPadding)
+            modifier = Modifier.fillMaxSize()
         )
     }
 }
@@ -85,6 +75,7 @@ private fun CustomerNavHost(
             ) {
                 sharedComposable(CustomerDestination.HOME.route) {
                     HomeScreen(
+                        session = session,
                         onOfferClick = { offerId ->
                             navController.navigate("offer/$offerId")
                         },
@@ -96,43 +87,33 @@ private fun CustomerNavHost(
                 }
                 sharedComposable(CustomerDestination.EXPLORE.route) {
                     ExploreScreen(
+                        session = session,
                         viewRequest = exploreViewRequest,
                         onOfferClick = { offerId ->
                             navController.navigate("offer/$offerId")
-                        },
-                        onFavoriteClick = { /* Handle favorite click temporarily */ }
+                        }
                     )
                 }
                 composable(CustomerDestination.ORDERS.route) {
-                    OrdersScreen()
+                    OrdersScreen(session = session)
                 }
                 composable(CustomerDestination.PROFILE.route) {
                     ProfileScreen(
-                        displayName = session.displayName,
-                        email = session.email,
+                        session = session,
                         onSignOut = onSignOut
                     )
                 }
                 sharedComposable("offer/{offerId}") { backStackEntry ->
-                    val offerId = backStackEntry.arguments?.getString("offerId")
-                    val mockOffers = MockOffers.getList()
-                    val offer = mockOffers.find { it.id == offerId }
-            
-                    if (offer != null) {
-                        OfferDetailScreen(
-                            offer = offer,
-                            onBackClick = { navController.popBackStack() },
-                            onFavoriteClick = { /* Handle favorite click temporarily */ },
-                            onReserveClick = { /* Handle reserve click temporarily */ }
-                        )
-                    } else {
-                        // Safe fallback state for missing offer
-                        Text(
-                            text = stringResource(R.string.navigation_offer_not_found),
-                            modifier = Modifier.padding(16.dp),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
+                    OfferDetailScreen(
+                        session = session,
+                        offerId = backStackEntry.arguments?.getString("offerId").orEmpty(),
+                        onBackClick = { navController.popBackStack() },
+                        onViewOrders = {
+                            // Leave the detail first, so Home does not reopen on it later
+                            navController.popBackStack()
+                            navController.navigateToTab(CustomerDestination.ORDERS)
+                        }
+                    )
                 }
             }
         }

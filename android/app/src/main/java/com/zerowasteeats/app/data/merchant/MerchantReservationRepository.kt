@@ -5,15 +5,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
-/** The reservations customers made at this business. */
+/**
+ * The reservations customers made at this business: the backend in live mode
+ * ([RemoteMerchantReservationRepository]), memory in demo mode.
+ */
 interface MerchantReservationRepository {
     val reservations: StateFlow<List<MerchantReservation>>
 
-    /**
-     * Hands over the reservation with this [code], ignoring case, spaces and dashes. A code
-     * works once: the second time it is [RedeemResult.AlreadyRedeemed].
-     */
-    suspend fun redeem(code: String): RedeemResult
+    /** Whether [reservations] has been loaded, is loading, or failed to load. */
+    val loadState: StateFlow<LoadState>
+
+    /** Loads the reservations again; on failure the ones already loaded stay. */
+    suspend fun refresh()
 
     /**
      * Hands over the reservation [reservationId] if [code] is that reservation's own code,
@@ -33,7 +36,16 @@ class FakeMerchantReservationRepository(
 
     override val reservations: StateFlow<List<MerchantReservation>> = state
 
-    override suspend fun redeem(code: String): RedeemResult =
+    /** Memory is always there. */
+    override val loadState: StateFlow<LoadState> = MutableStateFlow(LoadState.Loaded)
+
+    override suspend fun refresh() = Unit
+
+    /**
+     * Hands over the reservation with this [code], ignoring case, spaces and dashes. A code
+     * works once: the second time it is [RedeemResult.AlreadyRedeemed].
+     */
+    suspend fun redeem(code: String): RedeemResult =
         redeemMatching(code) { reservation, wanted -> normalize(reservation.code) == wanted }
 
     override suspend fun redeem(reservationId: String, code: String): RedeemResult =

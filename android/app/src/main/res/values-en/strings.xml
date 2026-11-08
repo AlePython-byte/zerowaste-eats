@@ -22,6 +22,20 @@
     <string name="nav_orders">Orders</string>
     <string name="nav_profile">Profile</string>
     <string name="navigation_offer_not_found">Offer not found</string>
+    <string name="offer_unavailable_badge">Not available</string>
+    <string name="favorite_not_available">This offer is no longer available.</string>
+    <string name="favorite_failed">We couldn\'t update your favorites.</string>
+    <string name="favorite_failed_network">We couldn\'t update your favorites. Check your connection.</string>
+    <string name="offer_distance_km">%1$s km</string>
+    <string name="catalog_loading">Looking for offers near you…</string>
+    <string name="catalog_load_failed">We couldn\'t load the offers.</string>
+    <string name="catalog_load_failed_network">We couldn\'t load the offers. Check your connection.</string>
+    <string name="catalog_session_failed">Your session is no longer valid. Sign out and sign in again.</string>
+    <string name="offer_detail_loading">Loading the offer…</string>
+    <string name="offer_detail_load_failed">We couldn\'t load the offer.</string>
+    <string name="offer_detail_load_failed_network">We couldn\'t load the offer. Check your connection.</string>
+    <string name="offer_not_available_title">This offer is no longer available</string>
+    <string name="offer_not_available_subtitle">It may have sold out or the business may have taken it down. Take a look at other offers near you.</string>
 
     <string name="common_back_cd">Back</string>
     <string name="common_view_map">View map</string>
@@ -50,7 +64,25 @@
     <string name="order_day_tomorrow">Tomorrow</string>
     <string name="order_day_yesterday">Yesterday</string>
     <string name="offer_detail_pickup_title">Pickup</string>
-    <string name="offer_detail_reserve">Reserve</string>
+    <string name="offer_detail_quantity_label">Quantity</string>
+    <string name="offer_detail_quantity_decrease_cd">One unit less</string>
+    <string name="offer_detail_quantity_increase_cd">One unit more</string>
+    <plurals name="offer_detail_quantity_cd">
+        <item quantity="one">%1$d unit selected</item>
+        <item quantity="other">%1$d units selected</item>
+    </plurals>
+    <string name="offer_detail_reserve_total">Reserve · %1$s</string>
+    <string name="reserve_failed_not_enough_units">There are no longer enough units of this offer. We updated it.</string>
+    <string name="reserve_failed_network">We couldn\'t make the reservation. Check your connection.</string>
+    <string name="reserve_failed_session">Your session expired. Sign out and sign in again to reserve.</string>
+    <string name="reserve_failed">We couldn\'t make the reservation. Please try again.</string>
+    <string name="reserved_title">Reserved!</string>
+    <string name="reserved_code_label">Your pickup code</string>
+    <string name="reserved_code_cd">Pickup code: %1$s</string>
+    <string name="reserved_code_hint">Show it at the business when you pick up. You can also find it in Orders.</string>
+    <string name="reserved_total">Total: %1$s</string>
+    <string name="reserved_view_orders">View my orders</string>
+    <string name="reserved_done">Done</string>
 
     <string name="orders_title">Orders</string>
     <string name="orders_subtitle">Manage your reservations and pickups.</string>
@@ -58,6 +90,12 @@
     <string name="orders_tab_history">History</string>
     <string name="orders_empty_active">You have no active orders.</string>
     <string name="orders_empty_history">You have no past orders yet.</string>
+    <string name="orders_loading">Loading your orders…</string>
+    <string name="orders_load_failed_title">We couldn\'t load your orders</string>
+    <string name="orders_load_failed">Please try again in a moment.</string>
+    <string name="orders_load_failed_network">Check your connection and try again.</string>
+    <string name="orders_refresh_failed">We couldn\'t update your orders.</string>
+    <string name="orders_refresh_failed_network">We couldn\'t update your orders. Check your connection.</string>
 
     <string name="order_status_reserved">Reserved</string>
     <string name="order_status_ready_for_pickup">Ready for pickup</string>
@@ -99,6 +137,7 @@
     <string name="explore_empty_subtitle">Try another search or change the filters.</string>
 
     <string name="map_my_location_cd">My location</string>
+    <string name="map_pin_title">%1$s, %2$s</string>
     <string name="map_view_offer">View offer</string>
     <string name="map_location_unavailable">We couldn\'t get your location.</string>
     <string name="map_location_permission_required">Turn on location permission to use this feature.</string>
@@ -106,10 +145,14 @@
     <string name="profile_title">Profile</string>
     <string name="profile_subtitle">Your account and impact on ZeroWaste Eats.</string>
     <string name="profile_impact_title">Your impact</string>
-    <string name="profile_metric_rescued_orders">Rescued orders</string>
+    <string name="profile_metric_completed_orders">Completed orders</string>
     <string name="profile_metric_rescued_food">Food rescued</string>
-    <string name="profile_metric_estimated_savings">Estimated savings</string>
+    <string name="profile_metric_savings">Money saved</string>
     <string name="profile_rescued_food_value">%1$.1f kg</string>
+    <string name="profile_rescued_food_value_approx">%1$.1f kg approx.</string>
+    <string name="profile_impact_loading">Loading your impact…</string>
+    <string name="profile_impact_load_failed">We couldn\'t load your impact.</string>
+    <string name="profile_impact_load_failed_network">We couldn\'t load your impact. Check your connection.</string>
     <string name="profile_preferences_title">Preferences</string>
     <string name="profile_dark_mode_title">Dark mode</string>
     <string name="profile_dark_mode_subtitle">Switch between the light and dark themes.</string>
@@ -132,6 +175,10 @@
     <string name="auth_error_invalid_credentials">Incorrect email or password.</string>
     <string name="auth_error_email_registered">That email is already registered. Try signing in.</string>
     <string name="auth_error_network">We couldn\'t connect. Check your connection and try again.</string>
+    <string name="session_expired">Your session expired, please sign in again.</string>
+    <string name="auth_error_weak_password">That password is too easy to guess. Try a longer one or mix letters, numbers and symbols.</string>
+    <string name="auth_error_profile_incomplete">Finish creating your profile: your account exists, but we couldn\'t save your details.</string>
+    <string name="auth_error_unexpected">Something went wrong. Please try again in a moment.</string>
 
     <string name="validation_required">This field is required.</string>
     <plurals name="validation_name_too_short">
@@ -153,6 +200,8 @@
     <string name="signin_submit">Sign in</string>
     <string name="signin_forgot_password">Forgot your password?</string>
     <string name="signin_to_sign_up">No account yet? Create one</string>
+    <string name="signin_use_demo_data">Use demo data</string>
+    <string name="signin_demo_fallback_notice">Demo mode: the connection settings are not valid.</string>
     <string name="signin_debug_title">Debug only</string>
     <string name="signin_debug_as_customer">Sign in as buyer</string>
     <string name="signin_debug_as_merchant">Sign in as business</string>
@@ -183,6 +232,9 @@
     <string name="profile_sign_out_title">Sign out?</string>
     <string name="profile_sign_out_message">You will need to sign in again to see your orders.</string>
     <string name="mode_badge_merchant">Business</string>
+    <string name="demo_badge">Demo mode</string>
+    <string name="demo_badge_cd">Demo mode: the data is sample data and is not saved on the server.</string>
+    <string name="server_waking">Waking up the server… this can take up to a minute.</string>
     <string name="merchant_nav_dashboard">Overview</string>
     <string name="merchant_nav_offers">Offers</string>
     <string name="merchant_nav_reservations">Bookings</string>
@@ -220,6 +272,15 @@
     <string name="merchant_offer_paused_message">Offer paused</string>
     <string name="merchant_offer_resumed_message">Offer resumed</string>
     <string name="merchant_offers_empty_active_title">You have no active offers</string>
+    <string name="merchant_offers_loading">Loading your offers…</string>
+    <string name="merchant_profile_load_failed">We couldn\'t load your business details.</string>
+    <string name="merchant_profile_load_failed_network">We couldn\'t load your business details. Check your connection.</string>
+    <string name="merchant_offers_load_failed">We couldn\'t load your offers.</string>
+    <string name="merchant_offers_load_failed_network">We couldn\'t load your offers. Check your connection.</string>
+    <string name="merchant_data_session_failed">Your session is no longer valid. Sign out and sign in again.</string>
+    <string name="merchant_offer_change_failed">We couldn\'t change the offer\'s status.</string>
+    <string name="offer_save_failed_network">We couldn\'t save the offer. Check your connection and try again.</string>
+    <string name="offer_save_failed">We couldn\'t save the offer. Please try again.</string>
     <string name="merchant_offers_empty_active_message">Publish an offer so others can rescue it.</string>
     <string name="merchant_offers_empty_paused_title">You have no paused offers</string>
     <string name="merchant_offers_empty_paused_message">Offers you pause will show up here, ready to resume.</string>
@@ -246,6 +307,32 @@
     <string name="offer_field_pickup_start">From</string>
     <string name="offer_field_pickup_end">Until</string>
     <string name="offer_pickup_choose_time">Choose time</string>
+    <string name="offer_photo_device">Your photo</string>
+    <string name="offer_photo_current">Current photo</string>
+    <string name="offer_photo_pick_cd">Choose a photo from your gallery</string>
+    <string name="offer_photo_change_cd">Choose another photo from your gallery</string>
+    <string name="offer_photo_preparing">Preparing the photo…</string>
+    <string name="offer_photo_failed">We couldn\'t use that photo. Try another one.</string>
+    <string name="offer_photo_upload_network">We couldn\'t upload the photo, so nothing was published. Check your connection and try again.</string>
+    <string name="offer_photo_upload_rejected">We couldn\'t upload the photo, so nothing was published. Sign out, sign in again and try again.</string>
+    <string name="offer_photo_upload_unexpected">We couldn\'t upload the photo, so nothing was published. Choose the photo again and try again.</string>
+    <string name="offer_field_description">Description (optional)</string>
+    <plurals name="offer_error_description_too_long">
+        <item quantity="one">Use %1$d character at most.</item>
+        <item quantity="other">Use %1$d characters at most.</item>
+    </plurals>
+    <string name="ai_suggest_button">Suggest with AI</string>
+    <string name="ai_suggest_hint">Use your photo to fill in the title, category, description and discount.</string>
+    <string name="ai_suggest_loading">Looking at the photo…</string>
+    <string name="ai_suggested_chip">Suggested by AI</string>
+    <string name="ai_suggestion_example">Example suggestion</string>
+    <string name="ai_suggestion_applied_title">Suggestion applied</string>
+    <string name="ai_suggestion_applied">Check and adjust anything before publishing: every field is still editable.</string>
+    <string name="ai_suggestion_discount_hint">Suggested discount: %1$d %%. Enter the original price and suggest again to work out the discounted price.</string>
+    <string name="ai_error_invalid_photo">We couldn\'t analyze that photo. Choose another photo of food.</string>
+    <string name="ai_error_limit">You\'ve reached the suggestion limit for now. Try again later or fill in the offer yourself.</string>
+    <string name="ai_error_unavailable">The AI isn\'t available right now. Fill in the offer yourself or try again later.</string>
+    <string name="ai_error_unexpected">We couldn\'t get a suggestion. Fill in the offer yourself or try again.</string>
     <string name="offer_photo_croissant">Croissants</string>
     <string name="offer_photo_salmon_bowl">Salmon bowl</string>
     <string name="offer_photo_desserts">Desserts</string>
@@ -276,6 +363,18 @@
         <item quantity="one">Too many attempts. Try again in %1$d second.</item>
         <item quantity="other">Too many attempts. Try again in %1$d seconds.</item>
     </plurals>
+    <plurals name="merchant_code_locked_minutes">
+        <item quantity="one">Too many attempts. Try again in %1$d minute.</item>
+        <item quantity="other">Too many attempts. Try again in %1$d minutes.</item>
+    </plurals>
+    <string name="merchant_code_failed_network">We couldn\'t check the code. Check your connection and try again.</string>
+    <string name="merchant_code_failed_session">Your session expired. Sign out and sign in again.</string>
+    <string name="merchant_code_failed">We couldn\'t check the code. Please try again.</string>
+    <string name="merchant_reservations_load_failed_title">We couldn\'t load the reservations</string>
+    <string name="merchant_reservations_load_failed">Please try again in a moment.</string>
+    <string name="merchant_reservations_load_failed_network">Check your connection and try again.</string>
+    <string name="merchant_reservations_refresh_failed">We couldn\'t update the reservations.</string>
+    <string name="merchant_reservations_refresh_failed_network">We couldn\'t update the reservations. Check your connection.</string>
     <string name="merchant_reservations_empty_pending_title">Nothing pending for now</string>
     <string name="merchant_reservations_empty_pending_message">When someone reserves one of your offers, it will show up here.</string>
     <string name="merchant_reservations_empty_completed_title">No pickups handed over yet</string>

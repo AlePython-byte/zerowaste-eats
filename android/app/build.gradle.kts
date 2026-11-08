@@ -1,11 +1,50 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.secrets.gradle.plugin)
 }
 
+// Endpoints come from local.properties, which is never committed (see local.properties.example)
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) file.inputStream().use(::load)
+}
+
+fun localProperty(name: String, default: String = ""): String =
+    localProperties.getProperty(name)?.let(LocalProperties::clean) ?: default
+
+/** A URL from local.properties. A malformed one stops the build instead of crashing the app. */
+fun endpointProperty(name: String, default: String = "", trailingSlash: Boolean = false): String =
+    LocalProperties.requireEndpoint(name, localProperty(name, default), trailingSlash)
+
+/** A Kotlin string literal for a BuildConfig field. */
+fun stringField(value: String): String =
+    "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+
+/**
+ * The release keystore, when local.properties names one. Without it the release build is
+ * signed with the debug key: good enough for a demo APK to install, never for a store.
+ */
+val releaseKeystore: File? = localProperty("RELEASE_STORE_FILE")
+    .takeIf { it.isNotEmpty() }
+    ?.let { rootProject.file(it) }
+
 android {
     namespace = "com.zerowasteeats.app"
+
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = releaseKeystore
+                storePassword = localProperty("RELEASE_STORE_PASSWORD")
+                keyAlias = localProperty("RELEASE_KEY_ALIAS")
+                keyPassword = localProperty("RELEASE_KEY_PASSWORD")
+            }
+        }
+    }
 
     compileSdk {
         version = release(37)
@@ -19,13 +58,46 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // The publishable key is public by design (Supabase pairs it with row level
+        // security), but it still stays out of the repository
+        buildConfigField("String", "SUPABASE_URL", stringField(endpointProperty("SUPABASE_URL")))
+        buildConfigField(
+            "String",
+            "SUPABASE_PUBLISHABLE_KEY",
+            stringField(localProperty("SUPABASE_PUBLISHABLE_KEY"))
+        )
     }
 
     buildTypes {
+        debug {
+            // The emulator reaches the computer running the backend at 10.0.2.2
+            buildConfigField(
+                "String",
+                "API_BASE_URL",
+                stringField(
+                    endpointProperty(
+                        "API_BASE_URL_DEBUG",
+                        default = "http://10.0.2.2:3000/api/v1/",
+                        trailingSlash = true
+                    )
+                )
+            )
+        }
         release {
+            // The deployed backend (HTTPS: release builds refuse cleartext). Empty means the
+            // app offers demo data only
+            buildConfigField(
+                "String",
+                "API_BASE_URL",
+                stringField(endpointProperty("API_BASE_URL_RELEASE", trailingSlash = true))
+            )
+            // R8 shrinks and obfuscates; src/main/keepRules keeps what Retrofit and
+            // kotlinx.serialization reach by reflection
             optimization {
-                enable = false
+                enable = true
             }
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
 
@@ -36,6 +108,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     androidResources {
@@ -43,8 +116,15 @@ android {
     }
 }
 
+secrets {
+    // These become BuildConfig fields per build type above; the plugin only handles the maps key
+    ignoreList.add("API_BASE_URL_.*")
+    ignoreList.add("SUPABASE_.*")
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
 
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity.compose)
@@ -60,11 +140,20 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.maps.compose)
     implementation(libs.play.services.location)
+    implementation(libs.androidx.exifinterface)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.kotlinx.serialization)
+    implementation(libs.okhttp)
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.androidx.compose.ui.tooling.preview)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)
+    testImplementation(libs.okhttp.mockwebserver)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -43,19 +43,80 @@ import com.zerowasteeats.app.presentation.components.common.AppSearchBar
 import com.zerowasteeats.app.presentation.components.common.EmptyStateIcon
 import com.zerowasteeats.app.presentation.components.filters.CategoryChip
 import com.zerowasteeats.app.presentation.components.offers.OfferCard
-import com.zerowasteeats.app.presentation.data.MockOffers
-import com.zerowasteeats.app.presentation.model.OfferUiModel
+import com.zerowasteeats.app.presentation.components.offers.OfferCardSkeleton
+import com.zerowasteeats.app.presentation.model.OfferFilters
+import com.zerowasteeats.app.presentation.model.filterAndSort
+import com.zerowasteeats.app.presentation.model.toUiModel
+import com.zerowasteeats.app.presentation.navigation.aboveBottomBar
+import com.zerowasteeats.app.presentation.screens.feed.CatalogLoadFailureSnackbar
+import com.zerowasteeats.app.presentation.screens.feed.FavoriteProblem
+import com.zerowasteeats.app.presentation.screens.feed.FavoriteProblemSnackbar
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import com.zerowasteeats.app.presentation.screens.feed.OfferFeedState
+import com.zerowasteeats.app.presentation.screens.feed.OfferFeedViewModel
+import com.zerowasteeats.app.presentation.screens.feed.OfferFeedViewModelFactory
+import com.zerowasteeats.app.ZeroWasteEatsApplication
+import com.zerowasteeats.app.data.catalog.CatalogLoadState
+import com.zerowasteeats.app.data.catalog.FakeOfferCatalogRepository
+import com.zerowasteeats.app.data.session.Session
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zerowasteeats.app.presentation.theme.AppRadius
+import com.zerowasteeats.app.presentation.navigation.LocalBottomBarInset
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
 import java.time.Clock
 
+/** Home of the customer: the offers near them, loaded from the catalog of their account. */
 @Composable
 fun HomeScreen(
+    session: Session.Customer,
     onMapClick: () -> Unit = {},
     onOfferClick: (String) -> Unit = {},
+    clock: Clock = Clock.systemDefaultZone()
+) {
+    val container =
+        (LocalContext.current.applicationContext as ZeroWasteEatsApplication).container
+    val viewModel: OfferFeedViewModel = viewModel(
+        factory = OfferFeedViewModelFactory(
+            container.offerCatalog(session),
+            container.customerLocation,
+            clock
+        )
+    )
+    val state by viewModel.state.collectAsState()
+    // Each time the screen shows, including coming back from another tab
+    LaunchedEffect(viewModel) { viewModel.onShown() }
+
+    HomeContent(
+        state = state,
+        favoriteFailures = viewModel.favoriteFailures,
+        onRetry = viewModel::retryLoad,
+        onMapClick = onMapClick,
+        onOfferClick = onOfferClick,
+        onFavoriteClick = viewModel::toggleFavorite,
+        onRetryFavorite = viewModel::setFavorite,
+        clock = clock
+    )
+}
+
+@Composable
+private fun HomeContent(
+    state: OfferFeedState,
+    onRetry: () -> Unit,
+    onMapClick: () -> Unit,
+    onOfferClick: (String) -> Unit,
+    favoriteFailures: Flow<FavoriteProblem> = emptyFlow(),
     onFavoriteClick: (String) -> Unit = {},
+    onRetryFavorite: (offerId: String, favorite: Boolean) -> Unit = { _, _ -> },
     clock: Clock = Clock.systemDefaultZone()
 ) {
     // Worked out when the screen opens; it does not tick while the screen stays open
@@ -66,17 +127,27 @@ fun HomeScreen(
     val categories = OfferCategory.entries
     // Cards already shown once; they skip the entrance animation when they reappear
     val seenOfferIds = remember { mutableSetOf<String>() }
-    val mockOffers = MockOffers.getList()
-
-    val filteredOffers = mockOffers.filter { offer ->
-        val matchesSearch = offer.title.contains(searchQuery, ignoreCase = true) ||
-                offer.merchantName.contains(searchQuery, ignoreCase = true)
-        val matchesCategory = selectedCategory == OfferCategory.ALL || offer.category == selectedCategory
-        matchesSearch && matchesCategory
+    // Search and category stay on the device, over the offers the server sent
+    val filteredOffers = remember(state.offers, searchQuery, selectedCategory) {
+        state.offers.filterAndSort(searchQuery, OfferFilters(category = selectedCategory))
     }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val loadingDescription = stringResource(R.string.catalog_loading)
+
+    CatalogLoadFailureSnackbar(
+        state = state,
+        snackbarHostState = snackbarHostState,
+        onRetry = onRetry
+    )
+    FavoriteProblemSnackbar(
+        problems = favoriteFailures,
+        snackbarHostState = snackbarHostState,
+        onRetry = onRetryFavorite
+    )
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = { SnackbarHost(snackbarHostState, modifier = Modifier.aboveBottomBar()) }
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -89,7 +160,8 @@ LazyColumn(
                     start = AppSpacing.regular,
                     end = AppSpacing.regular,
                     top = AppSpacing.regular, // Slightly tighter top spacing
-                    bottom = AppSpacing.large // Trailing gap; the bottom bar inset comes from the app scaffold
+                    // Trailing gap, plus the floating bar the list runs under
+                    bottom = AppSpacing.large + LocalBottomBarInset.current
                 ),
                 verticalArrangement = Arrangement.spacedBy(AppSpacing.medium) // Improved info density
             ) {
@@ -128,9 +200,21 @@ LazyColumn(
                     }
                 }
 
-                if (filteredOffers.isEmpty()) {
-                    item {
-                        EmptyState()
+                if (state.showSkeletons) {
+                    item(key = "loading") {
+                        Column(
+                            modifier = Modifier.semantics { contentDescription = loadingDescription },
+                            verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
+                        ) {
+                            repeat(SKELETON_COUNT) { OfferCardSkeleton() }
+                        }
+                    }
+                } else if (filteredOffers.isEmpty()) {
+                    // After a failed first load the snackbar explains; "no offers" would not be true
+                    if (state.showEmptyState) {
+                        item(key = "empty") {
+                            EmptyState()
+                        }
                     }
                 } else {
                     items(
@@ -229,7 +313,19 @@ private fun EmptyState(modifier: Modifier = Modifier) {
 @Preview
 @Composable
 private fun HomeScreenPreview() {
+    val clock = Clock.systemDefaultZone()
     ZeroWasteEatsTheme {
-        HomeScreen()
+        HomeContent(
+            state = OfferFeedState(
+                offers = FakeOfferCatalogRepository.demoOffers(clock).map { it.toUiModel(clock) },
+                loadState = CatalogLoadState.Loaded
+            ),
+            onRetry = {},
+            onMapClick = {},
+            onOfferClick = {}
+        )
     }
 }
+
+/** Enough placeholders to fill the screen below the header. */
+private const val SKELETON_COUNT = 2

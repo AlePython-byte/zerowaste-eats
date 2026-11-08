@@ -33,7 +33,7 @@ class FakeMerchantOfferRepositoryTest {
         quantity = quantity,
         pickupStart = now.plusSeconds(3600),
         pickupEnd = pickupEnd,
-        photo = OfferPhoto.CROISSANT
+        photo = OfferPhoto.Bundled.CROISSANT
     )
 
     @Test
@@ -63,7 +63,7 @@ class FakeMerchantOfferRepositoryTest {
             quantity = 5,
             pickupStart = now.minusSeconds(7200),
             pickupEnd = now.minusSeconds(3600),
-            photo = OfferPhoto.CROISSANT
+            photo = OfferPhoto.Bundled.CROISSANT
         )
 
         assertEquals(MerchantOfferStatus.EXPIRED, repository().createOffer(past).status)

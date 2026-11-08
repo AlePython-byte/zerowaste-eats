@@ -36,8 +36,8 @@ fun AuthLinkButton(
 }
 
 /**
- * Form-level banner for [error]. A network failure also offers a retry, since sending the
- * same form again may just work.
+ * Form-level banner for [error]. A failure that may be temporary (see [isRetryable]) also
+ * offers a retry, since sending the same form again may just work.
  */
 @Composable
 fun AuthErrorBanner(
@@ -48,7 +48,7 @@ fun AuthErrorBanner(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         FormErrorBanner(message = error?.message())
-        if (error == AuthError.NETWORK) {
+        if (error?.isRetryable == true) {
             AuthLinkButton(
                 text = stringResource(R.string.auth_retry),
                 onClick = onRetry,

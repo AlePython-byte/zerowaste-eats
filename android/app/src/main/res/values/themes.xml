@@ -10,4 +10,20 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
+    <!--
+        Theme of the launch window only: brand icon centered on the same background as the app
+        (cream, or carbon in night mode via window_background), shown until the first frame is
+        ready with no timer. The splash API swaps it for Theme.ZeroWasteEats afterwards.
+        On Android 12+ the system draws it before the process starts, so it follows the
+        system's light/dark setting; the app's own switch applies from the first frame.
+    -->
+    <style name="Theme.ZeroWasteEats.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/window_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.ZeroWasteEats</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
 </resources>

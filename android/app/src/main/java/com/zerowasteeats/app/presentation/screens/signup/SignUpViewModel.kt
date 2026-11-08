@@ -52,13 +52,29 @@ class SignUpViewModel(
         error = null
     }
 
+    /**
+     * True once the account exists but its profile is still missing: from then on sending the
+     * form finishes that profile instead of trying to create the account a second time.
+     */
+    private var profilePending = false
+
     fun submit(request: SignUpRequest) {
         if (isLoading) return
         error = null
         isLoading = true
         viewModelScope.launch {
-            val result = sessionManager.signUp(request)
-            if (result is AuthResult.Failure) error = result.error
+            val result = if (profilePending) {
+                sessionManager.completeProfile()
+            } else {
+                sessionManager.signUp(request)
+            }
+            when (result) {
+                is AuthResult.Success -> profilePending = false
+                is AuthResult.Failure -> {
+                    if (result.error == AuthError.PROFILE_INCOMPLETE) profilePending = true
+                    error = result.error
+                }
+            }
             isLoading = false
         }
     }

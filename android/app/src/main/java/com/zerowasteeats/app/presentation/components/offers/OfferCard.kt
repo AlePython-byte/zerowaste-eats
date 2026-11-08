@@ -7,7 +7,6 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -30,19 +29,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
-import com.zerowasteeats.app.presentation.data.offerPhotoRes
+import com.zerowasteeats.app.presentation.format.distanceText
+import com.zerowasteeats.app.presentation.format.formatPesos
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.navigation.sharedOfferImage
 import com.zerowasteeats.app.presentation.theme.RescateButter
@@ -64,8 +63,6 @@ fun OfferCard(
     favoriteContentDescription: String,
     modifier: Modifier = Modifier,
 ) {
-    val photo = offerPhotoRes(offer)
-
     val fallbackBrush = Brush.linearGradient(listOf(RescateCarbonElevated, RescateCarbon))
     val cardShape = RoundedCornerShape(28.dp)
 
@@ -95,14 +92,14 @@ fun OfferCard(
                 onClick = onClick
             )
     ) {
-        if (photo != null) {
-            Image(
-                painter = painterResource(id = photo),
+        if (offer.photo != null) {
+            OfferPhotoImage(
+                photo = offer.photo,
                 contentDescription = offer.title,
-                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxSize()
                     .sharedOfferImage(offer.id)
+                    .alpha(if (offer.isAvailable) 1f else UNAVAILABLE_PHOTO_ALPHA)
             )
         }
 
@@ -128,7 +125,11 @@ fun OfferCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            InfoPill(text = pluralStringResource(R.plurals.offer_remaining_count, offer.remainingQuantity, offer.remainingQuantity))
+            if (offer.isAvailable) {
+                InfoPill(text = pluralStringResource(R.plurals.offer_remaining_count, offer.remainingQuantity, offer.remainingQuantity))
+            } else {
+                InfoPill(text = stringResource(R.string.offer_unavailable_badge))
+            }
 
             FavoriteButton(
                 isFavorite = offer.isFavorite,
@@ -159,11 +160,13 @@ fun OfferCard(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
-                Text(
-                    text = offer.distance,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = RescateCream
-                )
+                distanceText(offer.distanceKm)?.let { distance ->
+                    Text(
+                        text = distance,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = RescateCream
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(6.dp))
@@ -183,13 +186,13 @@ fun OfferCard(
                 verticalAlignment = Alignment.Bottom
             ) {
                 Text(
-                    text = offer.discountedPrice,
+                    text = formatPesos(offer.discountedPrice),
                     style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
                     color = RescateButter
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
-                    text = offer.originalPrice,
+                    text = formatPesos(offer.originalPrice),
                     style = MaterialTheme.typography.bodyMedium.copy(textDecoration = TextDecoration.LineThrough),
                     color = RescateCreamMuted,
                     modifier = Modifier.padding(bottom = 3.dp)
@@ -214,6 +217,9 @@ fun OfferCard(
         }
     }
 }
+
+/** A photo of an offer that can no longer be reserved fades back, so the mark reads first. */
+internal const val UNAVAILABLE_PHOTO_ALPHA = 0.45f
 
 @Composable
 private fun InfoPill(

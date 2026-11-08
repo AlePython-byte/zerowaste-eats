@@ -45,6 +45,7 @@ import com.zerowasteeats.app.presentation.components.common.MetricCard
 import com.zerowasteeats.app.presentation.components.common.ModeBadge
 import com.zerowasteeats.app.presentation.components.common.staggeredEntrance
 import com.zerowasteeats.app.presentation.theme.AppRadius
+import com.zerowasteeats.app.presentation.navigation.LocalBottomBarInset
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.ThemeMode
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
@@ -93,7 +94,9 @@ fun MerchantDashboardContent(
                 .fillMaxSize()
                 .statusBarsPadding()
                 .verticalScroll(rememberScrollState())
-                .padding(AppSpacing.regular),
+                .padding(AppSpacing.regular)
+                // The floating bar sits over the bottom of the scroll; this lets the end clear it
+                .padding(bottom = LocalBottomBarInset.current),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.extraLarge)
         ) {
             Column(modifier = Modifier.staggeredEntrance(0, animateEntrance)) {

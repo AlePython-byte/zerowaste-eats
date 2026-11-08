@@ -1,5 +1,6 @@
 package com.zerowasteeats.app.presentation.screens.merchant.offers
 
+import com.zerowasteeats.app.data.merchant.LoadState
 import com.zerowasteeats.app.data.merchant.MerchantOffer
 import com.zerowasteeats.app.data.merchant.MerchantOfferRepository
 import com.zerowasteeats.app.data.merchant.MerchantOfferStatus
@@ -44,8 +45,20 @@ enum class OfferStatusChange {
 /** The offers, the chosen group, and what the list shows from them. */
 data class MerchantOfferListState(
     val offers: List<MerchantOffer>,
-    val filter: OfferFilter
+    val filter: OfferFilter,
+    val loadState: LoadState = LoadState.Loaded
 ) {
+    /** Placeholders while the first load runs: there is nothing real to show yet. */
+    val showSkeletons: Boolean =
+        offers.isEmpty() && (loadState == LoadState.Loading || loadState == LoadState.Idle)
+
+    /**
+     * The empty-group message only once the offers are known: after a failed first load
+     * "you have no offers" would not be true.
+     */
+    val showEmptyState: Boolean =
+        loadState == LoadState.Loaded || (loadState is LoadState.Failed && offers.isNotEmpty())
+
     /** How many offers each chip stands for. */
     val counts: Map<OfferFilter, Int> =
         OfferFilter.entries.associateWith { filter -> offers.count { filter.matches(it) } }

@@ -16,7 +16,14 @@ data class MerchantOffer(
     val pickupStart: Instant,
     val pickupEnd: Instant,
     val status: MerchantOfferStatus,
-    val photo: OfferPhoto
+    val photo: OfferPhoto?,
+    /** Optional; empty when the merchant wrote none. */
+    val description: String = "",
+    /**
+     * Units customers already reserved, on top of [quantity] (the ones still free). Kept so an
+     * edit sends the server the right total.
+     */
+    val quantityReserved: Int = 0
 ) {
     /** Whole percent off, rounded down. */
     val discountPercent: Int
@@ -36,7 +43,8 @@ data class MerchantOfferDraft(
     val quantity: Int,
     val pickupStart: Instant,
     val pickupEnd: Instant,
-    val photo: OfferPhoto
+    val photo: OfferPhoto,
+    val description: String = ""
 ) {
     init {
         require(title.isNotBlank()) { "An offer needs a title" }

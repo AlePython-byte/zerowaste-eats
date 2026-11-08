@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -28,12 +27,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -46,9 +44,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
-import com.zerowasteeats.app.presentation.data.MockOffers
-import com.zerowasteeats.app.presentation.data.offerPhotoRes
+import com.zerowasteeats.app.data.catalog.FakeOfferCatalogRepository
+import com.zerowasteeats.app.presentation.format.formatPesos
 import com.zerowasteeats.app.presentation.model.OfferUiModel
+import com.zerowasteeats.app.presentation.model.toUiModel
 import com.zerowasteeats.app.presentation.navigation.sharedOfferImage
 import com.zerowasteeats.app.presentation.theme.RescateButter
 import com.zerowasteeats.app.presentation.theme.RescateCarbon
@@ -57,6 +56,7 @@ import com.zerowasteeats.app.presentation.theme.RescateDiscountBadge
 import com.zerowasteeats.app.presentation.theme.RescateCream
 import com.zerowasteeats.app.presentation.theme.ThemeMode
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
+import java.time.Clock
 
 /**
  * Compact offer card for a two-column grid: a 4:5 photo with the discount, favorite and
@@ -71,16 +71,17 @@ fun CompactOfferCard(
     favoriteContentDescription: String,
     modifier: Modifier = Modifier,
 ) {
-    val photo = offerPhotoRes(offer)
+    val price = formatPesos(offer.discountedPrice)
     val cardShape = RoundedCornerShape(24.dp)
     val fallbackBrush = Brush.linearGradient(listOf(RescateCarbonElevated, RescateCarbon))
+    val unavailableText = stringResource(R.string.offer_unavailable_badge)
     val summary = stringResource(
         R.string.offer_card_summary_cd,
         offer.title,
         offer.merchantName,
-        offer.discountedPrice,
+        price,
         offer.discountPercent
-    )
+    ).let { if (offer.isAvailable) it else "$it, $unavailableText" }
 
     // Press feedback: the card shrinks slightly instead of showing a ripple
     val interactionSource = remember { MutableInteractionSource() }
@@ -111,14 +112,14 @@ fun CompactOfferCard(
                 onClick = onClick
             )
     ) {
-        if (photo != null) {
-            Image(
-                painter = painterResource(id = photo),
+        if (offer.photo != null) {
+            OfferPhotoImage(
+                photo = offer.photo,
                 contentDescription = null, // described by the card summary
-                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxSize()
                     .sharedOfferImage(offer.id)
+                    .alpha(if (offer.isAvailable) 1f else UNAVAILABLE_PHOTO_ALPHA)
             )
         }
 
@@ -153,7 +154,11 @@ fun CompactOfferCard(
                     .clearAndSetSemantics {}
             ) {
                 Text(
-                    text = stringResource(R.string.offer_discount_off, offer.discountPercent),
+                    text = if (offer.isAvailable) {
+                        stringResource(R.string.offer_discount_off, offer.discountPercent)
+                    } else {
+                        unavailableText
+                    },
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                     color = RescateCream
                 )
@@ -198,7 +203,7 @@ fun CompactOfferCard(
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text = offer.discountedPrice,
+                text = price,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
                 color = RescateButter,
                 maxLines = 1
@@ -216,7 +221,8 @@ private fun CompactOfferCardPreviewContent(themeMode: ThemeMode) {
                 .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            MockOffers.getList().take(2).forEach { offer ->
+            val clock = Clock.systemDefaultZone()
+            FakeOfferCatalogRepository.demoOffers(clock).take(2).map { it.toUiModel(clock) }.forEach { offer ->
                 CompactOfferCard(
                     offer = offer,
                     onClick = {},

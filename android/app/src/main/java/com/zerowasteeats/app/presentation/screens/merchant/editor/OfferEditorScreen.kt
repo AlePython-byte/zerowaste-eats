@@ -3,6 +3,11 @@ package com.zerowasteeats.app.presentation.screens.merchant.editor
 import android.content.res.Configuration
 import android.text.format.DateFormat
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.CircularProgressIndicator
+import com.zerowasteeats.app.presentation.components.offers.OfferPhotoImage
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -86,6 +91,12 @@ import com.zerowasteeats.app.R
 import com.zerowasteeats.app.ZeroWasteEatsApplication
 import com.zerowasteeats.app.data.merchant.MerchantOfferDraft
 import com.zerowasteeats.app.data.merchant.OfferPhoto
+import com.zerowasteeats.app.data.merchant.PhotoSelection
+import com.zerowasteeats.app.data.merchant.PickedPhoto
+import com.zerowasteeats.app.data.settings.DataMode
+import com.zerowasteeats.app.data.photos.PhotoUploadError
+import com.zerowasteeats.app.data.merchant.MerchantDataError
+import com.zerowasteeats.app.presentation.screens.auth.AuthLinkButton
 import com.zerowasteeats.app.data.session.Session
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppTextField
@@ -111,6 +122,7 @@ import kotlinx.coroutines.launch
 /** Fields typed with the keyboard: on a failed save these take the focus. */
 private val TEXT_FIELDS = setOf(
     OfferField.TITLE,
+    OfferField.DESCRIPTION,
     OfferField.ORIGINAL_PRICE,
     OfferField.DISCOUNTED_PRICE,
     OfferField.QUANTITY
@@ -131,10 +143,21 @@ fun OfferEditorScreen(
     val container =
         (LocalContext.current.applicationContext as ZeroWasteEatsApplication).container
     val viewModel: OfferEditorViewModel = viewModel(
-        factory = OfferEditorViewModelFactory(container.merchantRepositories(session).offers, offerId)
+        factory = OfferEditorViewModelFactory(
+            container.merchantRepositories(session).offers,
+            offerId,
+            container.offerPhotoPreparer,
+            container.offerSuggestions(),
+            container.offerPhotoUploader(session.userId)
+        )
     )
 
     LaunchedEffect(viewModel) { viewModel.saved.collect(onSaved) }
+
+    // The system photo picker: no storage permission, the person chooses exactly one image
+    val pickPhoto = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri -> if (uri != null) viewModel.preparePhoto(uri) }
 
     val existingOffer = viewModel.existingOffer
     if (offerId != null && existingOffer == null) {
@@ -149,18 +172,61 @@ fun OfferEditorScreen(
             ?: OfferEditorFormState.newOffer(clock)
     }
 
+    LaunchedEffect(viewModel, form) { viewModel.prepared.collect(form::onPhotoPicked) }
+    LaunchedEffect(viewModel, form) { viewModel.suggested.collect(form::applySuggestion) }
+
     OfferEditorContent(
         form = form,
         isNew = offerId == null,
         isSaving = viewModel.isSaving,
         saveFailed = viewModel.notFound,
+        uploadError = viewModel.uploadError,
+        saveError = viewModel.saveError,
+        photoPicking = PhotoPicking(
+            onPick = {
+                pickPhoto.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
+            },
+            isPreparing = viewModel.isPreparingPhoto,
+            failed = viewModel.photoFailed,
+            offerBundledPhotos = container.dataMode.mode.value == DataMode.DEMO
+        ),
+        suggestionPanel = SuggestionPanel(
+            state = viewModel.suggestion,
+            onSuggest = {
+                (form.values.photo as? PickedPhoto)?.let { photo ->
+                    viewModel.suggest(photo, originalPriceForSuggestion(form))
+                }
+            }
+        ),
         onClose = onClose,
         // The pickup window is for today, for now
-        onSave = { viewModel.save(form.toDraft(LocalDate.now(clock), zone, existingOffer)) },
+        onSave = {
+            // A picked photo is published first; the draft is built around the result
+            form.values.photo?.let { selection ->
+                viewModel.save(selection) { photo ->
+                    form.toDraft(LocalDate.now(clock), zone, existingOffer, photo)
+                }
+            }
+        },
         modifier = modifier,
         nowMinutes = { OfferEditorFormState.minutesOf(LocalTime.now(clock)) }
     )
 }
+
+/** Picking a photo from the device, and how that is going. */
+class PhotoPicking(
+    val onPick: () -> Unit = {},
+    val isPreparing: Boolean = false,
+    /** The last picked photo could not be used. */
+    val failed: Boolean = false,
+    /**
+     * Whether the app's own photos are offered too. Only in demo mode: a live offer needs a
+     * photo the server can serve.
+     */
+    val offerBundledPhotos: Boolean = true
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -173,6 +239,12 @@ fun OfferEditorContent(
     /** Called with a form that already passed validation. */
     onSave: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Why the photo could not be published on the last save, if it could not. */
+    uploadError: PhotoUploadError? = null,
+    /** Why the offer could not be saved on the server on the last try, if it could not. */
+    saveError: MerchantDataError? = null,
+    photoPicking: PhotoPicking = PhotoPicking(),
+    suggestionPanel: SuggestionPanel = SuggestionPanel(),
     /** The time of day now, in minutes, so a pickup that already ended today is caught. */
     nowMinutes: () -> Int = { OfferEditorFormState.minutesOf(LocalTime.now()) }
 ) {
@@ -229,20 +301,54 @@ fun OfferEditorContent(
                     .padding(horizontal = AppSpacing.regular, vertical = AppSpacing.regular),
                 verticalArrangement = Arrangement.spacedBy(AppSpacing.extraLarge)
             ) {
-                AppTextField(
-                    value = form.values.title,
-                    onValueChange = form::onTitleChange,
-                    label = stringResource(R.string.offer_field_title),
-                    modifier = fieldModifier(OfferField.TITLE)
-                        .onFieldBlur { form.onBlur(OfferField.TITLE) },
-                    error = form.errorOf(OfferField.TITLE)?.message(),
-                    imeAction = ImeAction.Next,
-                    capitalization = KeyboardCapitalization.Sentences
-                )
+                Column {
+                    AppTextField(
+                        value = form.values.title,
+                        onValueChange = form::onTitleChange,
+                        label = stringResource(R.string.offer_field_title),
+                        modifier = fieldModifier(OfferField.TITLE)
+                            .onFieldBlur { form.onBlur(OfferField.TITLE) },
+                        error = form.errorOf(OfferField.TITLE)?.message(),
+                        imeAction = ImeAction.Next,
+                        capitalization = KeyboardCapitalization.Sentences
+                    )
+                    SuggestedByAiChip(
+                        visible = OfferField.TITLE in form.suggestedFields,
+                        modifier = Modifier.padding(top = AppSpacing.small)
+                    )
+                }
+
+                Column {
+                    AppTextField(
+                        value = form.values.description,
+                        onValueChange = form::onDescriptionChange,
+                        label = stringResource(R.string.offer_field_description),
+                        modifier = fieldModifier(OfferField.DESCRIPTION)
+                            .onFieldBlur { form.onBlur(OfferField.DESCRIPTION) },
+                        error = form.errorOf(OfferField.DESCRIPTION)?.message(),
+                        imeAction = ImeAction.Next,
+                        capitalization = KeyboardCapitalization.Sentences,
+                        singleLine = false
+                    )
+                    SuggestedByAiChip(
+                        visible = OfferField.DESCRIPTION in form.suggestedFields,
+                        modifier = Modifier.padding(top = AppSpacing.small)
+                    )
+                }
 
                 CategorySection(form = form, modifier = fieldModifier(OfferField.CATEGORY))
 
-                PhotoSection(form = form, modifier = fieldModifier(OfferField.PHOTO))
+                Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.regular)) {
+                    PhotoSection(
+                        form = form,
+                        picking = photoPicking,
+                        modifier = fieldModifier(OfferField.PHOTO)
+                    )
+                    // Only the merchant's own photo can be read for a suggestion
+                    if (form.values.photo is PickedPhoto) {
+                        SuggestionSection(panel = suggestionPanel)
+                    }
+                }
 
                 PriceSection(form = form, fieldModifier = ::fieldModifier)
 
@@ -276,6 +382,15 @@ fun OfferEditorContent(
                 FormErrorBanner(
                     message = if (saveFailed) stringResource(R.string.offer_editor_not_found_message) else null
                 )
+                // Nothing was saved and the form is as it was: sending again retries the upload
+                FormErrorBanner(message = uploadError?.message() ?: saveError?.saveMessage())
+                if (uploadError != null || saveError != null) {
+                    AuthLinkButton(
+                        text = stringResource(R.string.auth_retry),
+                        onClick = ::submit,
+                        enabled = !isSaving
+                    )
+                }
                 AppButton(
                     text = stringResource(
                         if (isNew) R.string.merchant_publish_offer else R.string.offer_editor_save_changes
@@ -424,12 +539,19 @@ private fun CategorySection(form: OfferEditorFormState, modifier: Modifier) {
                 )
             }
         }
+        SuggestedByAiChip(
+            visible = OfferField.CATEGORY in form.suggestedFields,
+            modifier = Modifier.padding(top = AppSpacing.small)
+        )
     }
 }
 
-// TEMPORARY: picking one of the app's photos stands in for uploading a real one.
+/**
+ * The merchant's own photo comes first: a tile that opens the system photo picker, then shows
+ * the picked photo. The app's photos stay as an alternative for an offer without one.
+ */
 @Composable
-private fun PhotoSection(form: OfferEditorFormState, modifier: Modifier) {
+private fun PhotoSection(form: OfferEditorFormState, picking: PhotoPicking, modifier: Modifier) {
     ChoiceSection(
         labelRes = R.string.offer_field_photo,
         error = form.errorOf(OfferField.PHOTO)?.let { stringResource(R.string.offer_error_choose) },
@@ -441,11 +563,83 @@ private fun PhotoSection(form: OfferEditorFormState, modifier: Modifier) {
                 .selectableGroup(),
             horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
         ) {
-            OfferPhoto.entries.forEach { photo ->
+            // The photo the offer already has, so editing can keep it
+            val currentPhoto = form.initialValues.photo as? OfferPhoto.Remote
+            if (currentPhoto != null) {
                 PhotoOption(
-                    photo = photo,
-                    isSelected = form.values.photo == photo,
-                    onClick = { form.onPhotoSelected(photo) }
+                    photo = currentPhoto,
+                    description = stringResource(R.string.offer_photo_current),
+                    isSelected = form.values.photo == currentPhoto,
+                    onClick = { form.onPhotoSelected(currentPhoto) }
+                )
+            }
+            val pickedPhoto = form.values.pickedPhoto
+            if (pickedPhoto != null) {
+                PhotoOption(
+                    photo = pickedPhoto,
+                    description = stringResource(R.string.offer_photo_device),
+                    isSelected = form.values.photo == pickedPhoto,
+                    onClick = { form.onPhotoSelected(pickedPhoto) }
+                )
+            }
+            PickPhotoTile(
+                hasPhoto = pickedPhoto != null || currentPhoto != null,
+                isPreparing = picking.isPreparing,
+                onClick = picking.onPick
+            )
+            if (picking.offerBundledPhotos) {
+                OfferPhoto.Bundled.entries.forEach { photo ->
+                    PhotoOption(
+                        photo = photo,
+                        description = stringResource(photoNameRes(photo)),
+                        isSelected = form.values.photo == photo,
+                        onClick = { form.onPhotoSelected(photo) }
+                    )
+                }
+            }
+        }
+        if (picking.failed) {
+            FieldError(stringResource(R.string.offer_photo_failed))
+        }
+    }
+}
+
+/** Opens the photo picker; shows a quiet progress ring while a picked photo is prepared. */
+@Composable
+private fun PickPhotoTile(hasPhoto: Boolean, isPreparing: Boolean, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(AppRadius.medium)
+    val description = stringResource(
+        when {
+            isPreparing -> R.string.offer_photo_preparing
+            hasPhoto -> R.string.offer_photo_change_cd
+            else -> R.string.offer_photo_pick_cd
+        }
+    )
+    Surface(
+        modifier = Modifier
+            .size(84.dp)
+            .clip(shape)
+            .clickable(enabled = !isPreparing, role = Role.Button, onClick = onClick)
+            .semantics {
+                contentDescription = description
+                if (isPreparing) liveRegion = LiveRegionMode.Polite
+            },
+        shape = shape,
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            if (isPreparing) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+            } else {
+                Icon(
+                    painter = painterResource(R.drawable.ic_add),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -453,9 +647,13 @@ private fun PhotoSection(form: OfferEditorFormState, modifier: Modifier) {
 }
 
 @Composable
-private fun PhotoOption(photo: OfferPhoto, isSelected: Boolean, onClick: () -> Unit) {
+private fun PhotoOption(
+    photo: PhotoSelection,
+    description: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
     val shape = RoundedCornerShape(AppRadius.medium)
-    val description = stringResource(photoNameRes(photo))
     Surface(
         modifier = Modifier
             .size(84.dp)
@@ -466,12 +664,7 @@ private fun PhotoOption(photo: OfferPhoto, isSelected: Boolean, onClick: () -> U
         border = if (isSelected) BorderStroke(3.dp, MaterialTheme.colorScheme.primary) else null
     ) {
         Box {
-            Image(
-                painter = painterResource(photo.drawableRes),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
+            OfferPhotoImage(photo = photo, modifier = Modifier.fillMaxSize())
             if (isSelected) {
                 // Plain butter is too faint on cream to mark the choice alone
                 Surface(
@@ -519,6 +712,10 @@ private fun PriceSection(form: OfferEditorFormState, fieldModifier: (OfferField)
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Next,
                 visualTransformation = PesosInputTransformation
+            )
+            SuggestedByAiChip(
+                visible = OfferField.DISCOUNTED_PRICE in form.suggestedFields,
+                modifier = Modifier.padding(top = AppSpacing.small)
             )
             form.discountPercent?.let { percent ->
                 Text(
@@ -762,6 +959,11 @@ private fun OfferFieldError.message(): String = when (this) {
         OfferEditorFormState.MAX_TITLE_LENGTH,
         OfferEditorFormState.MAX_TITLE_LENGTH
     )
+    OfferFieldError.DESCRIPTION_TOO_LONG -> pluralStringResource(
+        R.plurals.offer_error_description_too_long,
+        OfferEditorFormState.MAX_DESCRIPTION_LENGTH,
+        OfferEditorFormState.MAX_DESCRIPTION_LENGTH
+    )
     OfferFieldError.PRICE_NOT_POSITIVE -> stringResource(R.string.offer_error_price_not_positive)
     OfferFieldError.DISCOUNT_NOT_LOWER -> stringResource(R.string.offer_error_discount_not_lower)
     OfferFieldError.QUANTITY_OUT_OF_RANGE -> stringResource(
@@ -773,12 +975,30 @@ private fun OfferFieldError.message(): String = when (this) {
     OfferFieldError.END_IN_PAST -> stringResource(R.string.offer_error_end_in_past)
 }
 
-private fun photoNameRes(photo: OfferPhoto): Int = when (photo) {
-    OfferPhoto.CROISSANT -> R.string.offer_photo_croissant
-    OfferPhoto.SALMON_BOWL -> R.string.offer_photo_salmon_bowl
-    OfferPhoto.DESSERTS -> R.string.offer_photo_desserts
-    OfferPhoto.BURGER -> R.string.offer_photo_burger
-    OfferPhoto.VEGETABLES -> R.string.offer_photo_vegetables
+@Composable
+private fun MerchantDataError.saveMessage(): String = stringResource(
+    when (this) {
+        MerchantDataError.NETWORK -> R.string.offer_save_failed_network
+        MerchantDataError.SESSION -> R.string.merchant_data_session_failed
+        MerchantDataError.UNEXPECTED -> R.string.offer_save_failed
+    }
+)
+
+@Composable
+private fun PhotoUploadError.message(): String = stringResource(
+    when (this) {
+        PhotoUploadError.NETWORK -> R.string.offer_photo_upload_network
+        PhotoUploadError.REJECTED -> R.string.offer_photo_upload_rejected
+        PhotoUploadError.UNEXPECTED -> R.string.offer_photo_upload_unexpected
+    }
+)
+
+private fun photoNameRes(photo: OfferPhoto.Bundled): Int = when (photo) {
+    OfferPhoto.Bundled.CROISSANT -> R.string.offer_photo_croissant
+    OfferPhoto.Bundled.SALMON_BOWL -> R.string.offer_photo_salmon_bowl
+    OfferPhoto.Bundled.DESSERTS -> R.string.offer_photo_desserts
+    OfferPhoto.Bundled.BURGER -> R.string.offer_photo_burger
+    OfferPhoto.Bundled.VEGETABLES -> R.string.offer_photo_vegetables
 }
 
 private const val DEFAULT_START_MINUTES = 18 * 60
@@ -799,7 +1019,7 @@ private fun EditorPreviewContent(themeMode: ThemeMode, withErrors: Boolean) {
                 } else {
                     onTitleChange("Croissants del día")
                     onCategorySelected(OfferCategory.BAKERY)
-                    onPhotoSelected(OfferPhoto.CROISSANT)
+                    onPhotoSelected(OfferPhoto.Bundled.CROISSANT)
                     onOriginalPriceChange("15000")
                     onDiscountedPriceChange("8900")
                     onPickupStartSelected(18 * 60)

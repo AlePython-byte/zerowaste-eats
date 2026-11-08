@@ -28,7 +28,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -44,8 +46,12 @@ import com.zerowasteeats.app.presentation.components.common.offerListItem
 import com.zerowasteeats.app.presentation.components.common.SegmentOption
 import com.zerowasteeats.app.presentation.components.common.SegmentedCountControl
 import com.zerowasteeats.app.presentation.components.offers.MerchantOfferCard
+import com.zerowasteeats.app.presentation.components.offers.MerchantOfferCardSkeleton
+import com.zerowasteeats.app.data.merchant.MerchantDataError
 import com.zerowasteeats.app.presentation.model.OfferCategory
 import com.zerowasteeats.app.presentation.screens.merchant.editor.OfferSaveResult
+import com.zerowasteeats.app.presentation.navigation.LocalBottomBarInset
+import com.zerowasteeats.app.presentation.navigation.aboveBottomBar
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.ThemeMode
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
@@ -109,6 +115,41 @@ fun MerchantOffersScreen(
         }
     }
 
+    // A failed load or change, with a way to try again. It waits for an action when nothing
+    // was loaded (there is nothing else to look at), and stays briefly otherwise.
+    val loadFailedMessages = mapOf(
+        MerchantDataError.NETWORK to stringResource(R.string.merchant_offers_load_failed_network),
+        MerchantDataError.SESSION to stringResource(R.string.merchant_data_session_failed),
+        MerchantDataError.UNEXPECTED to stringResource(R.string.merchant_offers_load_failed)
+    )
+    val changeFailedMessage = stringResource(R.string.merchant_offer_change_failed)
+    val retryLabel = stringResource(R.string.auth_retry)
+    LaunchedEffect(viewModel) {
+        viewModel.failures.collect { failure ->
+            launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                val result = snackbarHostState.showSnackbar(
+                    message = when (failure) {
+                        is OfferListFailure.Load -> loadFailedMessages.getValue(failure.error)
+                        is OfferListFailure.Change -> changeFailedMessage
+                    },
+                    actionLabel = retryLabel,
+                    duration = if (failure is OfferListFailure.Load && viewModel.state.value.offers.isEmpty()) {
+                        SnackbarDuration.Indefinite
+                    } else {
+                        SnackbarDuration.Long
+                    }
+                )
+                if (result == SnackbarResult.ActionPerformed) {
+                    when (failure) {
+                        is OfferListFailure.Load -> viewModel.retryLoad()
+                        is OfferListFailure.Change -> viewModel.toggleStatus(failure.offer)
+                    }
+                }
+            }
+        }
+    }
+
     MerchantOffersContent(
         state = state,
         snackbarHostState = snackbarHostState,
@@ -140,6 +181,7 @@ fun MerchantOffersContent(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = onNewOffer,
+                modifier = Modifier.aboveBottomBar(),
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
@@ -160,8 +202,9 @@ fun MerchantOffersContent(
                 start = AppSpacing.regular,
                 end = AppSpacing.regular,
                 top = AppSpacing.regular,
-                // Room for the button, so the last card can scroll clear of it
-                bottom = FAB_CLEARANCE
+                // Room for the button, so the last card can scroll clear of it, and for the
+                // floating bar the list runs under
+                bottom = FAB_CLEARANCE + LocalBottomBarInset.current
             ),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
         ) {
@@ -189,9 +232,24 @@ fun MerchantOffersContent(
                 )
             }
 
-            if (state.visibleOffers.isEmpty()) {
-                item(key = "empty-${state.filter}") {
-                    EmptyOffers(filter = state.filter, onNewOffer = onNewOffer)
+            if (state.showSkeletons) {
+                item(key = "loading") {
+                    Text(
+                        text = stringResource(R.string.merchant_offers_loading),
+                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                items(SKELETON_COUNT, key = { "skeleton-$it" }) {
+                    MerchantOfferCardSkeleton()
+                }
+            } else if (state.visibleOffers.isEmpty()) {
+                // After a failed first load the snackbar explains; "no offers" would not be true
+                if (state.showEmptyState) {
+                    item(key = "empty-${state.filter}") {
+                        EmptyOffers(filter = state.filter, onNewOffer = onNewOffer)
+                    }
                 }
             } else {
                 items(state.visibleOffers, key = { it.id }) { offer ->
@@ -262,10 +320,10 @@ private fun previewOffer(
 )
 
 private val previewOffers = listOf(
-    previewOffer("1", "Croissants del día", MerchantOfferStatus.ACTIVE, 6, OfferPhoto.CROISSANT),
-    previewOffer("2", "Caja de postres surtidos", MerchantOfferStatus.ACTIVE, 3, OfferPhoto.DESSERTS),
-    previewOffer("3", "Sándwich artesanal", MerchantOfferStatus.PAUSED, 4, OfferPhoto.BURGER),
-    previewOffer("4", "Caja de verduras", MerchantOfferStatus.SOLD_OUT, 0, OfferPhoto.VEGETABLES)
+    previewOffer("1", "Croissants del día", MerchantOfferStatus.ACTIVE, 6, OfferPhoto.Bundled.CROISSANT),
+    previewOffer("2", "Caja de postres surtidos", MerchantOfferStatus.ACTIVE, 3, OfferPhoto.Bundled.DESSERTS),
+    previewOffer("3", "Sándwich artesanal", MerchantOfferStatus.PAUSED, 4, OfferPhoto.Bundled.BURGER),
+    previewOffer("4", "Caja de verduras", MerchantOfferStatus.SOLD_OUT, 0, OfferPhoto.Bundled.VEGETABLES)
 )
 
 @Composable
@@ -305,3 +363,6 @@ private fun OffersEmptyLightPreview() {
 private fun OffersEmptyDarkPreview() {
     OffersPreviewContent(ThemeMode.DARK, emptyList())
 }
+
+/** Enough placeholder cards to fill a phone screen while the offers load. */
+private const val SKELETON_COUNT = 3

@@ -2,7 +2,13 @@ package com.zerowasteeats.app.presentation.screens.merchant.reservations
 
 import com.zerowasteeats.app.data.auth.FakeAuthRepository
 import com.zerowasteeats.app.data.merchant.FakeMerchantData
+import com.zerowasteeats.app.data.merchant.LoadState
+import com.zerowasteeats.app.data.merchant.MerchantDataError
+import com.zerowasteeats.app.data.merchant.MerchantReservation
 import com.zerowasteeats.app.data.merchant.MerchantReservationRepository
+import com.zerowasteeats.app.data.merchant.RedeemResult
+import kotlinx.coroutines.flow.MutableStateFlow
+import org.junit.Assert.assertFalse
 import com.zerowasteeats.app.data.merchant.MerchantReservationStatus
 import com.zerowasteeats.app.data.session.Session
 import java.time.Clock
@@ -198,5 +204,74 @@ class MerchantReservationsTest {
         assertEquals("PAN-4821", normalizePickupCodeInput("pan-4821"))
         assertEquals("PAN4821", normalizePickupCodeInput("pan 48.21"))
         assertEquals("ABCDEFGHIJ", normalizePickupCodeInput("abcdefghijklmn"))
+    }
+
+    // --- The server's answer wins ---
+
+    /** A repository that answers every redeem with [next], like the server would. */
+    private class ServerAnswer(var next: RedeemResult) : MerchantReservationRepository {
+        var calls = 0
+        override val reservations = MutableStateFlow<List<MerchantReservation>>(emptyList())
+        override val loadState = MutableStateFlow<LoadState>(LoadState.Loaded)
+        override suspend fun refresh() = Unit
+        override suspend fun redeem(reservationId: String, code: String): RedeemResult {
+            calls++
+            return next
+        }
+    }
+
+    @Test
+    fun theServersCount_isWhatIsShown() = runBlocking {
+        val server = ServerAnswer(RedeemResult.WrongCode(attemptsLeft = 2))
+        val confirmation = confirmationWith(server, TestTime())
+
+        assertEquals(PickupConfirmResult.WrongCode(attemptsLeft = 2), confirmation.confirm("r", "ZW-0000"))
+        // The local count does not run ahead of the server's: five more tries still reach it
+        repeat(5) { confirmation.confirm("r", "ZW-0000") }
+        assertEquals(6, server.calls)
+    }
+
+    @Test
+    fun theServersLock_locksTheSheet_forAsLongAsItSays() = runBlocking {
+        val time = TestTime()
+        val server = ServerAnswer(RedeemResult.Locked(retryAfterMillis = 7 * 60_000L))
+        val confirmation = confirmationWith(server, time)
+
+        val result = confirmation.confirm("r", "ZW-0000")
+
+        assertEquals(PickupConfirmResult.Locked(untilMillis = time.millis + 7 * 60_000L), result)
+        // While locked nothing is sent
+        confirmation.confirm("r", "ZW-7KQ3")
+        assertEquals(1, server.calls)
+        // Once it is over, codes go to the server again
+        time.millis += 7 * 60_000L
+        server.next = RedeemResult.WrongCode(attemptsLeft = 4)
+        assertEquals(PickupConfirmResult.WrongCode(attemptsLeft = 4), confirmation.confirm("r", "ZW-0000"))
+    }
+
+    @Test
+    fun aCodeThatNeverReachedTheServer_doesNotCount() = runBlocking {
+        val server = ServerAnswer(RedeemResult.Failed(MerchantDataError.NETWORK))
+        val attempts = PickupCodeAttempts(nowMillis = { 0L })
+        val confirmation = PickupConfirmation(server, attempts)
+
+        val result = confirmation.confirm("r", "ZW-7KQ3")
+
+        assertEquals(PickupConfirmResult.Failed(MerchantDataError.NETWORK), result)
+        assertEquals(attempts.maxFailures, attempts.attemptsLeft("r"))
+    }
+
+    @Test
+    fun aFailedLoad_withNothingLoaded_takesThePlaceOfTheList() {
+        val failed = MerchantReservationListState(
+            emptyList(),
+            ReservationTab.PENDING,
+            LoadState.Failed(MerchantDataError.NETWORK)
+        )
+        val loading = MerchantReservationListState(emptyList(), ReservationTab.PENDING, LoadState.Loading)
+
+        assertTrue(failed.showError)
+        assertTrue(loading.showSkeleton)
+        assertFalse(MerchantReservationListState(emptyList(), ReservationTab.PENDING).showSkeleton)
     }
 }

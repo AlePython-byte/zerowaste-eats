@@ -6,6 +6,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.zerowasteeats.app.data.merchant.LoadState
+import com.zerowasteeats.app.data.merchant.MerchantDataError
 import com.zerowasteeats.app.data.merchant.MerchantReservationRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -17,7 +19,17 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-enum class PickupCodeError { WRONG, ALREADY_COMPLETED }
+enum class PickupCodeError {
+    WRONG,
+    ALREADY_COMPLETED,
+
+    /** The code did not reach the server: nothing was counted, it can be sent again. */
+    NETWORK,
+
+    /** The session ended: only signing in again helps. */
+    SESSION,
+    UNEXPECTED
+}
 
 /** The pickup sheet while it is open. */
 data class PickupSheetState(
@@ -38,7 +50,7 @@ data class PickupSheetState(
  * screen, so a rotation keeps the sheet open with what was typed, and the count goes on.
  */
 class MerchantReservationsViewModel(
-    repository: MerchantReservationRepository,
+    private val repository: MerchantReservationRepository,
     /** The clock for the lock; tests replace it. */
     val nowMillis: () -> Long = System::currentTimeMillis
 ) : ViewModel() {
@@ -48,11 +60,16 @@ class MerchantReservationsViewModel(
     val state: StateFlow<MerchantReservationListState> = combine(
         repository.reservations,
         tab,
+        repository.loadState,
         ::MerchantReservationListState
     ).stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
-        initialValue = MerchantReservationListState(repository.reservations.value, tab.value)
+        initialValue = MerchantReservationListState(
+            repository.reservations.value,
+            tab.value,
+            repository.loadState.value
+        )
     )
 
     private val attempts = PickupCodeAttempts(nowMillis)
@@ -64,6 +81,12 @@ class MerchantReservationsViewModel(
     // Once per wrong code, for the short vibration; a channel so a rotation does not repeat it
     private val wrongCodes = Channel<Unit>(Channel.CONFLATED)
     val wrongCode: Flow<Unit> = wrongCodes.receiveAsFlow()
+
+    /** New reservations may have come in: showing the list is the moment to catch up. */
+    fun refresh() {
+        if (repository.loadState.value == LoadState.Loading) return
+        viewModelScope.launch { repository.refresh() }
+    }
 
     fun selectTab(value: ReservationTab) {
         tab.value = value
@@ -108,6 +131,14 @@ class MerchantReservationsViewModel(
                 }
                 PickupConfirmResult.AlreadyCompleted ->
                     open.copy(isChecking = false, error = PickupCodeError.ALREADY_COMPLETED)
+                is PickupConfirmResult.Failed -> open.copy(
+                    isChecking = false,
+                    error = when (result.error) {
+                        MerchantDataError.NETWORK -> PickupCodeError.NETWORK
+                        MerchantDataError.SESSION -> PickupCodeError.SESSION
+                        MerchantDataError.UNEXPECTED -> PickupCodeError.UNEXPECTED
+                    }
+                )
             }
         }
     }

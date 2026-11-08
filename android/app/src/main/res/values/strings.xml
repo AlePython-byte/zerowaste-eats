@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="es">
     <string name="app_name">ZeroWaste Eats</string>
 
     <string name="category_all">Todo</string>
@@ -25,6 +25,20 @@
     <string name="nav_orders">Pedidos</string>
     <string name="nav_profile">Perfil</string>
     <string name="navigation_offer_not_found">Oferta no encontrada</string>
+    <string name="offer_unavailable_badge">No disponible</string>
+    <string name="favorite_not_available">Esta oferta ya no está disponible.</string>
+    <string name="favorite_failed">No pudimos actualizar tus favoritos.</string>
+    <string name="favorite_failed_network">No pudimos actualizar tus favoritos. Revisa tu conexión.</string>
+    <string name="offer_distance_km">%1$s km</string>
+    <string name="catalog_loading">Buscando ofertas cerca de ti…</string>
+    <string name="catalog_load_failed">No pudimos cargar las ofertas.</string>
+    <string name="catalog_load_failed_network">No pudimos cargar las ofertas. Revisa tu conexión.</string>
+    <string name="catalog_session_failed">Tu sesión ya no es válida. Cierra sesión y vuelve a ingresar.</string>
+    <string name="offer_detail_loading">Cargando la oferta…</string>
+    <string name="offer_detail_load_failed">No pudimos cargar la oferta.</string>
+    <string name="offer_detail_load_failed_network">No pudimos cargar la oferta. Revisa tu conexión.</string>
+    <string name="offer_not_available_title">Esta oferta ya no está disponible</string>
+    <string name="offer_not_available_subtitle">Puede que se haya agotado o que el negocio la haya retirado. Mira otras ofertas cerca de ti.</string>
 
     <string name="common_back_cd">Volver</string>
     <string name="common_view_map">Ver mapa</string>
@@ -53,7 +67,26 @@
     <string name="order_day_tomorrow">Mañana</string>
     <string name="order_day_yesterday">Ayer</string>
     <string name="offer_detail_pickup_title">Recogida</string>
-    <string name="offer_detail_reserve">Reservar</string>
+    <string name="offer_detail_quantity_label">Cantidad</string>
+    <string name="offer_detail_quantity_decrease_cd">Una unidad menos</string>
+    <string name="offer_detail_quantity_increase_cd">Una unidad más</string>
+    <plurals name="offer_detail_quantity_cd">
+        <item quantity="one">%1$d unidad seleccionada</item>
+        <item quantity="many">%1$d unidades seleccionadas</item>
+        <item quantity="other">%1$d unidades seleccionadas</item>
+    </plurals>
+    <string name="offer_detail_reserve_total">Reservar · %1$s</string>
+    <string name="reserve_failed_not_enough_units">Ya no quedan unidades suficientes de esta oferta. La actualizamos.</string>
+    <string name="reserve_failed_network">No pudimos hacer la reserva. Revisa tu conexión.</string>
+    <string name="reserve_failed_session">Tu sesión expiró. Cierra sesión y vuelve a ingresar para reservar.</string>
+    <string name="reserve_failed">No pudimos hacer la reserva. Inténtalo de nuevo.</string>
+    <string name="reserved_title">¡Reservado!</string>
+    <string name="reserved_code_label">Tu código de recogida</string>
+    <string name="reserved_code_cd">Código de recogida: %1$s</string>
+    <string name="reserved_code_hint">Muéstralo en el negocio al recoger. También lo encuentras en Pedidos.</string>
+    <string name="reserved_total">Total: %1$s</string>
+    <string name="reserved_view_orders">Ver mis pedidos</string>
+    <string name="reserved_done">Listo</string>
 
     <string name="orders_title">Pedidos</string>
     <string name="orders_subtitle">Gestiona tus reservas y recogidas.</string>
@@ -61,6 +94,12 @@
     <string name="orders_tab_history">Historial</string>
     <string name="orders_empty_active">No tienes pedidos activos.</string>
     <string name="orders_empty_history">Aún no tienes pedidos anteriores.</string>
+    <string name="orders_loading">Cargando tus pedidos…</string>
+    <string name="orders_load_failed_title">No pudimos cargar tus pedidos</string>
+    <string name="orders_load_failed">Inténtalo de nuevo en un momento.</string>
+    <string name="orders_load_failed_network">Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="orders_refresh_failed">No pudimos actualizar tus pedidos.</string>
+    <string name="orders_refresh_failed_network">No pudimos actualizar tus pedidos. Revisa tu conexión.</string>
 
     <string name="order_status_reserved">Reservado</string>
     <string name="order_status_ready_for_pickup">Listo para recoger</string>
@@ -104,6 +143,7 @@
     <string name="explore_empty_subtitle">Prueba con otra búsqueda o cambia los filtros.</string>
 
     <string name="map_my_location_cd">Mi ubicación</string>
+    <string name="map_pin_title">%1$s, %2$s</string>
     <string name="map_view_offer">Ver oferta</string>
     <string name="map_location_unavailable">No pudimos obtener tu ubicación.</string>
     <string name="map_location_permission_required">Activa el permiso de ubicación para usar esta función.</string>
@@ -111,10 +151,14 @@
     <string name="profile_title">Perfil</string>
     <string name="profile_subtitle">Tu cuenta e impacto en ZeroWaste Eats.</string>
     <string name="profile_impact_title">Tu impacto</string>
-    <string name="profile_metric_rescued_orders">Pedidos rescatados</string>
+    <string name="profile_metric_completed_orders">Pedidos completados</string>
     <string name="profile_metric_rescued_food">Comida rescatada</string>
-    <string name="profile_metric_estimated_savings">Ahorro estimado</string>
+    <string name="profile_metric_savings">Ahorro</string>
     <string name="profile_rescued_food_value">%1$.1f kg</string>
+    <string name="profile_rescued_food_value_approx">%1$.1f kg aprox.</string>
+    <string name="profile_impact_loading">Cargando tu impacto…</string>
+    <string name="profile_impact_load_failed">No pudimos cargar tu impacto.</string>
+    <string name="profile_impact_load_failed_network">No pudimos cargar tu impacto. Revisa tu conexión.</string>
     <string name="profile_preferences_title">Preferencias</string>
     <string name="profile_dark_mode_title">Modo oscuro</string>
     <string name="profile_dark_mode_subtitle">Cambia entre el tema claro y el oscuro.</string>
@@ -140,6 +184,10 @@
     <string name="auth_error_invalid_credentials">Correo o contraseña incorrectos.</string>
     <string name="auth_error_email_registered">Ese correo ya está registrado. Prueba a ingresar.</string>
     <string name="auth_error_network">No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="session_expired">Tu sesión expiró, vuelve a ingresar.</string>
+    <string name="auth_error_weak_password">Esa contraseña es muy fácil de adivinar. Prueba con una más larga o mezcla letras, números y símbolos.</string>
+    <string name="auth_error_profile_incomplete">Termina de crear tu perfil: tu cuenta ya existe, pero no pudimos guardar tus datos.</string>
+    <string name="auth_error_unexpected">Algo salió mal. Inténtalo de nuevo en un momento.</string>
 
     <string name="validation_required">Este campo es obligatorio.</string>
     <plurals name="validation_name_too_short">
@@ -164,6 +212,8 @@
     <string name="signin_submit">Ingresar</string>
     <string name="signin_forgot_password">¿Olvidaste tu contraseña?</string>
     <string name="signin_to_sign_up">¿No tienes cuenta? Crea una</string>
+    <string name="signin_use_demo_data">Usar datos de demostración</string>
+    <string name="signin_demo_fallback_notice">Modo demostración: la configuración de conexión no es válida.</string>
     <string name="signin_debug_title">Solo depuración</string>
     <string name="signin_debug_as_customer">Entrar como comprador</string>
     <string name="signin_debug_as_merchant">Entrar como negocio</string>
@@ -194,6 +244,9 @@
     <string name="profile_sign_out_title">¿Cerrar sesión?</string>
     <string name="profile_sign_out_message">Tendrás que ingresar de nuevo para ver tus pedidos.</string>
     <string name="mode_badge_merchant">Negocio</string>
+    <string name="demo_badge">Modo demo</string>
+    <string name="demo_badge_cd">Modo demostración: los datos son de ejemplo y no se guardan en el servidor.</string>
+    <string name="server_waking">Despertando el servidor… puede tardar hasta un minuto.</string>
     <string name="merchant_nav_dashboard">Panel</string>
     <string name="merchant_nav_offers">Ofertas</string>
     <string name="merchant_nav_reservations">Reservas</string>
@@ -232,6 +285,15 @@
     <string name="merchant_offer_paused_message">Oferta pausada</string>
     <string name="merchant_offer_resumed_message">Oferta reanudada</string>
     <string name="merchant_offers_empty_active_title">No tienes ofertas activas</string>
+    <string name="merchant_offers_loading">Cargando tus ofertas…</string>
+    <string name="merchant_profile_load_failed">No pudimos cargar los datos de tu negocio.</string>
+    <string name="merchant_profile_load_failed_network">No pudimos cargar los datos de tu negocio. Revisa tu conexión.</string>
+    <string name="merchant_offers_load_failed">No pudimos cargar tus ofertas.</string>
+    <string name="merchant_offers_load_failed_network">No pudimos cargar tus ofertas. Revisa tu conexión.</string>
+    <string name="merchant_data_session_failed">Tu sesión ya no es válida. Cierra sesión y vuelve a ingresar.</string>
+    <string name="merchant_offer_change_failed">No pudimos cambiar el estado de la oferta.</string>
+    <string name="offer_save_failed_network">No pudimos guardar la oferta. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="offer_save_failed">No pudimos guardar la oferta. Inténtalo de nuevo.</string>
     <string name="merchant_offers_empty_active_message">Publica una oferta para que otros puedan rescatarla.</string>
     <string name="merchant_offers_empty_paused_title">No tienes ofertas pausadas</string>
     <string name="merchant_offers_empty_paused_message">Las ofertas que pauses aparecerán aquí, listas para reanudar.</string>
@@ -258,6 +320,33 @@
     <string name="offer_field_pickup_start">Desde</string>
     <string name="offer_field_pickup_end">Hasta</string>
     <string name="offer_pickup_choose_time">Elegir hora</string>
+    <string name="offer_photo_device">Tu foto</string>
+    <string name="offer_photo_current">Foto actual</string>
+    <string name="offer_photo_pick_cd">Elegir una foto de tu galería</string>
+    <string name="offer_photo_change_cd">Elegir otra foto de tu galería</string>
+    <string name="offer_photo_preparing">Preparando la foto…</string>
+    <string name="offer_photo_failed">No pudimos usar esa foto. Prueba con otra.</string>
+    <string name="offer_photo_upload_network">No pudimos subir la foto y no se publicó nada. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="offer_photo_upload_rejected">No pudimos subir la foto y no se publicó nada. Cierra sesión, vuelve a ingresar e inténtalo de nuevo.</string>
+    <string name="offer_photo_upload_unexpected">No pudimos subir la foto y no se publicó nada. Elige la foto otra vez e inténtalo de nuevo.</string>
+    <string name="offer_field_description">Descripción (opcional)</string>
+    <plurals name="offer_error_description_too_long">
+        <item quantity="one">Usa %1$d carácter como máximo.</item>
+        <item quantity="many">Usa %1$d caracteres como máximo.</item>
+        <item quantity="other">Usa %1$d caracteres como máximo.</item>
+    </plurals>
+    <string name="ai_suggest_button">Sugerir con IA</string>
+    <string name="ai_suggest_hint">Usa tu foto para rellenar el título, la categoría, la descripción y el descuento.</string>
+    <string name="ai_suggest_loading">Analizando la foto…</string>
+    <string name="ai_suggested_chip">Sugerido por IA</string>
+    <string name="ai_suggestion_example">Sugerencia de ejemplo</string>
+    <string name="ai_suggestion_applied_title">Sugerencia aplicada</string>
+    <string name="ai_suggestion_applied">Revisa y ajusta lo que quieras antes de publicar: todo sigue siendo editable.</string>
+    <string name="ai_suggestion_discount_hint">Descuento sugerido: %1$d %%. Escribe el precio original y vuelve a sugerir para calcular el precio con descuento.</string>
+    <string name="ai_error_invalid_photo">No pudimos analizar esa foto. Elige otra foto de comida.</string>
+    <string name="ai_error_limit">Llegaste al límite de sugerencias por ahora. Inténtalo más tarde o completa la oferta a mano.</string>
+    <string name="ai_error_unavailable">La IA no está disponible en este momento. Completa la oferta a mano o inténtalo más tarde.</string>
+    <string name="ai_error_unexpected">No pudimos obtener una sugerencia. Completa la oferta a mano o inténtalo de nuevo.</string>
     <string name="offer_photo_croissant">Croissants</string>
     <string name="offer_photo_salmon_bowl">Bowl de salmón</string>
     <string name="offer_photo_desserts">Postres</string>
@@ -290,6 +379,19 @@
         <item quantity="many">Demasiados intentos. Vuelve a intentarlo en %1$d segundos.</item>
         <item quantity="other">Demasiados intentos. Vuelve a intentarlo en %1$d segundos.</item>
     </plurals>
+    <plurals name="merchant_code_locked_minutes">
+        <item quantity="one">Demasiados intentos. Vuelve a intentarlo en %1$d minuto.</item>
+        <item quantity="many">Demasiados intentos. Vuelve a intentarlo en %1$d minutos.</item>
+        <item quantity="other">Demasiados intentos. Vuelve a intentarlo en %1$d minutos.</item>
+    </plurals>
+    <string name="merchant_code_failed_network">No pudimos comprobar el código. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="merchant_code_failed_session">Tu sesión expiró. Cierra sesión y vuelve a ingresar.</string>
+    <string name="merchant_code_failed">No pudimos comprobar el código. Inténtalo de nuevo.</string>
+    <string name="merchant_reservations_load_failed_title">No pudimos cargar las reservas</string>
+    <string name="merchant_reservations_load_failed">Inténtalo de nuevo en un momento.</string>
+    <string name="merchant_reservations_load_failed_network">Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="merchant_reservations_refresh_failed">No pudimos actualizar las reservas.</string>
+    <string name="merchant_reservations_refresh_failed_network">No pudimos actualizar las reservas. Revisa tu conexión.</string>
     <string name="merchant_reservations_empty_pending_title">Nada pendiente por ahora</string>
     <string name="merchant_reservations_empty_pending_message">Cuando alguien reserve una de tus ofertas, aparecerá aquí.</string>
     <string name="merchant_reservations_empty_completed_title">Aún no has entregado pedidos</string>

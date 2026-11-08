@@ -38,6 +38,9 @@ import com.zerowasteeats.app.R
 import com.zerowasteeats.app.ZeroWasteEatsApplication
 import com.zerowasteeats.app.data.auth.AuthError
 import com.zerowasteeats.app.data.auth.FakeAuthRepository
+import com.zerowasteeats.app.data.settings.DataMode
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.ui.semantics.Role
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppTextField
 import com.zerowasteeats.app.presentation.components.common.PasswordField
@@ -71,8 +74,21 @@ fun SignInScreen(
         factory = SignInViewModelFactory(container.sessionManager)
     )
 
+    val dataMode by container.dataMode.mode
+    val isDemo = dataMode == DataMode.DEMO
+    val dataModeSwitch = DataModeSwitch(
+        isDemo = isDemo,
+        // Without live endpoints the demo is all there is, so the switch stays on
+        enabled = container.dataMode.liveAvailable,
+        onChange = { demo ->
+            container.dataMode.setMode(if (demo) DataMode.DEMO else DataMode.LIVE)
+            viewModel.clearError()
+        }
+    )
+
     val isDebuggable = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
-    val debugTools = if (isDebuggable) {
+    // The demo shortcuts only make sense where the demo accounts exist
+    val debugTools = if (isDebuggable && isDemo) {
         val fake = container.authRepository as? FakeAuthRepository
         var simulateNetworkError by remember { mutableStateOf(fake?.simulateNetworkError == true) }
         SignInDebugTools(
@@ -104,9 +120,18 @@ fun SignInScreen(
         onForgotPassword = onForgotPassword,
         onSignUp = onSignUp,
         modifier = modifier,
+        dataModeSwitch = dataModeSwitch,
+        demoFallbackNotice = container.liveSetupInvalid,
         debugTools = debugTools
     )
 }
+
+/** The "use demo data" switch. Only on this screen, where nobody is signed in. */
+class DataModeSwitch(
+    val isDemo: Boolean,
+    val enabled: Boolean,
+    val onChange: (Boolean) -> Unit
+)
 
 @Composable
 fun SignInContent(
@@ -120,6 +145,9 @@ fun SignInContent(
     onForgotPassword: () -> Unit,
     onSignUp: () -> Unit,
     modifier: Modifier = Modifier,
+    dataModeSwitch: DataModeSwitch? = null,
+    /** Says the app fell back to the demo because the connection settings were unusable. */
+    demoFallbackNotice: Boolean = false,
     debugTools: SignInDebugTools? = null
 ) {
     val emailFocus = remember { FocusRequester() }
@@ -187,6 +215,46 @@ fun SignInContent(
             onClick = onSignUp,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
+
+        if (dataModeSwitch != null) {
+            Spacer(modifier = Modifier.height(AppSpacing.small))
+            // The whole row is the control, so the label is part of the touch target
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = 48.dp)
+                    .toggleable(
+                        value = dataModeSwitch.isDemo,
+                        enabled = dataModeSwitch.enabled && !isLoading,
+                        role = Role.Switch,
+                        onValueChange = dataModeSwitch.onChange
+                    ),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.signin_use_demo_data),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = AppSpacing.regular),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Switch(
+                    checked = dataModeSwitch.isDemo,
+                    onCheckedChange = null,
+                    enabled = dataModeSwitch.enabled && !isLoading
+                )
+            }
+        }
+
+        if (demoFallbackNotice) {
+            Text(
+                text = stringResource(R.string.signin_demo_fallback_notice),
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
 
         if (debugTools != null) {
             Spacer(modifier = Modifier.height(AppSpacing.large))
@@ -278,6 +346,8 @@ private fun SignInPreviewContent(
             onSubmit = { form.validate() },
             onForgotPassword = {},
             onSignUp = {},
+            dataModeSwitch = DataModeSwitch(isDemo = withErrors, enabled = !withErrors, onChange = {}),
+            demoFallbackNotice = withErrors,
             debugTools = if (withErrors) {
                 SignInDebugTools(
                     simulateNetworkError = true,

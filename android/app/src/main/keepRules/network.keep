@@ -1,0 +1,32 @@
+# Keep rules for the release build (R8). Retrofit and kotlinx.serialization ship their own
+# rules; these make sure the app's own API interfaces and response classes survive shrinking
+# and obfuscation in full mode, where generic signatures and unused-looking members go first.
+
+# Retrofit reads method annotations, parameter annotations and generic return types
+# (List<T>, suspend functions) by reflection
+-keepattributes Signature, InnerClasses, EnclosingMethod
+-keepattributes RuntimeVisibleAnnotations, RuntimeVisibleParameterAnnotations, AnnotationDefault
+
+# The service interfaces are only created through Retrofit.create(): keep each interface that
+# declares Retrofit methods, and the methods themselves
+-if interface * { @retrofit2.http.* <methods>; }
+-keep,allowobfuscation interface <1>
+-keepclassmembers,allowshrinking,allowobfuscation interface * {
+    @retrofit2.http.* <methods>;
+}
+
+# Suspend functions end in a Continuation, and some calls return Response<T>
+-keep,allowobfuscation,allowshrinking class kotlin.coroutines.Continuation
+-keep,allowobfuscation,allowshrinking class retrofit2.Response
+
+# The JSON the backend and Supabase send and receive: the converter finds each class's
+# serializer through its companion
+-keepclassmembers @kotlinx.serialization.Serializable class com.zerowasteeats.app.** {
+    *** Companion;
+    *** INSTANCE;
+    kotlinx.serialization.KSerializer serializer(...);
+}
+-keepclasseswithmembers class com.zerowasteeats.app.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+-keep,includedescriptorclasses class com.zerowasteeats.app.**$$serializer { *; }

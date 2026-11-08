@@ -16,15 +16,15 @@ import org.junit.Test
 
 class ExploreStateTest {
 
-    private fun offer(id: String, category: OfferCategory, price: String = "$10.000") = OfferUiModel(
+    private fun offer(id: String, category: OfferCategory, price: Long = 10_000) = OfferUiModel(
         id = id,
         title = "Oferta $id",
         merchantName = "Comercio $id",
-        imageUrl = "",
-        originalPrice = "$20.000",
+        photo = null,
+        originalPrice = 20_000,
         discountedPrice = price,
         discountPercent = 40,
-        distance = "1.0 km",
+        distanceKm = 1.0,
         remainingQuantity = 1,
         pickupWindow = PickupWindow(PickupDay.Today, LocalTime.NOON, LocalTime.of(13, 0)),
         isFavorite = false,
@@ -32,9 +32,9 @@ class ExploreStateTest {
     )
 
     private val offers = listOf(
-        offer("1", OfferCategory.BAKERY, price = "$9.000"),
-        offer("2", OfferCategory.DESSERTS, price = "$5.000"),
-        offer("3", OfferCategory.BAKERY, price = "$7.000")
+        offer("1", OfferCategory.BAKERY, price = 9_000),
+        offer("2", OfferCategory.DESSERTS, price = 5_000),
+        offer("3", OfferCategory.BAKERY, price = 7_000)
     )
 
     private fun state() = ExploreState(offers)
@@ -215,6 +215,37 @@ class ExploreStateTest {
         state.clearAppliedFilters()
 
         assertNull(state.selectedMapOfferId)
+    }
+
+    @Test
+    fun updateOffers_keepsSearchAndFilters_overTheNewOffers() {
+        val state = state()
+        state.applyFilters(OfferFilters(OfferCategory.BAKERY))
+
+        state.updateOffers(offers + offer("4", OfferCategory.BAKERY, price = 1_000))
+
+        assertEquals(listOf("1", "3", "4"), state.filteredOffers.map { it.id })
+        assertEquals(OfferFilters(OfferCategory.BAKERY), state.appliedFilters)
+    }
+
+    @Test
+    fun updateOffers_clearsTheMapSelection_whenItsOfferIsGone() {
+        val state = state()
+        state.selectMapOffer("2")
+
+        state.updateOffers(offers.filterNot { it.id == "2" })
+
+        assertNull(state.selectedMapOfferId)
+    }
+
+    @Test
+    fun updateOffers_keepsTheMapSelection_whenItsOfferIsStillThere() {
+        val state = state()
+        state.selectMapOffer("1")
+
+        state.updateOffers(offers.map { it.copy(remainingQuantity = 5) })
+
+        assertEquals("1", state.selectedMapOfferId)
     }
 
     @Test

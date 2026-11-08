@@ -26,8 +26,9 @@ data class OfferFilters(
 fun List<OfferUiModel>.filterAndSort(query: String, filters: OfferFilters): List<OfferUiModel> {
     val needle = query.normalizedForSearch()
     val comparator: Comparator<OfferUiModel> = when (filters.sort) {
-        OfferSort.DISTANCE -> compareBy<OfferUiModel> { it.distanceKm() }
-        OfferSort.PRICE -> compareBy<OfferUiModel> { it.discountedPriceAmount() }
+        // An offer whose distance is unknown goes last
+        OfferSort.DISTANCE -> compareBy<OfferUiModel> { it.distanceKm ?: Double.MAX_VALUE }
+        OfferSort.PRICE -> compareBy<OfferUiModel> { it.discountedPrice }
         OfferSort.DISCOUNT -> compareByDescending<OfferUiModel> { it.discountPercent }
     }.thenBy { it.id }
 
@@ -40,15 +41,6 @@ fun List<OfferUiModel>.filterAndSort(query: String, filters: OfferFilters): List
 }
 
 private val DIACRITICS = """\p{Mn}+""".toRegex()
-private val NON_DISTANCE_CHARS = "[^0-9.]".toRegex()
-private val NON_DIGITS = "[^0-9]".toRegex()
 
 private fun String.normalizedForSearch(): String =
     Normalizer.normalize(this, Normalizer.Form.NFD).replace(DIACRITICS, "").lowercase()
-
-// The mock models still carry display strings ("0.5 km", "$8.900"); parse them in one place.
-private fun OfferUiModel.distanceKm(): Float =
-    distance.replace(NON_DISTANCE_CHARS, "").toFloatOrNull() ?: 0f
-
-private fun OfferUiModel.discountedPriceAmount(): Int =
-    discountedPrice.replace(NON_DIGITS, "").toIntOrNull() ?: 0

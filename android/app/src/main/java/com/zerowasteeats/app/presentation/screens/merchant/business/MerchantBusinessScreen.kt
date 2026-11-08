@@ -34,6 +34,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zerowasteeats.app.R
+import com.zerowasteeats.app.data.merchant.MerchantDataError
+import com.zerowasteeats.app.presentation.components.common.FormErrorBanner
+import com.zerowasteeats.app.presentation.screens.auth.AuthLinkButton
 import com.zerowasteeats.app.ZeroWasteEatsApplication
 import com.zerowasteeats.app.data.session.Session
 import com.zerowasteeats.app.presentation.components.common.AppButton
@@ -43,6 +46,7 @@ import com.zerowasteeats.app.presentation.components.common.ModeBadge
 import com.zerowasteeats.app.presentation.components.settings.AppearanceSettingCard
 import com.zerowasteeats.app.presentation.components.settings.LanguageSettingCard
 import com.zerowasteeats.app.presentation.components.settings.SignOutDialog
+import com.zerowasteeats.app.presentation.navigation.LocalBottomBarInset
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.ThemeMode
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
@@ -60,14 +64,20 @@ fun MerchantBusinessScreen(
     )
     val state by viewModel.state.collectAsState()
 
-    MerchantBusinessContent(state = state, onSignOut = onSignOut, modifier = modifier)
+    MerchantBusinessContent(
+        state = state,
+        onSignOut = onSignOut,
+        modifier = modifier,
+        onRetryLoad = viewModel::retryLoad
+    )
 }
 
 @Composable
 fun MerchantBusinessContent(
     state: MerchantBusinessState,
     onSignOut: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onRetryLoad: () -> Unit = {}
 ) {
     var isSignOutDialogOpen by rememberSaveable { mutableStateOf(false) }
 
@@ -77,7 +87,9 @@ fun MerchantBusinessContent(
                 .fillMaxSize()
                 .statusBarsPadding()
                 .verticalScroll(rememberScrollState())
-                .padding(AppSpacing.regular),
+                .padding(AppSpacing.regular)
+                // The floating bar sits over the bottom of the scroll; this lets the end clear it
+                .padding(bottom = LocalBottomBarInset.current),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.extraLarge)
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(AppSpacing.small)) {
@@ -96,6 +108,17 @@ fun MerchantBusinessContent(
                         text = stringResource(R.string.merchant_review_message),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            // What is shown may be what the session knew; say so and offer to try again
+            if (state.loadError != null) {
+                Column {
+                    FormErrorBanner(message = state.loadError.message())
+                    AuthLinkButton(
+                        text = stringResource(R.string.auth_retry),
+                        onClick = onRetryLoad
                     )
                 }
             }
@@ -253,3 +276,12 @@ private fun BusinessInReviewLightPreview() {
 private fun BusinessInReviewDarkPreview() {
     BusinessPreviewContent(ThemeMode.DARK, previewNew)
 }
+
+@Composable
+private fun MerchantDataError.message(): String = stringResource(
+    when (this) {
+        MerchantDataError.NETWORK -> R.string.merchant_profile_load_failed_network
+        MerchantDataError.SESSION -> R.string.merchant_data_session_failed
+        MerchantDataError.UNEXPECTED -> R.string.merchant_profile_load_failed
+    }
+)

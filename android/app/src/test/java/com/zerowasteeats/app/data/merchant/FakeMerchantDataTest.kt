@@ -94,7 +94,7 @@ class FakeMerchantDataTest {
     fun metrics_followARedeem() = kotlinx.coroutines.runBlocking {
         val repositories = repositoriesFor(demo)
 
-        repositories.reservations.redeem("PAN-4821")
+        repositories.reservations.redeem("demo-reservation-1", "PAN-4821")
 
         val metrics = MerchantMetrics.from(
             repositories.offers.offers.value,

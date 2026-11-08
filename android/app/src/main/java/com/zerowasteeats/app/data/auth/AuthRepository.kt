@@ -33,7 +33,16 @@ data class SignUpRequest(
 enum class AuthError {
     INVALID_CREDENTIALS,
     EMAIL_ALREADY_REGISTERED,
-    NETWORK
+    /** The auth server wants a stronger password than the form's minimum. */
+    WEAK_PASSWORD,
+    /**
+     * The account was created but the profile could not be saved yet. Retrying goes through
+     * [AuthRepository.completeProfile], never a second sign up.
+     */
+    PROFILE_INCOMPLETE,
+    NETWORK,
+    /** Anything else: a reply the app did not expect. Trying again may still work. */
+    UNEXPECTED
 }
 
 sealed interface AuthResult {
@@ -42,12 +51,21 @@ sealed interface AuthResult {
 }
 
 /**
- * Where accounts come from. Today a fake in memory; later Supabase plus the backend, with
- * the screens unchanged. Failures that are expected (wrong password, no network) come back
+ * Where accounts come from: Supabase plus the backend ([SupabaseAuthRepository]), or the
+ * in-memory demo accounts ([FakeAuthRepository]), with the screens unchanged. Failures that are expected (wrong password, no network) come back
  * as [AuthResult.Failure] instead of exceptions.
  */
 interface AuthRepository {
     suspend fun signIn(email: String, password: String): AuthResult
 
     suspend fun signUp(request: SignUpRequest): AuthResult
+
+    /** Saves the profile of a sign up that ended in [AuthError.PROFILE_INCOMPLETE]. */
+    suspend fun completeProfile(): AuthResult = AuthResult.Failure(AuthError.UNEXPECTED)
+
+    /**
+     * Ends the session on the server, best effort. By the time this runs the app has already
+     * forgotten the session and its tokens, so a failure here changes nothing for the person.
+     */
+    suspend fun signOut(accessToken: String?) = Unit
 }
