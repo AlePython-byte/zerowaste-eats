@@ -406,11 +406,14 @@ export function createFakeOffersDb(seed: Partial<FakeTables> = {}) {
       async ({
         where,
         include,
+        select,
         orderBy,
         take,
       }: {
         where?: Where;
         include?: Where;
+        /** Treated like include: the rows carry more fields than asked, never fewer. */
+        select?: Where;
         orderBy?: Where;
         take?: number;
       } = {}) =>
@@ -419,7 +422,7 @@ export function createFakeOffersDb(seed: Partial<FakeTables> = {}) {
           orderBy,
         )
           .slice(0, take ?? undefined)
-          .map((r) => reservationWithIncludes(r, include)),
+          .map((r) => reservationWithIncludes(r, include ?? select)),
     ),
     update: jest.fn(
       async ({

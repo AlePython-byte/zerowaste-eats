@@ -221,6 +221,28 @@ describe('Reservations (e2e)', () => {
         .expect(404);
     });
 
+    it('counts the pickup in the customer stats', async () => {
+      await as(app, ana)
+        .get('/api/v1/users/me/stats')
+        .expect(200)
+        .expect((r) => expect(r.body.completedOrders).toBe(0));
+
+      await as(app, business.userId)
+        .post(redeemPath())
+        .send({ code: reserved.code })
+        .expect(200);
+
+      await as(app, ana).get('/api/v1/users/me/stats').expect(200).expect({
+        completedOrders: 1,
+        unitsRescued: 1,
+        moneySaved: 6000,
+        foodRescuedKg: 0.4,
+        foodRescuedKgIsEstimate: true,
+        kgPerUnitEstimate: 0.4,
+      });
+      await as(app, business.userId).get('/api/v1/users/me/stats').expect(403);
+    });
+
     it.each([
       ['no code', {}],
       ['an empty code', { code: '' }],
