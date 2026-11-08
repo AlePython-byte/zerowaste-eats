@@ -169,6 +169,8 @@ model Reservation {
 
   offer Offer @relation(fields: [offerId], references: [id], onDelete: Restrict)
 
+  redemptionAttempts RedemptionAttempt[]
+
   completedAt DateTime? @db.Timestamptz(3)
   cancelledAt DateTime? @db.Timestamptz(3)
 
@@ -180,6 +182,19 @@ model Reservation {
   @@index([status])
   @@index([createdAt])
   @@map("reservations")
+}
+
+/// A wrong pickup code typed for a reservation. Recent rows decide whether the business
+/// may try again (5 per 10 minutes); older ones are deleted as new attempts come in.
+model RedemptionAttempt {
+  id            String   @id @default(uuid()) @db.Uuid
+  reservationId String   @db.Uuid
+  attemptedAt   DateTime @default(now()) @db.Timestamptz(3)
+
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+
+  @@index([reservationId, attemptedAt])
+  @@map("redemption_attempts")
 }
 
 model Favorite {

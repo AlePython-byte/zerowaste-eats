@@ -16,3 +16,15 @@ export function randomPickupCode(): string {
   }
   return `${PREFIX}-${body}`;
 }
+
+/**
+ * The part of a code that identifies it, from whatever the business typed: case, spaces,
+ * the dash and the ZW prefix do not matter, so "zw-7kq3", "ZW7KQ3" and "7kq3" are the same.
+ */
+export function pickupCodeBody(typed: string): string {
+  const compact = typed.toUpperCase().replace(/[^0-9A-Z]/g, '');
+  return compact.length === PREFIX.length + PICKUP_CODE_LENGTH &&
+    compact.startsWith(PREFIX)
+    ? compact.slice(PREFIX.length)
+    : compact;
+}

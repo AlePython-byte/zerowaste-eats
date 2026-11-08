@@ -151,4 +151,84 @@ describe('Reservations (e2e)', () => {
       await as(app, ana).get('/api/v1/merchant/reservations').expect(403);
     });
   });
+
+  describe('POST /merchant/reservations/:id/redeem', () => {
+    let reserved: { id: string; code: string };
+    const redeemPath = () =>
+      `/api/v1/merchant/reservations/${reserved.id}/redeem`;
+    const wrongCode = () =>
+      reserved.code === 'ZW-2222' ? 'ZW-3333' : 'ZW-2222';
+
+    beforeEach(async () => {
+      ({ body: reserved } = await as(app, ana)
+        .post('/api/v1/reservations')
+        .send({ offerId, quantity: 1 })
+        .expect(201));
+    });
+
+    it('redeems once with the right code, then answers 409', async () => {
+      await as(app, business.userId)
+        .post(redeemPath())
+        .send({ code: reserved.code.toLowerCase() })
+        .expect(200)
+        .expect((r) =>
+          expect(r.body).toMatchObject({
+            id: reserved.id,
+            status: 'COMPLETED',
+          }),
+        );
+
+      await as(app, business.userId)
+        .post(redeemPath())
+        .send({ code: reserved.code })
+        .expect(409)
+        .expect((r) => expect(r.body.message).toMatch(/^Ya canjeado/));
+
+      await as(app, ana)
+        .get('/api/v1/reservations')
+        .expect((r) => expect(r.body[0].status).toBe('COMPLETED'));
+    });
+
+    it('answers 429 after 5 wrong codes', async () => {
+      const statuses: number[] = [];
+      for (let i = 0; i < 6; i++) {
+        const r = await as(app, business.userId)
+          .post(redeemPath())
+          .send({ code: wrongCode() });
+        statuses.push(r.status);
+      }
+      expect(statuses).toEqual([400, 400, 400, 400, 429, 429]);
+
+      await as(app, business.userId)
+        .post(redeemPath())
+        .send({ code: reserved.code })
+        .expect(429);
+    });
+
+    it("is only for the reservation's own business", async () => {
+      const other = addBusiness(db.tables, { businessName: 'Otra' });
+      await as(app, other.userId)
+        .post(redeemPath())
+        .send({ code: reserved.code })
+        .expect(404);
+      await as(app, ana)
+        .post(redeemPath())
+        .send({ code: reserved.code })
+        .expect(403);
+      await as(app, business.userId)
+        .post('/api/v1/merchant/reservations/no-es-un-id/redeem')
+        .send({ code: reserved.code })
+        .expect(404);
+    });
+
+    it.each([
+      ['no code', {}],
+      ['an empty code', { code: '' }],
+      ['a code that is too long', { code: 'x'.repeat(17) }],
+      ['a code that is not text', { code: 1234 }],
+    ])('rejects %s with 400 without counting it', async (_label, body) => {
+      await as(app, business.userId).post(redeemPath()).send(body).expect(400);
+      expect(db.tables.redemptionAttempts).toEqual([]);
+    });
+  });
 });

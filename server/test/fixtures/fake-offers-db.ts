@@ -47,6 +47,11 @@ export interface FakeTables {
   offers: FakeOffer[];
   reservations: FakeReservation[];
   favorites: { userId: string; offerId: string; createdAt: Date }[];
+  redemptionAttempts: {
+    id: string;
+    reservationId: string;
+    attemptedAt: Date;
+  }[];
 }
 
 type Where = Record<string, any>;
@@ -59,6 +64,7 @@ export function createFakeOffersDb(seed: Partial<FakeTables> = {}) {
     offers: [],
     reservations: [],
     favorites: [],
+    redemptionAttempts: [],
     ...seed,
   };
 
@@ -484,8 +490,46 @@ export function createFakeOffersDb(seed: Partial<FakeTables> = {}) {
     ),
   };
 
+  /** Wrong pickup codes typed for a reservation. */
+  const redemptionAttempt = {
+    create: jest.fn(
+      async ({
+        data,
+      }: {
+        data: { reservationId: string; attemptedAt?: Date };
+      }) => {
+        const row = {
+          id: randomUUID(),
+          attemptedAt: data.attemptedAt ?? new Date(),
+          reservationId: data.reservationId,
+        };
+        t.redemptionAttempts.push(row);
+        return { ...row };
+      },
+    ),
+    findMany: jest.fn(
+      async ({ where, orderBy }: { where?: Where; orderBy?: Where } = {}) =>
+        sortBy(
+          t.redemptionAttempts.filter((a) => matchRecord(a, where)),
+          orderBy,
+        ).map((a) => ({ ...a })),
+    ),
+    deleteMany: jest.fn(async ({ where }: { where?: Where } = {}) => {
+      const before = t.redemptionAttempts.length;
+      t.redemptionAttempts = t.redemptionAttempts.filter(
+        (a) => !matchRecord(a, where),
+      );
+      return { count: before - t.redemptionAttempts.length };
+    }),
+  };
+
+  /** Raw statements are only row locks here; there is nothing to lock in memory. */
+  const $executeRaw = jest.fn(async () => 1);
+
   const client = {
     offer,
+    redemptionAttempt,
+    $executeRaw,
     establishment,
     reservation,
     user,
