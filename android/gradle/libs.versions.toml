@@ -15,6 +15,8 @@ lifecycleViewModelCompose = "2.11.0"
 mapsCompose = "6.1.0"
 playServicesLocation = "21.4.0"
 exifinterface = "1.4.2"
+# 3.4+ needs kotlin-stdlib 2.3 and 3.5+ Kotlin 2.4; keep in step with the Kotlin version above
+coil = "3.3.0"
 secrets = "2.0.1"
 retrofit = "3.0.0"
 okhttp = "5.5.0"
@@ -57,6 +59,8 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "mapsCompose" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-converter-kotlinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
