@@ -266,6 +266,7 @@
     <string name="offer_field_pickup_end">Hasta</string>
     <string name="offer_pickup_choose_time">Elegir hora</string>
     <string name="offer_photo_device">Tu foto</string>
+    <string name="offer_photo_current">Foto actual</string>
     <string name="offer_photo_pick_cd">Elegir una foto de tu galería</string>
     <string name="offer_photo_change_cd">Elegir otra foto de tu galería</string>
     <string name="offer_photo_preparing">Preparando la foto…</string>

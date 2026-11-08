@@ -5,6 +5,7 @@ import com.zerowasteeats.app.data.merchant.FakeMerchantOfferRepository
 import com.zerowasteeats.app.data.merchant.MerchantOffer
 import com.zerowasteeats.app.data.merchant.MerchantOfferStatus
 import com.zerowasteeats.app.data.merchant.OfferPhoto
+import com.zerowasteeats.app.data.merchant.PickedPhoto
 import com.zerowasteeats.app.presentation.model.OfferCategory
 import java.time.Clock
 import java.time.Instant
@@ -34,7 +35,7 @@ class OfferEditorFormStateTest {
     private fun validForm() = OfferEditorFormState.newOffer(clock).apply {
         onTitleChange("Croissants del día")
         onCategorySelected(OfferCategory.BAKERY)
-        onPhotoSelected(OfferPhoto.Stock.CROISSANT)
+        onPhotoSelected(OfferPhoto.Bundled.CROISSANT)
         onOriginalPriceChange("15000")
         onDiscountedPriceChange("8900")
         onQuantityChange("6")
@@ -125,7 +126,7 @@ class OfferEditorFormStateTest {
         assertEquals(OfferFieldError.REQUIRED, form.shownError(OfferField.PHOTO))
 
         form.onCategorySelected(OfferCategory.DESSERTS)
-        form.onPhotoSelected(OfferPhoto.Stock.DESSERTS)
+        form.onPhotoSelected(OfferPhoto.Bundled.DESSERTS)
 
         assertNull(form.errorOf(OfferField.CATEGORY))
         assertNull(form.errorOf(OfferField.PHOTO))
@@ -314,7 +315,7 @@ class OfferEditorFormStateTest {
         val form = OfferEditorFormState.newOffer(clockAt("23:50")).apply {
             onTitleChange("Pan de la casa")
             onCategorySelected(OfferCategory.BAKERY)
-            onPhotoSelected(OfferPhoto.Stock.CROISSANT)
+            onPhotoSelected(OfferPhoto.Bundled.CROISSANT)
             onOriginalPriceChange("12000")
             onDiscountedPriceChange("6000")
         }
@@ -444,7 +445,7 @@ class OfferEditorFormStateTest {
         val form = OfferEditorFormState.fromOffer(sampleOffer(), zone)
         assertFalse(form.hasUnsavedChanges)
 
-        form.onPhotoSelected(OfferPhoto.Stock.BURGER)
+        form.onPhotoSelected(OfferPhoto.Bundled.BURGER)
         assertTrue(form.hasUnsavedChanges)
     }
 
@@ -490,63 +491,95 @@ class OfferEditorFormStateTest {
         assertEquals(OfferFieldError.END_IN_PAST, restored.errorOf(OfferField.PICKUP_END))
     }
 
-    // --- Photo from the device ---
+    // --- Photos: picked from the device, published, or the app's own ---
 
-    private val devicePhoto = OfferPhoto.Device("/cache/offer_photos/pan.jpg")
+    private val picked = PickedPhoto("/cache/offer_photos/pan.jpg")
+    private val published = OfferPhoto.Remote("https://ref.supabase.co/storage/v1/object/public/offer-photos/u/pan.jpg")
 
     @Test
-    fun aPreparedDevicePhoto_becomesTheOffersPhoto_andIsRemembered() {
+    fun aPickedPhoto_becomesTheChosenPhoto_andIsRemembered() {
         val form = emptyForm()
 
-        form.onDevicePhotoPrepared(devicePhoto)
+        form.onPhotoPicked(picked)
 
-        assertEquals(devicePhoto, form.values.photo)
-        assertEquals(devicePhoto, form.values.devicePhoto)
+        assertEquals(picked, form.values.photo)
+        assertEquals(picked, form.values.pickedPhoto)
         assertNull(form.errorOf(OfferField.PHOTO))
         assertTrue(form.hasUnsavedChanges)
     }
 
     @Test
-    fun choosingAnAppPhoto_keepsTheDevicePhotoAround_toGoBackToIt() {
-        val form = emptyForm().apply { onDevicePhotoPrepared(devicePhoto) }
+    fun choosingAnotherPhoto_keepsThePickedOneAround_toGoBackToIt() {
+        val form = emptyForm().apply { onPhotoPicked(picked) }
 
-        form.onPhotoSelected(OfferPhoto.Stock.DESSERTS)
-        assertEquals(OfferPhoto.Stock.DESSERTS, form.values.photo)
-        assertEquals(devicePhoto, form.values.devicePhoto)
+        form.onPhotoSelected(OfferPhoto.Bundled.DESSERTS)
+        assertEquals(OfferPhoto.Bundled.DESSERTS, form.values.photo)
+        assertEquals(picked, form.values.pickedPhoto)
 
-        form.onPhotoSelected(devicePhoto)
-        assertEquals(devicePhoto, form.values.photo)
+        form.onPhotoSelected(picked)
+        assertEquals(picked, form.values.photo)
     }
 
     @Test
-    fun aDevicePhoto_isSavedWithTheOffer() {
-        val form = validForm().apply { onDevicePhotoPrepared(devicePhoto) }
+    fun aPickedPhoto_isSavedAsThePhotoItWasPublishedAs() {
+        val form = validForm().apply { onPhotoPicked(picked) }
 
         assertNull(form.validate())
-        assertEquals(devicePhoto, form.toDraft(LocalDate.of(2026, 11, 7), zone).photo)
+        assertEquals(
+            published,
+            form.toDraft(LocalDate.of(2026, 11, 7), zone, photo = published).photo
+        )
     }
 
     @Test
-    fun editingAnOfferWithADevicePhoto_showsThatPhoto() {
-        val form = OfferEditorFormState.fromOffer(sampleOffer().copy(photo = devicePhoto), zone)
+    fun aPickedPhoto_cannotBeSavedWithoutPublishingIt() {
+        val form = validForm().apply { onPhotoPicked(picked) }
 
-        assertEquals(devicePhoto, form.values.photo)
-        assertEquals(devicePhoto, form.values.devicePhoto)
+        assertThrows(IllegalArgumentException::class.java) {
+            form.toDraft(LocalDate.of(2026, 11, 7), zone)
+        }
+    }
+
+    @Test
+    fun editingAnOfferWithARemotePhoto_keepsThatPhoto_andHasNothingPicked() {
+        val form = OfferEditorFormState.fromOffer(sampleOffer().copy(photo = published), zone)
+
+        assertEquals(published, form.values.photo)
+        assertNull(form.values.pickedPhoto)
         assertFalse(form.hasUnsavedChanges)
+        assertEquals(published, form.toDraft(LocalDate.of(2026, 11, 7), zone, sampleOffer()).photo)
     }
 
     @Test
-    fun saver_keepsTheDevicePhoto_evenWhileAnAppPhotoIsChosen() {
+    fun editingAnOfferWithoutPhoto_asksForOne() {
+        val form = OfferEditorFormState.fromOffer(sampleOffer().copy(photo = null), zone)
+
+        form.validate()
+
+        assertEquals(OfferFieldError.REQUIRED, form.errorOf(OfferField.PHOTO))
+    }
+
+    @Test
+    fun saver_keepsThePickedPhoto_evenWhileAnotherIsChosen() {
         val form = emptyForm().apply {
-            onDevicePhotoPrepared(devicePhoto)
-            onPhotoSelected(OfferPhoto.Stock.BURGER)
+            onPhotoPicked(picked)
+            onPhotoSelected(OfferPhoto.Bundled.BURGER)
         }
 
         val saved = with(OfferEditorFormState.Saver) { SaverScope { true }.save(form) }!!
         val restored = OfferEditorFormState.Saver.restore(saved)!!
 
-        assertEquals(OfferPhoto.Stock.BURGER, restored.values.photo)
-        assertEquals(devicePhoto, restored.values.devicePhoto)
+        assertEquals(OfferPhoto.Bundled.BURGER, restored.values.photo)
+        assertEquals(picked, restored.values.pickedPhoto)
+    }
+
+    @Test
+    fun saver_keepsARemotePhoto() {
+        val form = OfferEditorFormState.fromOffer(sampleOffer().copy(photo = published), zone)
+
+        val saved = with(OfferEditorFormState.Saver) { SaverScope { true }.save(form) }!!
+
+        assertEquals(published, OfferEditorFormState.Saver.restore(saved)!!.values.photo)
     }
 
     @Test
@@ -622,7 +655,7 @@ class OfferEditorFormStateTest {
         with(form.values) {
             assertEquals("Croissants del día", title)
             assertEquals(OfferCategory.BAKERY, category)
-            assertEquals(OfferPhoto.Stock.CROISSANT, photo)
+            assertEquals(OfferPhoto.Bundled.CROISSANT, photo)
             assertEquals("15000", originalPrice)
             assertEquals("8900", discountedPrice)
             assertEquals("6", quantity)
@@ -642,6 +675,6 @@ class OfferEditorFormStateTest {
         pickupStart = Instant.parse("2026-10-24T18:00:00Z"),
         pickupEnd = Instant.parse("2026-10-24T19:30:00Z"),
         status = MerchantOfferStatus.ACTIVE,
-        photo = OfferPhoto.Stock.CROISSANT
+        photo = OfferPhoto.Bundled.CROISSANT
     )
 }

@@ -10,6 +10,8 @@ import com.zerowasteeats.app.data.merchant.MerchantOffer
 import com.zerowasteeats.app.data.merchant.MerchantOfferDraft
 import com.zerowasteeats.app.data.merchant.MerchantOfferRepository
 import com.zerowasteeats.app.data.merchant.OfferPhoto
+import com.zerowasteeats.app.data.merchant.PhotoSelection
+import com.zerowasteeats.app.data.merchant.PickedPhoto
 import com.zerowasteeats.app.presentation.model.OfferCategory
 import java.time.Clock
 import java.time.LocalDate
@@ -48,17 +50,18 @@ enum class OfferFieldError {
 data class OfferEditorValues(
     val title: String = "",
     val category: OfferCategory? = null,
-    val photo: OfferPhoto? = null,
+    /** The offer's current photo, a newly picked one, or one of the app's (demo). */
+    val photo: PhotoSelection? = null,
     val originalPrice: String = "",
     val discountedPrice: String = "",
     val quantity: String = OfferEditorFormState.MIN_QUANTITY.toString(),
     val pickupStartMinutes: Int? = null,
     val pickupEndMinutes: Int? = null,
     /**
-     * The last photo picked from the device, kept even while one of the app's photos is
-     * chosen, so the merchant can go back to it.
+     * The last photo picked from the device, not published yet. Kept even while another photo
+     * is chosen, so the merchant can go back to it.
      */
-    val devicePhoto: OfferPhoto.Device? = null,
+    val pickedPhoto: PickedPhoto? = null,
     /** Optional. */
     val description: String = ""
 )
@@ -164,14 +167,14 @@ class OfferEditorFormState(
         if (field in suggestedFields) suggestedFields = suggestedFields - field
     }
 
-    fun onPhotoSelected(value: OfferPhoto) {
+    fun onPhotoSelected(value: PhotoSelection) {
         update { copy(photo = value) }
         show(OfferField.PHOTO)
     }
 
-    /** A photo from the device is ready: it becomes the offer's photo. */
-    fun onDevicePhotoPrepared(value: OfferPhoto.Device) {
-        update { copy(photo = value, devicePhoto = value) }
+    /** A photo from the device is ready: it becomes the offer's photo once published. */
+    fun onPhotoPicked(value: PickedPhoto) {
+        update { copy(photo = value, pickedPhoto = value) }
         show(OfferField.PHOTO)
     }
 
@@ -217,16 +220,21 @@ class OfferEditorFormState(
     }
 
     /**
-     * The offer to save. A new or changed pickup window goes on [date]; when editing
-     * [existingOffer] without touching the window, its own start and end are kept as they were,
-     * day included. Call only after [validate] returned null; it fails on a form that is not valid.
+     * The offer to save, with [photo] as its published photo: the chosen one when it already
+     * is, or the upload of a picked one. A new or changed pickup window goes on [date]; when
+     * editing [existingOffer] without touching the window, its own start and end are kept as
+     * they were, day included. Call only after [validate] returned null; it fails on a form that
+     * is not valid.
      */
     fun toDraft(
         date: LocalDate,
         zone: ZoneId,
-        existingOffer: MerchantOffer? = null
+        existingOffer: MerchantOffer? = null,
+        photo: OfferPhoto = requireNotNull(values.photo as? OfferPhoto) {
+            "A picked photo has to be published first"
+        }
     ): MerchantOfferDraft {
-        val draft = draftOn(date, zone)
+        val draft = draftOn(date, zone, photo)
         return if (existingOffer != null && !isPickupWindowChanged) {
             draft.copy(pickupStart = existingOffer.pickupStart, pickupEnd = existingOffer.pickupEnd)
         } else {
@@ -234,7 +242,11 @@ class OfferEditorFormState(
         }
     }
 
-    private fun draftOn(date: LocalDate, zone: ZoneId): MerchantOfferDraft = with(values) {
+    private fun draftOn(
+        date: LocalDate,
+        zone: ZoneId,
+        publishedPhoto: OfferPhoto
+    ): MerchantOfferDraft = with(values) {
         MerchantOfferDraft(
             title = title.trim(),
             category = requireNotNull(category),
@@ -243,7 +255,7 @@ class OfferEditorFormState(
             quantity = quantity.toInt(),
             pickupStart = date.atTime(timeOf(requireNotNull(pickupStartMinutes))).atZone(zone).toInstant(),
             pickupEnd = date.atTime(timeOf(requireNotNull(pickupEndMinutes))).atZone(zone).toInstant(),
-            photo = requireNotNull(photo),
+            photo = publishedPhoto,
             description = description.trim()
         )
     }
@@ -379,7 +391,7 @@ class OfferEditorFormState(
                 quantity = offer.quantity.toString(),
                 pickupStartMinutes = minutesOf(offer.pickupStart.atZone(zone).toLocalTime()),
                 pickupEndMinutes = minutesOf(offer.pickupEnd.atZone(zone).toLocalTime()),
-                devicePhoto = offer.photo as? OfferPhoto.Device,
+                pickedPhoto = null,
                 description = offer.description
             ),
             isNewOffer = false
@@ -413,26 +425,26 @@ class OfferEditorFormState(
         private fun OfferEditorValues.toSavedList(): ArrayList<Any> = arrayListOf(
             title,
             category?.name.orEmpty(),
-            photo?.let(OfferPhoto::encode).orEmpty(),
+            photo?.let(PhotoSelection::encode).orEmpty(),
             originalPrice,
             discountedPrice,
             quantity,
             pickupStartMinutes ?: NO_TIME,
             pickupEndMinutes ?: NO_TIME,
-            devicePhoto?.let(OfferPhoto::encode).orEmpty(),
+            pickedPhoto?.let(PhotoSelection::encode).orEmpty(),
             description
         )
 
         private fun valuesFrom(list: List<*>) = OfferEditorValues(
             title = list[0] as String,
             category = (list[1] as String).takeIf { it.isNotEmpty() }?.let(OfferCategory::valueOf),
-            photo = OfferPhoto.decode(list[2] as String),
+            photo = PhotoSelection.decode(list[2] as String),
             originalPrice = list[3] as String,
             discountedPrice = list[4] as String,
             quantity = list[5] as String,
             pickupStartMinutes = (list[6] as Int).takeIf { it != NO_TIME },
             pickupEndMinutes = (list[7] as Int).takeIf { it != NO_TIME },
-            devicePhoto = OfferPhoto.decode(list[8] as String) as? OfferPhoto.Device,
+            pickedPhoto = PhotoSelection.decode(list[8] as String) as? PickedPhoto,
             description = list[9] as String
         )
 

@@ -256,22 +256,22 @@ private fun MerchantOfferCardPreviewContent(themeMode: ThemeMode) {
                 verticalArrangement = Arrangement.spacedBy(AppSpacing.small)
             ) {
                 MerchantOfferCard(
-                    offer = previewOffer("Croissants del día", MerchantOfferStatus.ACTIVE, 6, OfferPhoto.Stock.CROISSANT),
+                    offer = previewOffer("Croissants del día", MerchantOfferStatus.ACTIVE, 6, OfferPhoto.Bundled.CROISSANT),
                     onEditClick = {},
                     onToggleStatusClick = {}
                 )
                 MerchantOfferCard(
-                    offer = previewOffer("Sándwich artesanal con un nombre muy largo", MerchantOfferStatus.PAUSED, 4, OfferPhoto.Stock.BURGER),
+                    offer = previewOffer("Sándwich artesanal con un nombre muy largo", MerchantOfferStatus.PAUSED, 4, OfferPhoto.Bundled.BURGER),
                     onEditClick = {},
                     onToggleStatusClick = {}
                 )
                 MerchantOfferCard(
-                    offer = previewOffer("Caja de verduras", MerchantOfferStatus.SOLD_OUT, 0, OfferPhoto.Stock.VEGETABLES),
+                    offer = previewOffer("Caja de verduras", MerchantOfferStatus.SOLD_OUT, 0, OfferPhoto.Bundled.VEGETABLES),
                     onEditClick = {},
                     onToggleStatusClick = null
                 )
                 MerchantOfferCard(
-                    offer = previewOffer("Postres del lunes", MerchantOfferStatus.EXPIRED, 2, OfferPhoto.Stock.DESSERTS),
+                    offer = previewOffer("Postres del lunes", MerchantOfferStatus.EXPIRED, 2, OfferPhoto.Bundled.DESSERTS),
                     onEditClick = {},
                     onToggleStatusClick = null
                 )

@@ -91,6 +91,9 @@ import com.zerowasteeats.app.R
 import com.zerowasteeats.app.ZeroWasteEatsApplication
 import com.zerowasteeats.app.data.merchant.MerchantOfferDraft
 import com.zerowasteeats.app.data.merchant.OfferPhoto
+import com.zerowasteeats.app.data.merchant.PhotoSelection
+import com.zerowasteeats.app.data.merchant.PickedPhoto
+import com.zerowasteeats.app.data.settings.DataMode
 import com.zerowasteeats.app.data.session.Session
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppTextField
@@ -141,7 +144,8 @@ fun OfferEditorScreen(
             container.merchantRepositories(session).offers,
             offerId,
             container.offerPhotoPreparer,
-            container.offerSuggestions()
+            container.offerSuggestions(),
+            container.offerPhotoUploader()
         )
     )
 
@@ -165,7 +169,7 @@ fun OfferEditorScreen(
             ?: OfferEditorFormState.newOffer(clock)
     }
 
-    LaunchedEffect(viewModel, form) { viewModel.prepared.collect(form::onDevicePhotoPrepared) }
+    LaunchedEffect(viewModel, form) { viewModel.prepared.collect(form::onPhotoPicked) }
     LaunchedEffect(viewModel, form) { viewModel.suggested.collect(form::applySuggestion) }
 
     OfferEditorContent(
@@ -180,19 +184,27 @@ fun OfferEditorScreen(
                 )
             },
             isPreparing = viewModel.isPreparingPhoto,
-            failed = viewModel.photoFailed
+            failed = viewModel.photoFailed,
+            offerBundledPhotos = container.dataMode.mode.value == DataMode.DEMO
         ),
         suggestionPanel = SuggestionPanel(
             state = viewModel.suggestion,
             onSuggest = {
-                (form.values.photo as? OfferPhoto.Device)?.let { photo ->
+                (form.values.photo as? PickedPhoto)?.let { photo ->
                     viewModel.suggest(photo, originalPriceForSuggestion(form))
                 }
             }
         ),
         onClose = onClose,
         // The pickup window is for today, for now
-        onSave = { viewModel.save(form.toDraft(LocalDate.now(clock), zone, existingOffer)) },
+        onSave = {
+            // A picked photo is published first; the draft is built around the result
+            form.values.photo?.let { selection ->
+                viewModel.save(selection) { photo ->
+                    form.toDraft(LocalDate.now(clock), zone, existingOffer, photo)
+                }
+            }
+        },
         modifier = modifier,
         nowMinutes = { OfferEditorFormState.minutesOf(LocalTime.now(clock)) }
     )
@@ -203,7 +215,12 @@ class PhotoPicking(
     val onPick: () -> Unit = {},
     val isPreparing: Boolean = false,
     /** The last picked photo could not be used. */
-    val failed: Boolean = false
+    val failed: Boolean = false,
+    /**
+     * Whether the app's own photos are offered too. Only in demo mode: a live offer needs a
+     * photo the server can serve.
+     */
+    val offerBundledPhotos: Boolean = true
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -319,7 +336,7 @@ fun OfferEditorContent(
                         modifier = fieldModifier(OfferField.PHOTO)
                     )
                     // Only the merchant's own photo can be read for a suggestion
-                    if (form.values.photo is OfferPhoto.Device) {
+                    if (form.values.photo is PickedPhoto) {
                         SuggestionSection(panel = suggestionPanel)
                     }
                 }
@@ -528,27 +545,39 @@ private fun PhotoSection(form: OfferEditorFormState, picking: PhotoPicking, modi
                 .selectableGroup(),
             horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
         ) {
-            val devicePhoto = form.values.devicePhoto
-            if (devicePhoto != null) {
+            // The photo the offer already has, so editing can keep it
+            val currentPhoto = form.initialValues.photo as? OfferPhoto.Remote
+            if (currentPhoto != null) {
                 PhotoOption(
-                    photo = devicePhoto,
+                    photo = currentPhoto,
+                    description = stringResource(R.string.offer_photo_current),
+                    isSelected = form.values.photo == currentPhoto,
+                    onClick = { form.onPhotoSelected(currentPhoto) }
+                )
+            }
+            val pickedPhoto = form.values.pickedPhoto
+            if (pickedPhoto != null) {
+                PhotoOption(
+                    photo = pickedPhoto,
                     description = stringResource(R.string.offer_photo_device),
-                    isSelected = form.values.photo == devicePhoto,
-                    onClick = { form.onPhotoSelected(devicePhoto) }
+                    isSelected = form.values.photo == pickedPhoto,
+                    onClick = { form.onPhotoSelected(pickedPhoto) }
                 )
             }
             PickPhotoTile(
-                hasPhoto = devicePhoto != null,
+                hasPhoto = pickedPhoto != null || currentPhoto != null,
                 isPreparing = picking.isPreparing,
                 onClick = picking.onPick
             )
-            OfferPhoto.Stock.entries.forEach { photo ->
-                PhotoOption(
-                    photo = photo,
-                    description = stringResource(photoNameRes(photo)),
-                    isSelected = form.values.photo == photo,
-                    onClick = { form.onPhotoSelected(photo) }
-                )
+            if (picking.offerBundledPhotos) {
+                OfferPhoto.Bundled.entries.forEach { photo ->
+                    PhotoOption(
+                        photo = photo,
+                        description = stringResource(photoNameRes(photo)),
+                        isSelected = form.values.photo == photo,
+                        onClick = { form.onPhotoSelected(photo) }
+                    )
+                }
             }
         }
         if (picking.failed) {
@@ -601,7 +630,7 @@ private fun PickPhotoTile(hasPhoto: Boolean, isPreparing: Boolean, onClick: () -
 
 @Composable
 private fun PhotoOption(
-    photo: OfferPhoto,
+    photo: PhotoSelection,
     description: String,
     isSelected: Boolean,
     onClick: () -> Unit
@@ -928,12 +957,12 @@ private fun OfferFieldError.message(): String = when (this) {
     OfferFieldError.END_IN_PAST -> stringResource(R.string.offer_error_end_in_past)
 }
 
-private fun photoNameRes(photo: OfferPhoto.Stock): Int = when (photo) {
-    OfferPhoto.Stock.CROISSANT -> R.string.offer_photo_croissant
-    OfferPhoto.Stock.SALMON_BOWL -> R.string.offer_photo_salmon_bowl
-    OfferPhoto.Stock.DESSERTS -> R.string.offer_photo_desserts
-    OfferPhoto.Stock.BURGER -> R.string.offer_photo_burger
-    OfferPhoto.Stock.VEGETABLES -> R.string.offer_photo_vegetables
+private fun photoNameRes(photo: OfferPhoto.Bundled): Int = when (photo) {
+    OfferPhoto.Bundled.CROISSANT -> R.string.offer_photo_croissant
+    OfferPhoto.Bundled.SALMON_BOWL -> R.string.offer_photo_salmon_bowl
+    OfferPhoto.Bundled.DESSERTS -> R.string.offer_photo_desserts
+    OfferPhoto.Bundled.BURGER -> R.string.offer_photo_burger
+    OfferPhoto.Bundled.VEGETABLES -> R.string.offer_photo_vegetables
 }
 
 private const val DEFAULT_START_MINUTES = 18 * 60
@@ -954,7 +983,7 @@ private fun EditorPreviewContent(themeMode: ThemeMode, withErrors: Boolean) {
                 } else {
                     onTitleChange("Croissants del día")
                     onCategorySelected(OfferCategory.BAKERY)
-                    onPhotoSelected(OfferPhoto.Stock.CROISSANT)
+                    onPhotoSelected(OfferPhoto.Bundled.CROISSANT)
                     onOriginalPriceChange("15000")
                     onDiscountedPriceChange("8900")
                     onPickupStartSelected(18 * 60)

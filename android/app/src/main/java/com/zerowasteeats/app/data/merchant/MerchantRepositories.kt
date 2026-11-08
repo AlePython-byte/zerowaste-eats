@@ -79,7 +79,7 @@ object FakeMerchantData {
             pickupStart = today(clock, 18, 0),
             pickupEnd = today(clock, 19, 30),
             status = MerchantOfferStatus.ACTIVE,
-            photo = OfferPhoto.Stock.CROISSANT
+            photo = OfferPhoto.Bundled.CROISSANT
         ),
         MerchantOffer(
             id = "demo-offer-2",
@@ -91,7 +91,7 @@ object FakeMerchantData {
             pickupStart = today(clock, 17, 30),
             pickupEnd = today(clock, 19, 0),
             status = MerchantOfferStatus.ACTIVE,
-            photo = OfferPhoto.Stock.DESSERTS
+            photo = OfferPhoto.Bundled.DESSERTS
         ),
         MerchantOffer(
             id = "demo-offer-3",
@@ -103,7 +103,7 @@ object FakeMerchantData {
             pickupStart = today(clock, 18, 30),
             pickupEnd = today(clock, 20, 0),
             status = MerchantOfferStatus.PAUSED,
-            photo = OfferPhoto.Stock.BURGER
+            photo = OfferPhoto.Bundled.BURGER
         ),
         MerchantOffer(
             id = "demo-offer-4",
@@ -115,7 +115,7 @@ object FakeMerchantData {
             pickupStart = today(clock, 16, 0),
             pickupEnd = today(clock, 18, 0),
             status = MerchantOfferStatus.SOLD_OUT,
-            photo = OfferPhoto.Stock.VEGETABLES
+            photo = OfferPhoto.Bundled.VEGETABLES
         )
     )
 

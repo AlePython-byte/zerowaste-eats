@@ -17,52 +17,79 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import com.zerowasteeats.app.data.merchant.OfferPhoto
+import com.zerowasteeats.app.data.merchant.PhotoSelection
+import com.zerowasteeats.app.data.merchant.PickedPhoto
 import com.zerowasteeats.app.data.photos.PhotoScaling
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+private const val FILE_URL_PREFIX = "file://"
+
 /**
- * Draws an offer's photo. A device photo is read from its file off the main thread, sampled
- * down to about the size it is shown at; until then, or if the file is gone, a plain surface
- * of the theme fills its place.
+ * Draws an offer's photo, or the one being edited. A photo on the device is read from its file
+ * off the main thread, sampled down to about the size it is shown at. Until it is ready, when
+ * there is no photo, or when the file is gone, a plain surface of the theme fills its place.
  */
 @Composable
 fun OfferPhotoImage(
-    photo: OfferPhoto,
+    photo: PhotoSelection?,
     modifier: Modifier = Modifier,
     contentDescription: String? = null,
     contentScale: ContentScale = ContentScale.Crop
 ) {
     when (photo) {
-        is OfferPhoto.Stock -> Image(
+        is OfferPhoto.Bundled -> Image(
             painter = painterResource(photo.drawableRes),
             contentDescription = contentDescription,
             modifier = modifier,
             contentScale = contentScale
         )
-        is OfferPhoto.Device -> BoxWithConstraints(modifier = modifier) {
-            val density = LocalDensity.current
-            val shownPx = with(density) { maxOf(maxWidth, maxHeight).roundToPx() }
-            val bitmap by produceState<ImageBitmap?>(null, photo.path, shownPx) {
-                value = withContext(Dispatchers.IO) { decodeForDisplay(photo.path, shownPx) }
-            }
-            val loaded = bitmap
-            if (loaded != null) {
-                Image(
-                    bitmap = loaded,
-                    contentDescription = contentDescription,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = contentScale
+        is PickedPhoto -> LocalPhoto(photo.path, modifier, contentDescription, contentScale)
+        is OfferPhoto.Remote ->
+            if (photo.url.startsWith(FILE_URL_PREFIX)) {
+                LocalPhoto(
+                    photo.url.removePrefix(FILE_URL_PREFIX),
+                    modifier,
+                    contentDescription,
+                    contentScale
                 )
             } else {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                )
+                PhotoPlaceholder(modifier)
             }
+        null -> PhotoPlaceholder(modifier)
+    }
+}
+
+@Composable
+private fun LocalPhoto(
+    path: String,
+    modifier: Modifier,
+    contentDescription: String?,
+    contentScale: ContentScale
+) {
+    BoxWithConstraints(modifier = modifier) {
+        val density = LocalDensity.current
+        val shownPx = with(density) { maxOf(maxWidth, maxHeight).roundToPx() }
+        val bitmap by produceState<ImageBitmap?>(null, path, shownPx) {
+            value = withContext(Dispatchers.IO) { decodeForDisplay(path, shownPx) }
+        }
+        val loaded = bitmap
+        if (loaded != null) {
+            Image(
+                bitmap = loaded,
+                contentDescription = contentDescription,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = contentScale
+            )
+        } else {
+            PhotoPlaceholder(Modifier.fillMaxSize())
         }
     }
+}
+
+@Composable
+private fun PhotoPlaceholder(modifier: Modifier) {
+    Box(modifier = modifier.background(MaterialTheme.colorScheme.surfaceVariant))
 }
 
 private fun decodeForDisplay(path: String, shownPx: Int): ImageBitmap? = try {

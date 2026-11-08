@@ -16,7 +16,7 @@ data class MerchantOffer(
     val pickupStart: Instant,
     val pickupEnd: Instant,
     val status: MerchantOfferStatus,
-    val photo: OfferPhoto,
+    val photo: OfferPhoto?,
     /** Optional; empty when the merchant wrote none. */
     val description: String = ""
 ) {

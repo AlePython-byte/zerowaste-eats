@@ -153,7 +153,7 @@ class OfferSuggestionFormTest {
             onTitleChange("Pan del día")
             onDescriptionChange("  Pan de esta mañana.  ")
             onCategorySelected(OfferCategory.BAKERY)
-            onPhotoSelected(com.zerowasteeats.app.data.merchant.OfferPhoto.Stock.CROISSANT)
+            onPhotoSelected(com.zerowasteeats.app.data.merchant.OfferPhoto.Bundled.CROISSANT)
             onOriginalPriceChange("10000")
             onDiscountedPriceChange("5000")
             onPickupStartSelected(20 * 60)

@@ -30,7 +30,9 @@ import com.zerowasteeats.app.data.ai.OfferSuggestionRepository
 import com.zerowasteeats.app.data.ai.RemoteOfferSuggestionRepository
 import java.util.concurrent.TimeUnit
 import okhttp3.OkHttpClient
+import com.zerowasteeats.app.data.photos.LocalOfferPhotoUploader
 import com.zerowasteeats.app.data.photos.OfferPhotoPreparer
+import com.zerowasteeats.app.data.photos.OfferPhotoUploader
 import com.zerowasteeats.app.data.photos.OfferPhotoProcessor
 import com.zerowasteeats.app.data.session.PrefsSessionStore
 import com.zerowasteeats.app.data.session.Session
@@ -109,6 +111,11 @@ class AppContainer(context: Context) {
 
     /** Readies a photo picked for an offer: upright, at most 1280 px, JPEG under 2 MB. */
     val offerPhotoPreparer: OfferPhotoPreparer = OfferPhotoProcessor(context.applicationContext)
+
+    private val localPhotoUploader: OfferPhotoUploader = LocalOfferPhotoUploader()
+
+    /** Publishes a picked offer photo. For now it stays on the device in every mode. */
+    fun offerPhotoUploader(): OfferPhotoUploader = localPhotoUploader
 
     private val demoSuggestions: OfferSuggestionRepository by lazy { DemoOfferSuggestionRepository() }
 

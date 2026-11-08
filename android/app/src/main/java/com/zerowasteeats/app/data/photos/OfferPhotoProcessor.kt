@@ -10,7 +10,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.graphics.scale
 import androidx.exifinterface.media.ExifInterface
-import com.zerowasteeats.app.data.merchant.OfferPhoto
+import com.zerowasteeats.app.data.merchant.PickedPhoto
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
@@ -21,7 +21,7 @@ import kotlinx.coroutines.withContext
 
 /** What came of preparing a photo the merchant picked. */
 sealed interface PhotoPreparation {
-    data class Ready(val photo: OfferPhoto.Device, val sizeBytes: Int) : PhotoPreparation
+    data class Ready(val photo: PickedPhoto, val sizeBytes: Int) : PhotoPreparation
 
     /** Not an image this device can read, or it could not be opened. */
     data object Unreadable : PhotoPreparation
@@ -57,7 +57,7 @@ class OfferPhotoProcessor(
             outputDir.mkdirs()
             val file = File(outputDir, "${UUID.randomUUID()}.jpg")
             file.writeBytes(encoded.bytes)
-            PhotoPreparation.Ready(OfferPhoto.Device(file.absolutePath), encoded.bytes.size)
+            PhotoPreparation.Ready(PickedPhoto(file.absolutePath), encoded.bytes.size)
         } catch (e: CancellationException) {
             throw e
         } catch (_: IOException) {
