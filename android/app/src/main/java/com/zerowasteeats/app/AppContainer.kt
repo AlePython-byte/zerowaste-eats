@@ -27,6 +27,9 @@ import com.zerowasteeats.app.data.merchant.MerchantRepositories
 import com.zerowasteeats.app.data.merchant.FakeMerchantReservationRepository
 import com.zerowasteeats.app.data.merchant.MerchantOffersApi
 import com.zerowasteeats.app.data.merchant.RemoteMerchantOfferRepository
+import com.zerowasteeats.app.data.merchant.MerchantProfile
+import com.zerowasteeats.app.data.merchant.MerchantProfileApi
+import com.zerowasteeats.app.data.merchant.RemoteMerchantProfileRepository
 import com.zerowasteeats.app.data.ai.AiSuggestionApi
 import com.zerowasteeats.app.data.ai.DemoOfferSuggestionRepository
 import com.zerowasteeats.app.data.ai.OfferSuggestionRepository
@@ -204,11 +207,20 @@ class AppContainer(context: Context) {
         session: Session.Merchant,
         backend: Retrofit
     ): MerchantRepositories {
-        val demoShaped = FakeMerchantData.repositoriesFor(session)
         return MerchantRepositories(
             offers = RemoteMerchantOfferRepository(backend.create(MerchantOffersApi::class.java)),
             reservations = FakeMerchantReservationRepository(emptyList()),
-            profile = demoShaped.profile
+            profile = RemoteMerchantProfileRepository(
+                backend.create(MerchantProfileApi::class.java),
+                // What the session knows, shown until the backend answers
+                MerchantProfile(
+                    businessName = session.businessName,
+                    description = "",
+                    address = "",
+                    city = session.city,
+                    isVerified = false
+                )
+            )
         )
     }
 }

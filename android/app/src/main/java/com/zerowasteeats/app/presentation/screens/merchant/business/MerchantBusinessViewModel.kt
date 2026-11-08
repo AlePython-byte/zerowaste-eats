@@ -6,19 +6,39 @@ import androidx.lifecycle.viewModelScope
 import com.zerowasteeats.app.data.merchant.MerchantProfileRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
+import com.zerowasteeats.app.data.merchant.loadIfNeeded
 import kotlinx.coroutines.flow.stateIn
 
-/** Follows the business's profile, so the tab changes when the profile does. */
-class MerchantBusinessViewModel(repository: MerchantProfileRepository) : ViewModel() {
+/**
+ * Follows the business's profile, so the tab changes when the profile does. In live mode it
+ * loads the profile on the way in; a failed load is shown with a way to try again.
+ */
+class MerchantBusinessViewModel(
+    private val repository: MerchantProfileRepository
+) : ViewModel() {
 
-    val state: StateFlow<MerchantBusinessState> = repository.profile
-        .map(MerchantBusinessState::from)
+    val state: StateFlow<MerchantBusinessState> = combine(
+        repository.profile,
+        repository.loadState
+    ) { profile, load -> MerchantBusinessState.from(profile, load) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
-            initialValue = MerchantBusinessState.from(repository.profile.value)
+            initialValue = MerchantBusinessState.from(
+                repository.profile.value,
+                repository.loadState.value
+            )
         )
+
+    init {
+        viewModelScope.launch { repository.loadIfNeeded() }
+    }
+
+    fun retryLoad() {
+        viewModelScope.launch { repository.refresh() }
+    }
 
     private companion object {
         const val STOP_TIMEOUT_MILLIS = 5_000L

@@ -228,6 +228,8 @@
     <string name="merchant_offer_resumed_message">Offer resumed</string>
     <string name="merchant_offers_empty_active_title">You have no active offers</string>
     <string name="merchant_offers_loading">Loading your offers…</string>
+    <string name="merchant_profile_load_failed">We couldn\'t load your business details.</string>
+    <string name="merchant_profile_load_failed_network">We couldn\'t load your business details. Check your connection.</string>
     <string name="merchant_offers_load_failed">We couldn\'t load your offers.</string>
     <string name="merchant_offers_load_failed_network">We couldn\'t load your offers. Check your connection.</string>
     <string name="merchant_data_session_failed">Your session is no longer valid. Sign out and sign in again.</string>
