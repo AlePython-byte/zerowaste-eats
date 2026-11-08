@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { DatabaseService } from '../../src/database/database.service';
+import { Prisma } from '../../src/generated/prisma/client';
 
 /**
  * A tiny in-memory database for the offer services. It evaluates the `where` shapes those
@@ -11,6 +12,7 @@ import type { DatabaseService } from '../../src/database/database.service';
 export interface FakeUser {
   id: string;
   role: 'CUSTOMER' | 'MERCHANT';
+  displayName?: string;
 }
 export interface FakeMerchantProfile {
   id: string;
@@ -34,12 +36,16 @@ export type FakeOffer = Record<string, any> & {
   establishmentId: string;
 };
 
+export type FakeReservation = Record<string, any> & {
+  offerId: string;
+};
+
 export interface FakeTables {
   users: FakeUser[];
   merchantProfiles: FakeMerchantProfile[];
   establishments: FakeEstablishment[];
   offers: FakeOffer[];
-  reservations: { offerId: string }[];
+  reservations: FakeReservation[];
   favorites: { userId: string; offerId: string; createdAt: Date }[];
 }
 
@@ -156,6 +162,24 @@ export function createFakeOffersDb(seed: Partial<FakeTables> = {}) {
     });
   }
 
+  /** Writes [data] into [row], honouring Prisma's `{ increment }` and `{ decrement }`. */
+  function applyData(row: Record<string, any>, data: Record<string, any>) {
+    for (const [key, value] of Object.entries(data)) {
+      if (value !== null && typeof value === 'object' && 'decrement' in value) {
+        row[key] -= value.decrement;
+      } else if (
+        value !== null &&
+        typeof value === 'object' &&
+        'increment' in value
+      ) {
+        row[key] += value.increment;
+      } else {
+        row[key] = value;
+      }
+    }
+    row.updatedAt = new Date();
+  }
+
   const offer = {
     findFirst: jest.fn(
       async ({ where, include }: { where?: Where; include?: Where } = {}) => {
@@ -209,10 +233,9 @@ export function createFakeOffersDb(seed: Partial<FakeTables> = {}) {
     ),
     updateMany: jest.fn(
       async ({ where, data }: { where: Where; data: Record<string, any> }) => {
+        // Checks and writes with no await in between: atomic, like one UPDATE statement
         const rows = t.offers.filter((o) => matchOffer(o, where));
-        rows.forEach((row) =>
-          Object.assign(row, data, { updatedAt: new Date() }),
-        );
+        rows.forEach((row) => applyData(row, data));
         return { count: rows.length };
       },
     ),
@@ -301,10 +324,112 @@ export function createFakeOffersDb(seed: Partial<FakeTables> = {}) {
     },
   );
 
+  const offerOf = (r: FakeReservation) =>
+    t.offers.find((o) => o.id === r.offerId);
+
+  function matchReservation(r: FakeReservation, where: Where = {}): boolean {
+    return Object.entries(where).every(([key, condition]) => {
+      if (condition === undefined) return true;
+      if (key === 'offer') {
+        const found = offerOf(r);
+        return !!found && matchOffer(found, condition);
+      }
+      if (key === 'OR')
+        return (condition as Where[]).some((w) => matchReservation(r, w));
+      return matchValue(r[key], condition);
+    });
+  }
+
+  /** Includes the offer (with its business) and the customer, like Prisma's `include`. */
+  function reservationWithIncludes(r: FakeReservation, include?: Where) {
+    const row: Record<string, any> = { ...r };
+    if (include?.offer) {
+      const nested = include.offer === true ? undefined : include.offer.include;
+      row.offer = withIncludes(offerOf(r)!, nested);
+    }
+    if (include?.customer) {
+      row.customer = { ...t.users.find((u) => u.id === r.customerId) };
+    }
+    return row;
+  }
+
+  /** Reservations; the pickup code is unique, like the index in the schema. */
   const reservation = {
     count: jest.fn(
       async ({ where }: { where?: Where } = {}) =>
-        t.reservations.filter((r) => matchRecord(r, where)).length,
+        t.reservations.filter((r) => matchReservation(r, where)).length,
+    ),
+    create: jest.fn(
+      async ({
+        data,
+        include,
+      }: {
+        data: Record<string, any>;
+        include?: Where;
+      }) => {
+        if (
+          t.reservations.some((r) => r.reservationCode === data.reservationCode)
+        ) {
+          throw new Prisma.PrismaClientKnownRequestError('Unique violation', {
+            code: 'P2002',
+            clientVersion: '7.10.1',
+            meta: { target: ['reservationCode'] },
+          });
+        }
+        const now = new Date();
+        const row: FakeReservation = {
+          id: randomUUID(),
+          status: 'PENDING',
+          completedAt: null,
+          cancelledAt: null,
+          createdAt: now,
+          updatedAt: now,
+          ...data,
+        } as unknown as FakeReservation;
+        t.reservations.push(row);
+        return reservationWithIncludes(row, include);
+      },
+    ),
+    findFirst: jest.fn(
+      async ({ where, include }: { where?: Where; include?: Where } = {}) => {
+        const found = t.reservations.find((r) => matchReservation(r, where));
+        return found ? reservationWithIncludes(found, include) : null;
+      },
+    ),
+    findMany: jest.fn(
+      async ({
+        where,
+        include,
+        orderBy,
+        take,
+      }: {
+        where?: Where;
+        include?: Where;
+        orderBy?: Where;
+        take?: number;
+      } = {}) =>
+        sortBy(
+          t.reservations.filter((r) => matchReservation(r, where)),
+          orderBy,
+        )
+          .slice(0, take ?? undefined)
+          .map((r) => reservationWithIncludes(r, include)),
+    ),
+    update: jest.fn(
+      async ({
+        where,
+        data,
+        include,
+      }: {
+        where: { id: string };
+        data: Record<string, any>;
+        include?: Where;
+      }) => {
+        const row = t.reservations.find((r) => r.id === where.id);
+        if (!row) throw new Error('Record to update not found');
+        applyData(row, data);
+        return reservationWithIncludes(row, include);
+      },
     ),
   };
 
