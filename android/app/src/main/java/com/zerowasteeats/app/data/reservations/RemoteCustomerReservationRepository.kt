@@ -1,6 +1,7 @@
 package com.zerowasteeats.app.data.reservations
 
 import com.zerowasteeats.app.data.catalog.CatalogError
+import com.zerowasteeats.app.data.catalog.CatalogLoadState
 import java.time.Instant
 import java.time.format.DateTimeParseException
 import kotlin.math.roundToLong
@@ -11,13 +12,29 @@ import kotlinx.coroutines.flow.update
 import kotlinx.serialization.Serializable
 import retrofit2.HttpException
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 
 /** The backend's reservations of the signed-in customer. The access token travels in the client. */
 interface ReservationsApi {
     @POST("reservations")
     suspend fun reserve(@Body body: ReserveBody): CustomerReservationResponse
+
+    /** Newest first. */
+    @GET("reservations")
+    suspend fun list(): List<CustomerReservationResponse>
+
+    @GET("users/me/stats")
+    suspend fun stats(): CustomerStatsResponse
 }
+
+@Serializable
+data class CustomerStatsResponse(
+    val completedOrders: Int,
+    val moneySaved: Double,
+    val foodRescuedKg: Double,
+    val foodRescuedKgIsEstimate: Boolean = true
+)
 
 @Serializable
 data class ReserveBody(val offerId: String, val quantity: Int)
@@ -49,16 +66,53 @@ data class ReservedOfferResponse(
 data class ReservedBusinessResponse(val name: String)
 
 /**
- * The customer's reservations on the backend. A new one is added to [reservations] with the
- * server's answer, so the orders show it without asking again.
+ * The customer's reservations and impact on the backend. A new reservation is added to
+ * [reservations] with the server's answer, so the orders show it without asking again.
+ * Reservations the app cannot read are left out rather than failing the whole list.
  */
 class RemoteCustomerReservationRepository(
     private val api: ReservationsApi
 ) : CustomerReservationRepository {
 
     private val state = MutableStateFlow<List<CustomerReservation>>(emptyList())
+    private val load = MutableStateFlow<CatalogLoadState>(CatalogLoadState.Idle)
+    private val impactValue = MutableStateFlow<CustomerImpact?>(null)
+    private val impactLoad = MutableStateFlow<CatalogLoadState>(CatalogLoadState.Idle)
 
     override val reservations: StateFlow<List<CustomerReservation>> = state
+    override val loadState: StateFlow<CatalogLoadState> = load
+    override val impact: StateFlow<CustomerImpact?> = impactValue
+    override val impactState: StateFlow<CatalogLoadState> = impactLoad
+
+    override suspend fun refresh() {
+        load.value = CatalogLoadState.Loading
+        load.value = try {
+            state.value = api.list().mapNotNull { it.toReservation() }
+            CatalogLoadState.Loaded
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            CatalogLoadState.Failed(customerErrorOf(e))
+        }
+    }
+
+    override suspend fun refreshImpact() {
+        impactLoad.value = CatalogLoadState.Loading
+        impactLoad.value = try {
+            val stats = api.stats()
+            impactValue.value = CustomerImpact(
+                completedOrders = stats.completedOrders,
+                moneySaved = stats.moneySaved.roundToLong(),
+                foodRescuedKg = stats.foodRescuedKg,
+                foodIsEstimate = stats.foodRescuedKgIsEstimate
+            )
+            CatalogLoadState.Loaded
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            CatalogLoadState.Failed(customerErrorOf(e))
+        }
+    }
 
     override suspend fun reserve(offerId: String, quantity: Int): ReserveResult = try {
         val reservation = api.reserve(ReserveBody(offerId, quantity)).toReservation()

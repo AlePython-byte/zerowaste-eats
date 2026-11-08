@@ -95,6 +95,12 @@
     <string name="orders_tab_history">Historial</string>
     <string name="orders_empty_active">No tienes pedidos activos.</string>
     <string name="orders_empty_history">Aún no tienes pedidos anteriores.</string>
+    <string name="orders_loading">Cargando tus pedidos…</string>
+    <string name="orders_load_failed_title">No pudimos cargar tus pedidos</string>
+    <string name="orders_load_failed">Inténtalo de nuevo en un momento.</string>
+    <string name="orders_load_failed_network">Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="orders_refresh_failed">No pudimos actualizar tus pedidos.</string>
+    <string name="orders_refresh_failed_network">No pudimos actualizar tus pedidos. Revisa tu conexión.</string>
 
     <string name="order_status_reserved">Reservado</string>
     <string name="order_status_ready_for_pickup">Listo para recoger</string>
@@ -146,10 +152,14 @@
     <string name="profile_title">Perfil</string>
     <string name="profile_subtitle">Tu cuenta e impacto en ZeroWaste Eats.</string>
     <string name="profile_impact_title">Tu impacto</string>
-    <string name="profile_metric_rescued_orders">Pedidos rescatados</string>
+    <string name="profile_metric_completed_orders">Pedidos completados</string>
     <string name="profile_metric_rescued_food">Comida rescatada</string>
-    <string name="profile_metric_estimated_savings">Ahorro estimado</string>
+    <string name="profile_metric_savings">Ahorro</string>
     <string name="profile_rescued_food_value">%1$.1f kg</string>
+    <string name="profile_rescued_food_value_approx">%1$.1f kg aprox.</string>
+    <string name="profile_impact_loading">Cargando tu impacto…</string>
+    <string name="profile_impact_load_failed">No pudimos cargar tu impacto.</string>
+    <string name="profile_impact_load_failed_network">No pudimos cargar tu impacto. Revisa tu conexión.</string>
     <string name="profile_preferences_title">Preferencias</string>
     <string name="profile_dark_mode_title">Modo oscuro</string>
     <string name="profile_dark_mode_subtitle">Cambia entre el tema claro y el oscuro.</string>

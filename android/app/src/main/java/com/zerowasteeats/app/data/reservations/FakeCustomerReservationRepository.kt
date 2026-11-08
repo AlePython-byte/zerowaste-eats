@@ -1,5 +1,6 @@
 package com.zerowasteeats.app.data.reservations
 
+import com.zerowasteeats.app.data.catalog.CatalogLoadState
 import com.zerowasteeats.app.data.catalog.CatalogOffer
 import java.time.Clock
 import java.time.Instant
@@ -13,8 +14,9 @@ import kotlinx.coroutines.flow.update
 
 /**
  * Reservations for demo mode, kept in memory: nothing leaves the device. A reservation is made
- * from what the app knows of the offer through [offerLookup], with a code like the server's.
- * Every call waits [latencyMillis] to look like a real request.
+ * from what the app knows of the offer through [offerLookup], with a code like the server's,
+ * and the impact is worked out from the picked-up ones the way the server does it. Every call
+ * waits [latencyMillis] to look like a real request.
  */
 class FakeCustomerReservationRepository(
     initialReservations: List<CustomerReservation> = emptyList(),
@@ -27,6 +29,24 @@ class FakeCustomerReservationRepository(
     private val state = MutableStateFlow(initialReservations)
 
     override val reservations: StateFlow<List<CustomerReservation>> = state
+
+    /** Memory is always there. */
+    override val loadState: StateFlow<CatalogLoadState> = MutableStateFlow(CatalogLoadState.Loaded)
+
+    private val impactValue = MutableStateFlow<CustomerImpact?>(null)
+    private val impactLoad = MutableStateFlow<CatalogLoadState>(CatalogLoadState.Idle)
+
+    override val impact: StateFlow<CustomerImpact?> = impactValue
+    override val impactState: StateFlow<CatalogLoadState> = impactLoad
+
+    override suspend fun refresh() = Unit
+
+    override suspend fun refreshImpact() {
+        impactLoad.value = CatalogLoadState.Loading
+        delay(latencyMillis)
+        impactValue.value = CustomerImpact.of(state.value)
+        impactLoad.value = CatalogLoadState.Loaded
+    }
 
     override suspend fun reserve(offerId: String, quantity: Int): ReserveResult {
         delay(latencyMillis)

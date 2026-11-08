@@ -1,6 +1,7 @@
 package com.zerowasteeats.app.data.reservations
 
 import com.zerowasteeats.app.data.catalog.CatalogError
+import com.zerowasteeats.app.data.catalog.CatalogLoadState
 import com.zerowasteeats.app.data.remote.createHttpClient
 import com.zerowasteeats.app.data.remote.createRetrofit
 import java.time.Instant
@@ -135,6 +136,77 @@ class RemoteCustomerReservationRepositoryTest {
             val result = runBlocking { repository.reserve("offer-1", 1) }
             assertEquals(server, expected, (result as ReserveResult.Reserved).reservation.status)
         }
+    }
+
+    @Test
+    fun theOrders_comeFromTheServer_newestFirst() = runBlocking {
+        respond(200, "[${reservationJson("r2")},${reservationJson("r1", status = "COMPLETED")}]")
+
+        repository.refresh()
+
+        val request = server.takeRequest()
+        assertEquals("GET", request.method)
+        assertEquals("/api/v1/reservations", request.url.encodedPath)
+        assertEquals(listOf("r2", "r1"), repository.reservations.value.map { it.id })
+        assertEquals(CustomerReservationStatus.COMPLETED, repository.reservations.value[1].status)
+        assertEquals(CatalogLoadState.Loaded, repository.loadState.value)
+    }
+
+    @Test
+    fun aReservationTheAppCannotRead_isLeftOut() = runBlocking {
+        respond(200, "[${reservationJson("ok")},${reservationJson("bad", createdAt = "yesterday")}]")
+
+        repository.refresh()
+
+        assertEquals(listOf("ok"), repository.reservations.value.map { it.id })
+    }
+
+    @Test
+    fun aFailedLoad_keepsTheOrdersAlreadyLoaded_andSaysWhy() = runBlocking {
+        respond(200, "[${reservationJson("r1")}]")
+        repository.refresh()
+
+        error(503, "x")
+        repository.refresh()
+
+        assertEquals(CatalogLoadState.Failed(CatalogError.NETWORK), repository.loadState.value)
+        assertEquals(listOf("r1"), repository.reservations.value.map { it.id })
+    }
+
+    @Test
+    fun anEndedSession_isTold() = runBlocking {
+        error(401, "x")
+
+        repository.refresh()
+
+        assertEquals(CatalogLoadState.Failed(CatalogError.SESSION), repository.loadState.value)
+    }
+
+    @Test
+    fun theImpact_comesFromTheServer() = runBlocking {
+        respond(
+            200,
+            """{"completedOrders":3,"unitsRescued":5,"moneySaved":41300.5,"foodRescuedKg":2.0,
+               "foodRescuedKgIsEstimate":true,"kgPerUnitEstimate":0.4}"""
+        )
+
+        repository.refreshImpact()
+
+        assertEquals("/api/v1/users/me/stats", server.takeRequest().url.encodedPath)
+        assertEquals(CustomerImpact(3, 41_301, 2.0, foodIsEstimate = true), repository.impact.value)
+        assertEquals(CatalogLoadState.Loaded, repository.impactState.value)
+    }
+
+    @Test
+    fun aFailedImpact_keepsTheFiguresAlreadyLoaded() = runBlocking {
+        respond(200, """{"completedOrders":1,"moneySaved":6000,"foodRescuedKg":0.4}""")
+        repository.refreshImpact()
+
+        server.close()
+        repository.refreshImpact()
+
+        assertEquals(CatalogLoadState.Failed(CatalogError.NETWORK), repository.impactState.value)
+        assertEquals(1, repository.impact.value?.completedOrders)
     }
 
     companion object {

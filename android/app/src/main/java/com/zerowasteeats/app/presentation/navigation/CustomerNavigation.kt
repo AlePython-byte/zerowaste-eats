@@ -99,8 +99,7 @@ private fun CustomerNavHost(
                 }
                 composable(CustomerDestination.PROFILE.route) {
                     ProfileScreen(
-                        displayName = session.displayName,
-                        email = session.email,
+                        session = session,
                         onSignOut = onSignOut
                     )
                 }

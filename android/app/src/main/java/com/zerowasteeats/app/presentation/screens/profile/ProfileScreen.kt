@@ -44,7 +44,23 @@ import com.zerowasteeats.app.presentation.components.settings.AppearanceSettingC
 import com.zerowasteeats.app.presentation.components.settings.LanguageSettingCard
 import com.zerowasteeats.app.presentation.components.settings.SignOutDialog
 import com.zerowasteeats.app.presentation.data.MockProfile
-import com.zerowasteeats.app.presentation.model.ProfileUiModel
+import androidx.compose.foundation.background
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.zerowasteeats.app.ZeroWasteEatsApplication
+import com.zerowasteeats.app.data.catalog.CatalogError
+import com.zerowasteeats.app.data.catalog.CatalogLoadState
+import com.zerowasteeats.app.data.reservations.CustomerImpact
+import com.zerowasteeats.app.data.session.Session
+import com.zerowasteeats.app.presentation.components.common.rememberSkeletonAlpha
+import com.zerowasteeats.app.presentation.format.formatPesos
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.navigation.LocalBottomBarInset
 import com.zerowasteeats.app.presentation.theme.AppSpacing
@@ -53,16 +69,39 @@ import com.zerowasteeats.app.presentation.theme.ThemeMode
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
 
 /**
- * The customer's profile. Name and email come from the session; the impact numbers are still
- * sample data. Signing out asks first, then [onSignOut] ends the session.
+ * The customer's profile. Name and email come from the session; the impact comes from the
+ * server and is loaded again each time the profile shows. Signing out asks first, then
+ * [onSignOut] ends the session.
  */
 @Composable
 fun ProfileScreen(
-    displayName: String,
-    email: String,
+    session: Session.Customer,
     onSignOut: () -> Unit
 ) {
-    val profile = MockProfile.getProfile()
+    val container = (LocalContext.current.applicationContext as ZeroWasteEatsApplication).container
+    val viewModel: ProfileImpactViewModel = viewModel(
+        factory = ProfileImpactViewModelFactory(container.customerReservations(session))
+    )
+    val impact by viewModel.state.collectAsState()
+    LaunchedEffect(Unit) { viewModel.refresh() }
+
+    ProfileContent(
+        displayName = session.displayName,
+        email = session.email,
+        impact = impact,
+        onRetryImpact = viewModel::refresh,
+        onSignOut = onSignOut
+    )
+}
+
+@Composable
+private fun ProfileContent(
+    displayName: String,
+    email: String,
+    impact: ProfileImpactState,
+    onRetryImpact: () -> Unit,
+    onSignOut: () -> Unit
+) {
     var isSignOutDialogOpen by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
@@ -90,11 +129,11 @@ fun ProfileScreen(
             }
 
             item {
-                ImpactSection(profile = profile)
+                ImpactSection(state = impact, onRetry = onRetryImpact)
             }
 
             item {
-                PreferencesSection(categories = profile.favoriteCategories)
+                PreferencesSection(categories = MockProfile.favoriteCategories)
             }
 
             item {
@@ -199,8 +238,16 @@ private fun ProfileHeroCard(
     }
 }
 
+/**
+ * Orders picked up, food rescued and money saved, from the server. Placeholders while the
+ * first load runs; a message with a retry if it fails with nothing to show.
+ */
 @Composable
-private fun ImpactSection(profile: ProfileUiModel, modifier: Modifier = Modifier) {
+private fun ImpactSection(
+    state: ProfileImpactState,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = stringResource(R.string.profile_impact_title),
@@ -210,31 +257,107 @@ private fun ImpactSection(profile: ProfileUiModel, modifier: Modifier = Modifier
         )
         Spacer(modifier = Modifier.height(AppSpacing.medium))
 
-        // Responsive arrangement: 2 metrics on first row, 1 full width below
+        val impact = state.impact
+        val error = state.loadError
+        when {
+            impact != null -> ImpactMetrics(impact)
+            state.showError && error != null -> ImpactLoadError(error = error, onRetry = onRetry)
+            else -> ImpactSkeleton()
+        }
+    }
+}
+
+@Composable
+private fun ImpactMetrics(impact: CustomerImpact) {
+    // Responsive arrangement: 2 metrics on first row, 1 full width below
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
+    ) {
+        MetricCard(
+            label = stringResource(R.string.profile_metric_completed_orders),
+            value = impact.completedOrders.toString(),
+            modifier = Modifier.weight(1f)
+        )
+        MetricCard(
+            label = stringResource(R.string.profile_metric_rescued_food),
+            value = stringResource(
+                if (impact.foodIsEstimate) R.string.profile_rescued_food_value_approx
+                else R.string.profile_rescued_food_value,
+                impact.foodRescuedKg
+            ),
+            modifier = Modifier.weight(1f)
+        )
+    }
+
+    Spacer(modifier = Modifier.height(AppSpacing.small))
+
+    MetricCard(
+        label = stringResource(R.string.profile_metric_savings),
+        value = formatPesos(impact.moneySaved),
+        modifier = Modifier.fillMaxWidth(),
+        isHighlight = true
+    )
+}
+
+/** The shape of the three figures while they load. Screen readers hear that they load. */
+@Composable
+private fun ImpactSkeleton() {
+    val alpha = rememberSkeletonAlpha()
+    val block = MaterialTheme.colorScheme.surfaceVariant
+    val shape = RoundedCornerShape(AppRadius.large)
+    val loading = stringResource(R.string.profile_impact_loading)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .semantics { contentDescription = loading }
+    ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clearAndSetSemantics {}
+                .alpha(alpha),
             horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
         ) {
-            MetricCard(
-                label = stringResource(R.string.profile_metric_rescued_orders),
-                value = profile.completedOrders.toString(),
-                modifier = Modifier.weight(1f)
-            )
-            MetricCard(
-                label = stringResource(R.string.profile_metric_rescued_food),
-                value = stringResource(R.string.profile_rescued_food_value, profile.rescuedFoodKg),
-                modifier = Modifier.weight(1f)
+            Box(Modifier.weight(1f).height(92.dp).clip(shape).background(block))
+            Box(Modifier.weight(1f).height(92.dp).clip(shape).background(block))
+        }
+        Spacer(modifier = Modifier.height(AppSpacing.small))
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(104.dp)
+                .clearAndSetSemantics {}
+                .alpha(alpha)
+                .clip(shape)
+                .background(block)
+        )
+    }
+}
+
+@Composable
+private fun ImpactLoadError(error: CatalogError, onRetry: () -> Unit) {
+    val message = when (error) {
+        CatalogError.NETWORK -> stringResource(R.string.profile_impact_load_failed_network)
+        CatalogError.SESSION -> stringResource(R.string.catalog_session_failed)
+        CatalogError.UNEXPECTED -> stringResource(R.string.profile_impact_load_failed)
+    }
+    AppCard(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        // Trying again does not help an ended session: only signing in again does
+        if (error != CatalogError.SESSION) {
+            Spacer(modifier = Modifier.height(AppSpacing.medium))
+            AppButton(
+                text = stringResource(R.string.auth_retry),
+                onClick = onRetry,
+                style = AppButtonStyle.SECONDARY
             )
         }
-        
-        Spacer(modifier = Modifier.height(AppSpacing.small))
-        
-        MetricCard(
-            label = stringResource(R.string.profile_metric_estimated_savings),
-            value = profile.estimatedSavings,
-            modifier = Modifier.fillMaxWidth(),
-            isHighlight = true
-        )
     }
 }
 
@@ -314,7 +437,16 @@ internal fun initialsOf(name: String): String {
 @Composable
 private fun ProfileScreenPreviewContent(themeMode: ThemeMode) {
     ZeroWasteEatsTheme(themeMode = themeMode) {
-        ProfileScreen(displayName = "Comprador Demo", email = "comprador@demo.co", onSignOut = {})
+        ProfileContent(
+            displayName = "Comprador Demo",
+            email = "comprador@demo.co",
+            impact = ProfileImpactState(
+                impact = CustomerImpact(completedOrders = 3, moneySaved = 41_300, foodRescuedKg = 2.0),
+                loadState = CatalogLoadState.Loaded
+            ),
+            onRetryImpact = {},
+            onSignOut = {}
+        )
     }
 }
 
