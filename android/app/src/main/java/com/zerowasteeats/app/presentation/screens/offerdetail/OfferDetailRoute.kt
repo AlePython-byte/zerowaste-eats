@@ -42,6 +42,7 @@ import com.zerowasteeats.app.data.catalog.CatalogError
 import com.zerowasteeats.app.data.session.Session
 import com.zerowasteeats.app.presentation.components.common.EmptyState
 import com.zerowasteeats.app.presentation.components.common.rememberSkeletonAlpha
+import com.zerowasteeats.app.presentation.screens.feed.FavoriteProblemSnackbar
 import com.zerowasteeats.app.presentation.screens.feed.LoadFailureSnackbar
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.RescateCarbon
@@ -84,6 +85,11 @@ fun OfferDetailScreen(
         retryLabel = stringResource(R.string.auth_retry),
         onRetry = viewModel::retry
     )
+    FavoriteProblemSnackbar(
+        problems = viewModel.favoriteFailures,
+        snackbarHostState = snackbarHostState,
+        onRetry = { _, favorite -> viewModel.setFavorite(favorite) }
+    )
 
     val offer = state.offer
     when {
@@ -91,7 +97,7 @@ fun OfferDetailScreen(
         offer != null -> OfferDetailContent(
             offer = offer,
             onBackClick = onBackClick,
-            onFavoriteClick = {},
+            onFavoriteClick = viewModel::toggleFavorite,
             onReserveClick = onReserveClick,
             snackbarHost = { SnackbarHost(snackbarHostState) }
         )

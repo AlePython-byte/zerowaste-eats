@@ -23,13 +23,15 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.theme.RescateCarbon
 import com.zerowasteeats.app.presentation.theme.RescateCoral
 import com.zerowasteeats.app.presentation.theme.RescateCream
 import kotlinx.coroutines.launch
 
 /**
- * Heart toggle for offer cards that sit over a photo: bounces and vibrates when pressed.
+ * Heart toggle for offer cards that sit over a photo: vibrates when pressed, and bounces when
+ * the system animations are on.
  * The visible circle is 44dp; the touch area is 48dp.
  */
 @Composable
@@ -42,6 +44,7 @@ fun FavoriteButton(
     val heartScale = remember { Animatable(1f) }
     val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
+    val animationsEnabled = rememberAnimationsEnabled()
 
     Box(
         modifier = modifier
@@ -52,7 +55,7 @@ fun FavoriteButton(
                 haptics.performHapticFeedback(
                     if (isFavorite) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn
                 )
-                scope.launch {
+                if (animationsEnabled) scope.launch {
                     heartScale.animateTo(
                         1.35f,
                         spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium)

@@ -41,6 +41,23 @@ class FakeOfferCatalogRepositoryTest {
     }
 
     @Test
+    fun favorites_areRememberedAcrossLoads_withoutAnyNetwork() = runBlocking {
+        repository.refresh(PASTO_CENTER)
+
+        assertEquals(FavoriteResult.Saved, repository.setFavorite("demo-catalog-1", true))
+        assertEquals(FavoriteResult.Saved, repository.setFavorite("demo-catalog-2", false))
+        repository.refresh(PASTO_CENTER)
+
+        val saved = repository.nearby.value.filter { it.isFavorite }.map { it.id }
+        assertEquals(listOf("demo-catalog-1"), saved)
+    }
+
+    @Test
+    fun savingAnUnknownOffer_isNotAvailable() = runBlocking {
+        assertEquals(FavoriteResult.NotAvailable, repository.setFavorite("nope", true))
+    }
+
+    @Test
     fun distance_matchesTheServersHaversine() {
         // About 1.1 km per hundredth of a degree of latitude
         val km = FakeOfferCatalogRepository.distanceKm(GeoPoint(1.20, -77.28), GeoPoint(1.21, -77.28))

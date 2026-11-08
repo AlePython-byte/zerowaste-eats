@@ -9,11 +9,17 @@ import com.zerowasteeats.app.data.catalog.OfferCatalogRepository
 import com.zerowasteeats.app.data.catalog.OfferLookup
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.model.toUiModel
+import com.zerowasteeats.app.presentation.screens.feed.FavoriteProblem
+import com.zerowasteeats.app.presentation.screens.feed.problemFor
 import java.time.Clock
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -58,11 +64,31 @@ class OfferDetailViewModel(
         initialValue = OfferDetailState()
     )
 
+    private val favoriteProblems = Channel<FavoriteProblem>(Channel.BUFFERED)
+    val favoriteFailures: Flow<FavoriteProblem> = favoriteProblems.receiveAsFlow()
+
     init {
         load()
     }
 
     fun retry() = load()
+
+    /** Saves the offer as a favorite, or removes it if it was one. */
+    fun toggleFavorite() {
+        viewModelScope.launch {
+            val offer = catalog.observe(offerId).first() ?: return@launch
+            changeFavorite(!offer.isFavorite)
+        }
+    }
+
+    fun setFavorite(favorite: Boolean) {
+        viewModelScope.launch { changeFavorite(favorite) }
+    }
+
+    private suspend fun changeFavorite(favorite: Boolean) {
+        catalog.setFavorite(offerId, favorite).problemFor(offerId, favorite)
+            ?.let { favoriteProblems.send(it) }
+    }
 
     private fun load() {
         status.value = DetailStatus.Loading

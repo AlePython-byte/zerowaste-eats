@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import retrofit2.HttpException
 
 /**
@@ -38,6 +40,12 @@ interface OfferCatalogRepository {
 
     /** Asks for offer [id] again; [location] only adds the distance. */
     suspend fun lookUp(id: String, location: GeoPoint?): OfferLookup
+
+    /**
+     * Saves offer [id] as a favorite, or removes it. Every screen shows the change at once; if
+     * the server refuses it or cannot be reached, the heart goes back as it was.
+     */
+    suspend fun setFavorite(id: String, favorite: Boolean): FavoriteResult
 }
 
 /**
@@ -61,6 +69,12 @@ abstract class CachedOfferCatalog(private val clock: Clock) : OfferCatalogReposi
 
     /** Offer [id], or null when customers can no longer reserve it. */
     protected abstract suspend fun fetchOffer(id: String, location: GeoPoint?): CatalogOffer?
+
+    /** Saves or removes the favorite; false when the offer can no longer be saved. */
+    protected abstract suspend fun sendFavorite(id: String, favorite: Boolean): Boolean
+
+    // One favorite write at a time, so the server receives them in the order they were made
+    private val favoriteWrites = Mutex()
 
     override suspend fun refresh(location: GeoPoint) {
         load.value = CatalogLoadState.Loading
@@ -107,6 +121,33 @@ abstract class CachedOfferCatalog(private val clock: Clock) : OfferCatalogReposi
         throw e
     } catch (e: Exception) {
         OfferLookup.Failed(errorOf(e))
+    }
+
+    override suspend fun setFavorite(id: String, favorite: Boolean): FavoriteResult {
+        // Shown before the server answers: the heart responds to the tap right away
+        change(id) { it.copy(isFavorite = favorite) }
+        return favoriteWrites.withLock {
+            try {
+                if (sendFavorite(id, favorite)) {
+                    FavoriteResult.Saved
+                } else {
+                    change(id) { it.copy(isFavorite = false, isAvailable = false) }
+                    FavoriteResult.NotAvailable
+                }
+            } catch (e: CancellationException) {
+                change(id) { it.copy(isFavorite = !favorite) }
+                throw e
+            } catch (e: Exception) {
+                change(id) { it.copy(isFavorite = !favorite) }
+                FavoriteResult.Failed(errorOf(e))
+            }
+        }
+    }
+
+    /** Applies [update] to offer [id] wherever it is known. */
+    private fun change(id: String, update: (CatalogOffer) -> CatalogOffer) {
+        known.update { offers -> offers[id]?.let { offers + (id to update(it)) } ?: offers }
+        nearbyState.update { offers -> offers.map { if (it.id == id) update(it) else it } }
     }
 
     /** Stores [offer] and replaces it in the list, where it keeps its place. */

@@ -7,9 +7,12 @@ import com.zerowasteeats.app.data.catalog.CustomerLocationSource
 import com.zerowasteeats.app.data.catalog.OfferCatalogRepository
 import com.zerowasteeats.app.presentation.model.toUiModel
 import java.time.Clock
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -34,6 +37,11 @@ class OfferFeedViewModel(
         )
     )
 
+    // A channel, not state: each problem is said once, and one that happens while the screen
+    // is rotating waits for it to come back
+    private val favoriteProblems = Channel<FavoriteProblem>(Channel.BUFFERED)
+    val favoriteFailures: Flow<FavoriteProblem> = favoriteProblems.receiveAsFlow()
+
     /** The screen is showing: loads the offers when there are none yet or they got old. */
     fun onShown() {
         viewModelScope.launch { catalog.refreshIfStale(location::current) }
@@ -41,6 +49,19 @@ class OfferFeedViewModel(
 
     fun retryLoad() {
         viewModelScope.launch { catalog.refresh(location.current()) }
+    }
+
+    /** Saves the offer as a favorite, or removes it if it was one. */
+    fun toggleFavorite(offerId: String) {
+        val offer = catalog.nearby.value.firstOrNull { it.id == offerId } ?: return
+        setFavorite(offerId, !offer.isFavorite)
+    }
+
+    fun setFavorite(offerId: String, favorite: Boolean) {
+        viewModelScope.launch {
+            catalog.setFavorite(offerId, favorite).problemFor(offerId, favorite)
+                ?.let { favoriteProblems.send(it) }
+        }
     }
 
     private companion object {

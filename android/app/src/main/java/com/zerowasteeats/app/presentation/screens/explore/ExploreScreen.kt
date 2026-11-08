@@ -71,6 +71,7 @@ import com.zerowasteeats.app.presentation.components.offers.OfferCard
 import com.zerowasteeats.app.presentation.components.offers.OfferCardSkeleton
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.screens.feed.CatalogLoadFailureSnackbar
+import com.zerowasteeats.app.presentation.screens.feed.FavoriteProblemSnackbar
 import com.zerowasteeats.app.presentation.screens.feed.OfferFeedState
 import com.zerowasteeats.app.presentation.screens.feed.OfferFeedViewModel
 import com.zerowasteeats.app.presentation.screens.feed.OfferFeedViewModelFactory
@@ -113,8 +114,7 @@ private fun Modifier.loadingDescription(): Modifier {
 fun ExploreScreen(
     session: Session.Customer,
     viewRequest: ExploreViewRequest = remember { ExploreViewRequest() },
-    onOfferClick: (String) -> Unit = {},
-    onFavoriteClick: (String) -> Unit = {}
+    onOfferClick: (String) -> Unit = {}
 ) {
     val container =
         (LocalContext.current.applicationContext as ZeroWasteEatsApplication).container
@@ -151,6 +151,12 @@ fun ExploreScreen(
         snackbarHostState = snackbarHostState,
         onRetry = viewModel::retryLoad
     )
+    FavoriteProblemSnackbar(
+        problems = viewModel.favoriteFailures,
+        snackbarHostState = snackbarHostState,
+        onRetry = viewModel::setFavorite
+    )
+    val onFavoriteClick: (String) -> Unit = viewModel::toggleFavorite
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,

@@ -29,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -98,6 +99,7 @@ fun OfferCard(
                 modifier = Modifier
                     .fillMaxSize()
                     .sharedOfferImage(offer.id)
+                    .alpha(if (offer.isAvailable) 1f else UNAVAILABLE_PHOTO_ALPHA)
             )
         }
 
@@ -123,7 +125,11 @@ fun OfferCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            InfoPill(text = pluralStringResource(R.plurals.offer_remaining_count, offer.remainingQuantity, offer.remainingQuantity))
+            if (offer.isAvailable) {
+                InfoPill(text = pluralStringResource(R.plurals.offer_remaining_count, offer.remainingQuantity, offer.remainingQuantity))
+            } else {
+                InfoPill(text = stringResource(R.string.offer_unavailable_badge))
+            }
 
             FavoriteButton(
                 isFavorite = offer.isFavorite,
@@ -211,6 +217,9 @@ fun OfferCard(
         }
     }
 }
+
+/** A photo of an offer that can no longer be reserved fades back, so the mark reads first. */
+internal const val UNAVAILABLE_PHOTO_ALPHA = 0.45f
 
 @Composable
 private fun InfoPill(

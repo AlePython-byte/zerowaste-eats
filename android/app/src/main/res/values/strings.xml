@@ -25,6 +25,10 @@
     <string name="nav_orders">Pedidos</string>
     <string name="nav_profile">Perfil</string>
     <string name="navigation_offer_not_found">Oferta no encontrada</string>
+    <string name="offer_unavailable_badge">No disponible</string>
+    <string name="favorite_not_available">Esta oferta ya no está disponible.</string>
+    <string name="favorite_failed">No pudimos actualizar tus favoritos.</string>
+    <string name="favorite_failed_network">No pudimos actualizar tus favoritos. Revisa tu conexión.</string>
     <string name="offer_distance_km">%1$s km</string>
     <string name="catalog_loading">Buscando ofertas cerca de ti…</string>
     <string name="catalog_load_failed">No pudimos cargar las ofertas.</string>

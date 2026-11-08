@@ -7,7 +7,10 @@ import java.time.Instant
 import java.time.format.DateTimeParseException
 import kotlinx.serialization.Serializable
 import retrofit2.HttpException
+import retrofit2.Response
+import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -28,6 +31,14 @@ interface OfferCatalogApi {
         @Query("lat") latitude: Double?,
         @Query("lng") longitude: Double?
     ): PublicOfferResponse
+
+    /** Saving twice is the same as saving once. */
+    @PUT("favorites/{offerId}")
+    suspend fun addFavorite(@Path("offerId") offerId: String): Response<Unit>
+
+    /** Removing one that is not saved changes nothing. */
+    @DELETE("favorites/{offerId}")
+    suspend fun removeFavorite(@Path("offerId") offerId: String): Response<Unit>
 }
 
 @Serializable
@@ -74,6 +85,16 @@ class RemoteOfferCatalogRepository(
         api.detail(id, location?.latitude, location?.longitude).toOffer()
     } catch (e: HttpException) {
         if (e.code() == 404) null else throw e
+    }
+
+    override suspend fun sendFavorite(id: String, favorite: Boolean): Boolean {
+        val response = if (favorite) api.addFavorite(id) else api.removeFavorite(id)
+        return when {
+            response.isSuccessful -> true
+            // Only an offer still on sale can be saved; removing never needs one
+            response.code() == 404 -> !favorite
+            else -> throw HttpException(response)
+        }
     }
 
     companion object {

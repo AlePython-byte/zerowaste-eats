@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -73,13 +74,14 @@ fun CompactOfferCard(
     val price = formatPesos(offer.discountedPrice)
     val cardShape = RoundedCornerShape(24.dp)
     val fallbackBrush = Brush.linearGradient(listOf(RescateCarbonElevated, RescateCarbon))
+    val unavailableText = stringResource(R.string.offer_unavailable_badge)
     val summary = stringResource(
         R.string.offer_card_summary_cd,
         offer.title,
         offer.merchantName,
         price,
         offer.discountPercent
-    )
+    ).let { if (offer.isAvailable) it else "$it, $unavailableText" }
 
     // Press feedback: the card shrinks slightly instead of showing a ripple
     val interactionSource = remember { MutableInteractionSource() }
@@ -117,6 +119,7 @@ fun CompactOfferCard(
                 modifier = Modifier
                     .fillMaxSize()
                     .sharedOfferImage(offer.id)
+                    .alpha(if (offer.isAvailable) 1f else UNAVAILABLE_PHOTO_ALPHA)
             )
         }
 
@@ -151,7 +154,11 @@ fun CompactOfferCard(
                     .clearAndSetSemantics {}
             ) {
                 Text(
-                    text = stringResource(R.string.offer_discount_off, offer.discountPercent),
+                    text = if (offer.isAvailable) {
+                        stringResource(R.string.offer_discount_off, offer.discountPercent)
+                    } else {
+                        unavailableText
+                    },
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                     color = RescateCream
                 )

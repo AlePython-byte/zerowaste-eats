@@ -37,7 +37,12 @@ data class CatalogOffer(
     /** From the person to the business, as the server measured it; null when unknown. */
     val distanceKm: Double?,
     val isFavorite: Boolean,
-    val business: CatalogBusiness
+    val business: CatalogBusiness,
+    /**
+     * False once the server said customers can no longer reserve it (sold out, paused, over).
+     * It stays on screen, marked, until the next load leaves it out.
+     */
+    val isAvailable: Boolean = true
 )
 
 /** Why the offers could not be read. */
@@ -68,4 +73,15 @@ sealed interface OfferLookup {
     data object NotAvailable : OfferLookup
 
     data class Failed(val error: CatalogError) : OfferLookup
+}
+
+/** What came of saving or removing a favorite. */
+sealed interface FavoriteResult {
+    data object Saved : FavoriteResult
+
+    /** The offer can no longer be saved: it is marked as not available. */
+    data object NotAvailable : FavoriteResult
+
+    /** The change did not reach the server; the heart is back as it was. */
+    data class Failed(val error: CatalogError) : FavoriteResult
 }

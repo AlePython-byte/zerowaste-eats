@@ -25,16 +25,36 @@ class FakeOfferCatalogRepository(
 
     private val offers: List<CatalogOffer> = demoOffers(clock)
 
+    // The demo customer's saved offers, while the app runs
+    private val favorites: MutableSet<String> =
+        offers.filter { it.isFavorite }.mapTo(mutableSetOf()) { it.id }
+
     override suspend fun fetchNearby(location: GeoPoint): List<CatalogOffer> {
         delay(latencyMillis)
-        return offers.map { it.measuredFrom(location) }.sortedBy { it.distanceKm }
+        return offers.map { it.measuredFrom(location).withSavedState() }.sortedBy { it.distanceKm }
     }
 
     override suspend fun fetchOffer(id: String, location: GeoPoint?): CatalogOffer? {
         delay(latencyMillis)
-        val offer = offers.firstOrNull { it.id == id } ?: return null
+        val offer = offers.firstOrNull { it.id == id }?.withSavedState() ?: return null
         return if (location == null) offer else offer.measuredFrom(location)
     }
+
+    override suspend fun sendFavorite(id: String, favorite: Boolean): Boolean {
+        delay(latencyMillis)
+        synchronized(favorites) {
+            if (favorite) {
+                if (offers.none { it.id == id }) return false
+                favorites += id
+            } else {
+                favorites -= id
+            }
+        }
+        return true
+    }
+
+    private fun CatalogOffer.withSavedState() =
+        copy(isFavorite = synchronized(favorites) { id in favorites })
 
     private fun CatalogOffer.measuredFrom(from: GeoPoint) = copy(
         distanceKm = roundToTenth(

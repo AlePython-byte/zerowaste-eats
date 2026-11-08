@@ -154,6 +154,15 @@ internal fun OfferDetailContent(
                     color = MaterialTheme.colorScheme.onBackground
                 )
 
+                if (!offer.isAvailable) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.favorite_not_available),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+
                 offer.description?.takeIf { it.isNotBlank() }?.let { description ->
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
@@ -293,7 +302,7 @@ internal fun OfferDetailContent(
                     haptics.performHapticFeedback(
                         if (offer.isFavorite) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn
                     )
-                    scope.launch {
+                    if (animationsEnabled) scope.launch {
                         heartScale.animateTo(
                             1.35f,
                             spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium)

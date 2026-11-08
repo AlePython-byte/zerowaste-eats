@@ -49,6 +49,10 @@ import com.zerowasteeats.app.presentation.model.filterAndSort
 import com.zerowasteeats.app.presentation.model.toUiModel
 import com.zerowasteeats.app.presentation.navigation.aboveBottomBar
 import com.zerowasteeats.app.presentation.screens.feed.CatalogLoadFailureSnackbar
+import com.zerowasteeats.app.presentation.screens.feed.FavoriteProblem
+import com.zerowasteeats.app.presentation.screens.feed.FavoriteProblemSnackbar
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import com.zerowasteeats.app.presentation.screens.feed.OfferFeedState
 import com.zerowasteeats.app.presentation.screens.feed.OfferFeedViewModel
 import com.zerowasteeats.app.presentation.screens.feed.OfferFeedViewModelFactory
@@ -94,9 +98,12 @@ fun HomeScreen(
 
     HomeContent(
         state = state,
+        favoriteFailures = viewModel.favoriteFailures,
         onRetry = viewModel::retryLoad,
         onMapClick = onMapClick,
         onOfferClick = onOfferClick,
+        onFavoriteClick = viewModel::toggleFavorite,
+        onRetryFavorite = viewModel::setFavorite,
         clock = clock
     )
 }
@@ -107,7 +114,9 @@ private fun HomeContent(
     onRetry: () -> Unit,
     onMapClick: () -> Unit,
     onOfferClick: (String) -> Unit,
+    favoriteFailures: Flow<FavoriteProblem> = emptyFlow(),
     onFavoriteClick: (String) -> Unit = {},
+    onRetryFavorite: (offerId: String, favorite: Boolean) -> Unit = { _, _ -> },
     clock: Clock = Clock.systemDefaultZone()
 ) {
     // Worked out when the screen opens; it does not tick while the screen stays open
@@ -129,6 +138,11 @@ private fun HomeContent(
         state = state,
         snackbarHostState = snackbarHostState,
         onRetry = onRetry
+    )
+    FavoriteProblemSnackbar(
+        problems = favoriteFailures,
+        snackbarHostState = snackbarHostState,
+        onRetry = onRetryFavorite
     )
 
     Scaffold(

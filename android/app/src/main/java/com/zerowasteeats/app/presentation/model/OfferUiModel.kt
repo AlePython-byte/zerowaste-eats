@@ -27,7 +27,9 @@ data class OfferUiModel(
     /** Where to pick it up: street address and city, ready to show. */
     val address: String = "",
     val latitude: Double = 0.0,
-    val longitude: Double = 0.0
+    val longitude: Double = 0.0,
+    /** False once the server said it can no longer be reserved: it shows marked. */
+    val isAvailable: Boolean = true
 )
 
 /** The offer for the screens, with its pickup day relative to today on [clock]. */
@@ -47,7 +49,8 @@ fun CatalogOffer.toUiModel(clock: Clock): OfferUiModel = OfferUiModel(
     description = description.takeIf { it.isNotBlank() },
     address = addressOf(business.address, business.city),
     latitude = business.latitude,
-    longitude = business.longitude
+    longitude = business.longitude,
+    isAvailable = isAvailable
 )
 
 /** The window in the clock's time zone, named after the day it starts on. */
