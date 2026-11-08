@@ -1,4 +1,7 @@
-/** The Supabase Storage bucket for offer photos (see docs/supabase/storage-offer-photos.sql). */
+/**
+ * The Supabase Storage bucket for offer photos. Its policies, in
+ * docs/supabase/storage-offer-photos.sql, only let a user write in their own folder.
+ */
 export const OFFER_PHOTOS_BUCKET = 'offer-photos';
 
 /** File names the app writes: letters, digits, dashes and underscores, then a photo extension. */
