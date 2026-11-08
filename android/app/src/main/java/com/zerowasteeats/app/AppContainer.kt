@@ -31,6 +31,13 @@ import com.zerowasteeats.app.data.merchant.MerchantProfile
 import com.zerowasteeats.app.data.merchant.MerchantProfileApi
 import com.zerowasteeats.app.data.merchant.RemoteMerchantProfileRepository
 import com.zerowasteeats.app.data.ai.AiSuggestionApi
+import com.zerowasteeats.app.data.catalog.CustomerLocationSource
+import com.zerowasteeats.app.data.catalog.DeviceLocationSource
+import com.zerowasteeats.app.data.catalog.FakeOfferCatalogRepository
+import com.zerowasteeats.app.data.catalog.OfferCatalogApi
+import com.zerowasteeats.app.data.catalog.OfferCatalogRepository
+import com.zerowasteeats.app.data.catalog.PastoLocationSource
+import com.zerowasteeats.app.data.catalog.RemoteOfferCatalogRepository
 import com.zerowasteeats.app.data.ai.DemoOfferSuggestionRepository
 import com.zerowasteeats.app.data.ai.OfferSuggestionRepository
 import com.zerowasteeats.app.data.ai.RemoteOfferSuggestionRepository
@@ -116,6 +123,10 @@ class AppContainer(context: Context) {
 
     private val merchantRepositories = mutableMapOf<String, MerchantRepositories>()
 
+    private val offerCatalogs = mutableMapOf<String, OfferCatalogRepository>()
+
+    private val deviceLocation: CustomerLocationSource = DeviceLocationSource(context)
+
     /** Readies a photo picked for an offer: upright, at most 1280 px, JPEG under 2 MB. */
     val offerPhotoPreparer: OfferPhotoPreparer = OfferPhotoProcessor(context.applicationContext)
 
@@ -180,7 +191,32 @@ class AppContainer(context: Context) {
     private fun rebuildRepositories(mode: DataMode) {
         authRepository = buildAuthRepository(mode)
         synchronized(merchantRepositories) { merchantRepositories.clear() }
+        synchronized(offerCatalogs) { offerCatalogs.clear() }
     }
+
+    /**
+     * The offers a signed-in customer browses: the backend in live mode, sample offers in demo
+     * mode. Kept per account while the process lives, so Home, Explore and the detail share them.
+     */
+    fun offerCatalog(session: Session.Customer): OfferCatalogRepository =
+        synchronized(offerCatalogs) {
+            offerCatalogs.getOrPut(session.userId) {
+                val backend = liveSetup.clientsOrNull?.backend
+                if (dataMode.mode.value == DataMode.LIVE && backend != null) {
+                    RemoteOfferCatalogRepository(backend.create(OfferCatalogApi::class.java))
+                } else {
+                    FakeOfferCatalogRepository()
+                }
+            }
+        }
+
+    /**
+     * Where the customer looks for offers: their own location when they allowed it, or the
+     * centre of Pasto. Demo mode always uses Pasto, where its sample offers are.
+     */
+    val customerLocation: CustomerLocationSource
+        get() = if (dataMode.mode.value == DataMode.LIVE && liveAvailable) deviceLocation
+        else PastoLocationSource
 
     /**
      * The repositories of a signed-in business. Asking needs a [Session.Merchant], so the

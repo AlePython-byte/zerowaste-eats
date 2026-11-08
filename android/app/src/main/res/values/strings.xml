@@ -25,6 +25,16 @@
     <string name="nav_orders">Pedidos</string>
     <string name="nav_profile">Perfil</string>
     <string name="navigation_offer_not_found">Oferta no encontrada</string>
+    <string name="offer_distance_km">%1$s km</string>
+    <string name="catalog_loading">Buscando ofertas cerca de ti…</string>
+    <string name="catalog_load_failed">No pudimos cargar las ofertas.</string>
+    <string name="catalog_load_failed_network">No pudimos cargar las ofertas. Revisa tu conexión.</string>
+    <string name="catalog_session_failed">Tu sesión ya no es válida. Cierra sesión y vuelve a ingresar.</string>
+    <string name="offer_detail_loading">Cargando la oferta…</string>
+    <string name="offer_detail_load_failed">No pudimos cargar la oferta.</string>
+    <string name="offer_detail_load_failed_network">No pudimos cargar la oferta. Revisa tu conexión.</string>
+    <string name="offer_not_available_title">Esta oferta ya no está disponible</string>
+    <string name="offer_not_available_subtitle">Puede que se haya agotado o que el negocio la haya retirado. Mira otras ofertas cerca de ti.</string>
 
     <string name="common_back_cd">Volver</string>
     <string name="common_view_map">Ver mapa</string>

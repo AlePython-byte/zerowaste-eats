@@ -22,6 +22,16 @@
     <string name="nav_orders">Orders</string>
     <string name="nav_profile">Profile</string>
     <string name="navigation_offer_not_found">Offer not found</string>
+    <string name="offer_distance_km">%1$s km</string>
+    <string name="catalog_loading">Looking for offers near you…</string>
+    <string name="catalog_load_failed">We couldn\'t load the offers.</string>
+    <string name="catalog_load_failed_network">We couldn\'t load the offers. Check your connection.</string>
+    <string name="catalog_session_failed">Your session is no longer valid. Sign out and sign in again.</string>
+    <string name="offer_detail_loading">Loading the offer…</string>
+    <string name="offer_detail_load_failed">We couldn\'t load the offer.</string>
+    <string name="offer_detail_load_failed_network">We couldn\'t load the offer. Check your connection.</string>
+    <string name="offer_not_available_title">This offer is no longer available</string>
+    <string name="offer_not_available_subtitle">It may have sold out or the business may have taken it down. Take a look at other offers near you.</string>
 
     <string name="common_back_cd">Back</string>
     <string name="common_view_map">View map</string>

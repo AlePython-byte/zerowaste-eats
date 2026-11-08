@@ -4,7 +4,6 @@ import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.format.formatted
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,8 +38,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -53,7 +50,8 @@ import androidx.compose.animation.core.spring
 import androidx.compose.ui.graphics.graphicsLayer
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
-import com.zerowasteeats.app.presentation.data.offerPhotoRes
+import com.zerowasteeats.app.presentation.components.offers.OfferPhotoImage
+import com.zerowasteeats.app.presentation.format.formatPesos
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.navigation.sharedOfferImage
 import com.zerowasteeats.app.presentation.theme.AppSpacing
@@ -62,14 +60,15 @@ import com.zerowasteeats.app.presentation.theme.RescateCoral
 import com.zerowasteeats.app.presentation.theme.RescateCream
 import kotlinx.coroutines.launch
 
+/** The offer's page, filled in from the catalog: the hero photo, what it is, and where to pick it up. */
 @Composable
-fun OfferDetailScreen(
+internal fun OfferDetailContent(
     offer: OfferUiModel,
     onBackClick: () -> Unit,
     onFavoriteClick: () -> Unit,
     onReserveClick: () -> Unit,
+    snackbarHost: @Composable () -> Unit = {}
 ) {
-    val photo = offerPhotoRes(offer)
     val discountText = stringResource(R.string.offer_discount_off, offer.discountPercent)
     val remainingText = pluralStringResource(R.plurals.offer_remaining_count, offer.remainingQuantity, offer.remainingQuantity)
     val heartScale = remember { Animatable(1f) }
@@ -80,6 +79,7 @@ fun OfferDetailScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = snackbarHost,
         bottomBar = {
             ReservationPanel(
                 offer = offer,
@@ -102,11 +102,10 @@ fun OfferDetailScreen(
                     .clipToBounds() // the photo is shifted below, keep it inside the hero
                     .background(MaterialTheme.colorScheme.surface)
             ) {
-                if (photo != null) {
-                    Image(
-                        painter = painterResource(id = photo),
+                if (offer.photo != null) {
+                    OfferPhotoImage(
+                        photo = offer.photo,
                         contentDescription = offer.title,
-                        contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxSize()
                             .sharedOfferImage(offer.id)
@@ -168,13 +167,13 @@ fun OfferDetailScreen(
 
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(
-                        text = offer.discountedPrice,
+                        text = formatPesos(offer.discountedPrice),
                         style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.ExtraBold),
                         color = MaterialTheme.colorScheme.tertiary
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = offer.originalPrice,
+                        text = formatPesos(offer.originalPrice),
                         style = MaterialTheme.typography.titleMedium.copy(textDecoration = TextDecoration.LineThrough),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(bottom = 6.dp)
@@ -235,12 +234,14 @@ fun OfferDetailScreen(
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = MaterialTheme.colorScheme.tertiary
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Cra. 27 #18-45, Pasto", // Temporary location text
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    if (offer.address.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = offer.address,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
                 // Space so the floating reservation panel does not cover the content
@@ -363,7 +364,7 @@ private fun ReservationPanel(
         ) {
             Column {
                 Text(
-                    text = offer.discountedPrice,
+                    text = formatPesos(offer.discountedPrice),
                     style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
                     color = MaterialTheme.colorScheme.tertiary
                 )

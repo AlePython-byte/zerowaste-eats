@@ -10,19 +10,19 @@ class OfferFiltersTest {
         id: String,
         title: String = "Oferta $id",
         merchant: String = "Comercio $id",
-        price: String = "$10.000",
+        price: Long = 10_000,
         discount: Int = 40,
-        distance: String = "1.0 km",
+        distance: Double? = 1.0,
         category: OfferCategory = OfferCategory.BAKERY
     ) = OfferUiModel(
         id = id,
         title = title,
         merchantName = merchant,
-        imageUrl = "",
-        originalPrice = "$20.000",
+        photo = null,
+        originalPrice = 20_000,
         discountedPrice = price,
         discountPercent = discount,
-        distance = distance,
+        distanceKm = distance,
         remainingQuantity = 1,
         pickupWindow = PickupWindow(PickupDay.Today, LocalTime.NOON, LocalTime.of(13, 0)),
         isFavorite = false,
@@ -83,9 +83,9 @@ class OfferFiltersTest {
     @Test
     fun sortByDistance_isAscendingAndNumeric() {
         val offers = listOf(
-            offer("1", distance = "10.5 km"),
-            offer("2", distance = "0.5 km"),
-            offer("3", distance = "2.5 km")
+            offer("1", distance = 10.5),
+            offer("2", distance = 0.5),
+            offer("3", distance = 2.5)
         )
 
         assertEquals(listOf("2", "3", "1"), offers.filterAndSort("", OfferFilters(sort = OfferSort.DISTANCE)).ids())
@@ -94,9 +94,9 @@ class OfferFiltersTest {
     @Test
     fun sortByPrice_isAscendingAndIgnoresSeparators() {
         val offers = listOf(
-            offer("1", price = "$19.000"),
-            offer("2", price = "$8.900"),
-            offer("3", price = "$9.900")
+            offer("1", price = 19_000),
+            offer("2", price = 8_900),
+            offer("3", price = 9_900)
         )
 
         assertEquals(listOf("2", "3", "1"), offers.filterAndSort("", OfferFilters(sort = OfferSort.PRICE)).ids())
@@ -116,9 +116,9 @@ class OfferFiltersTest {
     @Test
     fun ties_fallBackToIdRegardlessOfInputOrder() {
         val offers = listOf(
-            offer("3", distance = "1.0 km", price = "$5.000", discount = 30),
-            offer("1", distance = "1.0 km", price = "$5.000", discount = 30),
-            offer("2", distance = "1.0 km", price = "$5.000", discount = 30)
+            offer("3", distance = 1.0, price = 5_000, discount = 30),
+            offer("1", distance = 1.0, price = 5_000, discount = 30),
+            offer("2", distance = 1.0, price = 5_000, discount = 30)
         )
 
         OfferSort.entries.forEach { sort ->

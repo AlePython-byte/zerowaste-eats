@@ -62,12 +62,25 @@ import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEn
 import com.zerowasteeats.app.presentation.components.filters.ActiveFilterChips
 import com.zerowasteeats.app.presentation.components.filters.ExploreFilterSheet
 import com.zerowasteeats.app.presentation.components.filters.FilterButton
+import com.zerowasteeats.app.presentation.components.map.DEFAULT_MAP_ZOOM
 import com.zerowasteeats.app.presentation.components.map.OffersMap
+import com.zerowasteeats.app.presentation.components.map.PastoLatLng
 import com.zerowasteeats.app.presentation.components.offers.CompactOfferCard
+import com.zerowasteeats.app.presentation.components.offers.CompactOfferCardSkeleton
 import com.zerowasteeats.app.presentation.components.offers.OfferCard
-import com.zerowasteeats.app.presentation.data.MockMapCoordinates
-import com.zerowasteeats.app.presentation.data.MockOffers
+import com.zerowasteeats.app.presentation.components.offers.OfferCardSkeleton
 import com.zerowasteeats.app.presentation.model.OfferUiModel
+import com.zerowasteeats.app.presentation.screens.feed.CatalogLoadFailureSnackbar
+import com.zerowasteeats.app.presentation.screens.feed.OfferFeedState
+import com.zerowasteeats.app.presentation.screens.feed.OfferFeedViewModel
+import com.zerowasteeats.app.presentation.screens.feed.OfferFeedViewModelFactory
+import com.zerowasteeats.app.ZeroWasteEatsApplication
+import com.zerowasteeats.app.data.session.Session
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.zerowasteeats.app.presentation.navigation.LocalBottomBarInset
 import com.zerowasteeats.app.presentation.navigation.SuppressBottomBarFade
 import com.zerowasteeats.app.presentation.navigation.aboveBottomBar
@@ -84,14 +97,37 @@ private const val MAP_VEIL_TIMEOUT_MILLIS = 1500L
 
 private val GridSpacing = 12.dp
 
+/** Enough placeholders to fill the screen below the search. */
+private const val LIST_SKELETON_COUNT = 2
+private const val GRID_SKELETON_COUNT = 4
+
+/** Says the offers are loading, for screen readers; the placeholders themselves are silent. */
+@Composable
+private fun Modifier.loadingDescription(): Modifier {
+    val description = stringResource(R.string.catalog_loading)
+    return semantics { contentDescription = description }
+}
+
+/** Explore: the offers near the customer, searched and filtered here, in a list, grid or map. */
 @Composable
 fun ExploreScreen(
+    session: Session.Customer,
     viewRequest: ExploreViewRequest = remember { ExploreViewRequest() },
     onOfferClick: (String) -> Unit = {},
     onFavoriteClick: (String) -> Unit = {}
 ) {
-    val offers = remember { MockOffers.getList() }
-    val state = rememberExploreState(offers)
+    val container =
+        (LocalContext.current.applicationContext as ZeroWasteEatsApplication).container
+    val viewModel: OfferFeedViewModel = viewModel(
+        factory = OfferFeedViewModelFactory(container.offerCatalog(session), container.customerLocation)
+    )
+    val feed by viewModel.state.collectAsState()
+    // Each time the screen shows, including coming back from another tab
+    LaunchedEffect(viewModel) { viewModel.onShown() }
+
+    val state = rememberExploreState(feed.offers)
+    // Search and filters stay on the device, over the offers the server sent
+    LaunchedEffect(feed.offers) { state.updateOffers(feed.offers) }
     // Applied over the restored state, so search and filters are kept
     LaunchedEffect(viewRequest.pending) {
         viewRequest.consume()?.let { state.viewMode = it }
@@ -104,11 +140,17 @@ fun ExploreScreen(
     val gridState = rememberLazyGridState()
     // Lives here, not in the map, so the map reopens where the user left it
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(MockMapCoordinates.pastoCenter, 14f)
+        position = CameraPosition.fromLatLngZoom(PastoLatLng, DEFAULT_MAP_ZOOM)
     }
     val animationsEnabled = rememberAnimationsEnabled()
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    CatalogLoadFailureSnackbar(
+        state = feed,
+        snackbarHostState = snackbarHostState,
+        onRetry = viewModel::retryLoad
+    )
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -121,7 +163,8 @@ fun ExploreScreen(
         ) {
             ExploreSearchHeader(
                 state = state,
-                resultCount = filteredOffers.size,
+                // Unknown until the offers arrive
+                resultCount = filteredOffers.size.takeUnless { feed.showSkeletons },
                 modifier = Modifier.padding(
                     start = AppSpacing.regular,
                     end = AppSpacing.regular,
@@ -145,6 +188,7 @@ fun ExploreScreen(
                     ) { mode ->
                         when (mode) {
                             ExploreViewMode.LIST -> OfferList(
+                                feed = feed,
                                 offers = filteredOffers,
                                 listState = listState,
                                 seenOfferIds = seenOfferIds,
@@ -153,6 +197,7 @@ fun ExploreScreen(
                                 onClearFilters = state::clearAll
                             )
                             ExploreViewMode.GRID -> OfferGrid(
+                                feed = feed,
                                 offers = filteredOffers,
                                 gridState = gridState,
                                 seenOfferIds = seenOfferIds,
@@ -168,6 +213,7 @@ fun ExploreScreen(
                 if (state.viewMode == ExploreViewMode.MAP) {
                     ExploreMap(
                         state = state,
+                        canShowEmptyMessage = feed.showEmptyState,
                         cameraPositionState = cameraPositionState,
                         animationsEnabled = animationsEnabled,
                         onOfferClick = onOfferClick,
@@ -199,6 +245,7 @@ fun ExploreScreen(
 @Composable
 private fun ExploreMap(
     state: ExploreState,
+    canShowEmptyMessage: Boolean,
     cameraPositionState: CameraPositionState,
     animationsEnabled: Boolean,
     onOfferClick: (String) -> Unit,
@@ -233,7 +280,8 @@ private fun ExploreMap(
             onMapLoaded = { isMapReady = true }
         )
 
-        if (state.filteredOffers.isEmpty()) {
+        // Only once the offers are known; while they load the map simply has no pins yet
+        if (state.filteredOffers.isEmpty() && canShowEmptyMessage) {
             MapEmptyMessage(
                 onClearFilters = state::clearAll,
                 modifier = Modifier
@@ -285,6 +333,7 @@ private fun MapEmptyMessage(onClearFilters: () -> Unit, modifier: Modifier = Mod
 
 @Composable
 private fun OfferGrid(
+    feed: OfferFeedState,
     offers: List<OfferUiModel>,
     gridState: LazyGridState,
     seenOfferIds: MutableSet<String>,
@@ -306,9 +355,19 @@ private fun OfferGrid(
         horizontalArrangement = Arrangement.spacedBy(GridSpacing),
         verticalArrangement = Arrangement.spacedBy(GridSpacing)
     ) {
-        if (offers.isEmpty()) {
-            item(key = "empty", span = { GridItemSpan(maxLineSpan) }) {
-                EmptyState(onClearFilters = onClearFilters)
+        if (feed.showSkeletons) {
+            items(GRID_SKELETON_COUNT, key = { "loading-$it" }) { index ->
+                CompactOfferCardSkeleton(
+                    // The first one speaks for all of them
+                    modifier = if (index == 0) Modifier.loadingDescription() else Modifier
+                )
+            }
+        } else if (offers.isEmpty()) {
+            // After a failed first load the snackbar explains; "no offers" would not be true
+            if (feed.showEmptyState) {
+                item(key = "empty", span = { GridItemSpan(maxLineSpan) }) {
+                    EmptyState(onClearFilters = onClearFilters)
+                }
             }
         } else {
             items(
@@ -331,6 +390,7 @@ private fun OfferGrid(
 
 @Composable
 private fun OfferList(
+    feed: OfferFeedState,
     offers: List<OfferUiModel>,
     listState: LazyListState,
     seenOfferIds: MutableSet<String>,
@@ -350,9 +410,17 @@ private fun OfferList(
         ),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
     ) {
-        if (offers.isEmpty()) {
-            item(key = "empty") {
-                EmptyState(onClearFilters = onClearFilters)
+        if (feed.showSkeletons) {
+            items(LIST_SKELETON_COUNT, key = { "loading-$it" }) { index ->
+                OfferCardSkeleton(
+                    modifier = if (index == 0) Modifier.loadingDescription() else Modifier
+                )
+            }
+        } else if (offers.isEmpty()) {
+            if (feed.showEmptyState) {
+                item(key = "empty") {
+                    EmptyState(onClearFilters = onClearFilters)
+                }
             }
         } else {
             items(
@@ -376,7 +444,8 @@ private fun OfferList(
 @Composable
 private fun ExploreSearchHeader(
     state: ExploreState,
-    resultCount: Int,
+    /** Null while the offers load. */
+    resultCount: Int?,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -416,12 +485,13 @@ private fun ExploreSearchHeader(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            ResultsCount(
-                count = resultCount,
+            Box(
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = AppSpacing.small)
-            )
+            ) {
+                if (resultCount != null) ResultsCount(count = resultCount)
+            }
             ViewModeSelector(
                 selected = state.viewMode,
                 onSelect = { state.viewMode = it }

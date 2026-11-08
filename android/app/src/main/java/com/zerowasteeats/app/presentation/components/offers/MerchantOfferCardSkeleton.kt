@@ -1,11 +1,5 @@
 package com.zerowasteeats.app.presentation.components.offers
 
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,18 +11,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.presentation.components.common.AppCard
-import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
+import com.zerowasteeats.app.presentation.components.common.rememberSkeletonAlpha
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
-
-private const val PULSE_MILLIS = 900
 
 /**
  * The shape of a [MerchantOfferCard] while the offers load: the photo square and a few lines
@@ -37,21 +28,7 @@ private const val PULSE_MILLIS = 900
  */
 @Composable
 fun MerchantOfferCardSkeleton(modifier: Modifier = Modifier) {
-    val alpha = if (rememberAnimationsEnabled()) {
-        val transition = rememberInfiniteTransition(label = "skeletonPulse")
-        val value by transition.animateFloat(
-            initialValue = 1f,
-            targetValue = 0.5f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(PULSE_MILLIS, easing = FastOutSlowInEasing),
-                repeatMode = RepeatMode.Reverse
-            ),
-            label = "skeletonAlpha"
-        )
-        value
-    } else {
-        1f
-    }
+    val alpha = rememberSkeletonAlpha()
     val block = MaterialTheme.colorScheme.surfaceVariant
     val shape = RoundedCornerShape(AppRadius.medium)
 

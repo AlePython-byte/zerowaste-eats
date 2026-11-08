@@ -23,12 +23,12 @@ enum class ExploreViewMode { LIST, GRID, MAP }
  * The filter sheet edits [draftFilters], a copy that only becomes [appliedFilters] on
  * [applyDraft]. Closing the sheet any other way calls [discardDraft].
  *
- * The map selection always points at a visible offer: whenever the search or the filters
- * hide it, it is cleared.
+ * The map selection always points at a visible offer: whenever the search, the filters or a
+ * new list of offers hide it, it is cleared.
  */
 @Stable
 class ExploreState(
-    private val offers: List<OfferUiModel>,
+    offers: List<OfferUiModel>,
     query: String = "",
     appliedFilters: OfferFilters = OfferFilters(),
     viewMode: ExploreViewMode = ExploreViewMode.GRID,
@@ -36,6 +36,8 @@ class ExploreState(
     isFilterSheetOpen: Boolean = false,
     selectedMapOfferId: String? = null
 ) {
+    private var currentOffers by mutableStateOf(offers)
+
     private var queryState by mutableStateOf(query)
 
     var query: String
@@ -62,7 +64,13 @@ class ExploreState(
     val activeFilterCount: Int get() = appliedFilters.activeCount
 
     val filteredOffers: List<OfferUiModel> by derivedStateOf {
-        offers.filterAndSort(this.query, this.appliedFilters)
+        currentOffers.filterAndSort(this.query, this.appliedFilters)
+    }
+
+    /** The offers changed (they were loaded again, say); search and filters still apply. */
+    fun updateOffers(offers: List<OfferUiModel>) {
+        currentOffers = offers
+        dropHiddenMapSelection()
     }
 
     /** Selects an offer on the map; ids that are not among the results are ignored. */
@@ -155,6 +163,7 @@ class ExploreState(
     }
 }
 
+/** Restored with the offers known at the time; later ones arrive through [ExploreState.updateOffers]. */
 @Composable
 fun rememberExploreState(offers: List<OfferUiModel>): ExploreState =
     rememberSaveable(saver = ExploreState.saver(offers)) { ExploreState(offers) }

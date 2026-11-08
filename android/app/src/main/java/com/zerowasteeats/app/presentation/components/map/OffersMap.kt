@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
@@ -43,7 +44,9 @@ import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppCard
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
-import com.zerowasteeats.app.presentation.data.MockMapCoordinates
+import com.zerowasteeats.app.data.catalog.PASTO_CENTER
+import com.zerowasteeats.app.presentation.format.distanceText
+import com.zerowasteeats.app.presentation.format.formatPesos
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.isAppInDarkTheme
@@ -65,7 +68,7 @@ fun OffersMap(
     onLocationMessage: (String) -> Unit,
     modifier: Modifier = Modifier,
     cameraPositionState: CameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(MockMapCoordinates.pastoCenter, 14f)
+        position = CameraPosition.fromLatLngZoom(PastoLatLng, DEFAULT_MAP_ZOOM)
     },
     contentPadding: PaddingValues = PaddingValues(),
     onMapLoaded: () -> Unit = {}
@@ -112,9 +115,10 @@ fun OffersMap(
             onMapClick = { onSelectOffer(null) }
         ) {
             offers.forEach { offer ->
-                // Keyed so a marker's state stays with its offer when the list changes
-                key(offer.id) {
-                    val position = MockMapCoordinates.getCoordinatesForOffer(offer.id)
+                // Keyed so a marker's state stays with its offer when the list changes, and is
+                // placed again if the business moves
+                key(offer.id, offer.latitude, offer.longitude) {
+                    val position = LatLng(offer.latitude, offer.longitude)
                     val markerState = rememberMarkerState(position = position)
                     val selected = offer.id == selectedOfferId
                     val pinScale by animateFloatAsState(
@@ -129,9 +133,10 @@ fun OffersMap(
                     // The pin is redrawn into a bitmap whenever a key changes, so the scale is
                     // rounded to hundredths: a few redraws, only for the selected pin
                     val scaleStep = (pinScale * 100).roundToInt()
-                    val pinTitle = stringResource(R.string.map_pin_title, offer.title, offer.discountedPrice)
+                    val price = formatPesos(offer.discountedPrice)
+                    val pinTitle = stringResource(R.string.map_pin_title, offer.title, price)
                     MarkerComposable(
-                        offer.id, offer.discountedPrice, selected, scaleStep,
+                        offer.id, price, selected, scaleStep,
                         state = markerState,
                         title = pinTitle,
                         // Above the others, so the selected pin is never hidden under a neighbour
@@ -141,7 +146,7 @@ fun OffersMap(
                             true // consume the event to show custom UI
                         }
                     ) {
-                        PricePin(price = offer.discountedPrice, selected = selected, scale = scaleStep / 100f)
+                        PricePin(price = price, selected = selected, scale = scaleStep / 100f)
                     }
                 }
             }
@@ -205,11 +210,13 @@ private fun MapOfferCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Text(
-                    text = offer.distance,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                distanceText(offer.distanceKm)?.let { distance ->
+                    Text(
+                        text = distance,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
@@ -230,7 +237,7 @@ private fun MapOfferCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = offer.discountedPrice,
+                    text = formatPesos(offer.discountedPrice),
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = AppSpacing.small),
@@ -248,3 +255,9 @@ private fun MapOfferCard(
         }
     }
 }
+
+/** The centre of Pasto, where the map opens. */
+val PastoLatLng = LatLng(PASTO_CENTER.latitude, PASTO_CENTER.longitude)
+
+/** Close enough to tell the streets of the centre apart. */
+const val DEFAULT_MAP_ZOOM = 14f

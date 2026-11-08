@@ -2,24 +2,18 @@ package com.zerowasteeats.app.presentation.navigation
 
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.zerowasteeats.app.R
 import com.zerowasteeats.app.data.session.Session
-import com.zerowasteeats.app.presentation.data.MockOffers
 import com.zerowasteeats.app.presentation.screens.explore.ExploreScreen
 import com.zerowasteeats.app.presentation.screens.explore.ExploreViewMode
 import com.zerowasteeats.app.presentation.screens.explore.ExploreViewRequest
@@ -81,6 +75,7 @@ private fun CustomerNavHost(
             ) {
                 sharedComposable(CustomerDestination.HOME.route) {
                     HomeScreen(
+                        session = session,
                         onOfferClick = { offerId ->
                             navController.navigate("offer/$offerId")
                         },
@@ -92,11 +87,11 @@ private fun CustomerNavHost(
                 }
                 sharedComposable(CustomerDestination.EXPLORE.route) {
                     ExploreScreen(
+                        session = session,
                         viewRequest = exploreViewRequest,
                         onOfferClick = { offerId ->
                             navController.navigate("offer/$offerId")
-                        },
-                        onFavoriteClick = { /* Handle favorite click temporarily */ }
+                        }
                     )
                 }
                 composable(CustomerDestination.ORDERS.route) {
@@ -110,25 +105,13 @@ private fun CustomerNavHost(
                     )
                 }
                 sharedComposable("offer/{offerId}") { backStackEntry ->
-                    val offerId = backStackEntry.arguments?.getString("offerId")
-                    val mockOffers = MockOffers.getList()
-                    val offer = mockOffers.find { it.id == offerId }
-            
-                    if (offer != null) {
-                        OfferDetailScreen(
-                            offer = offer,
-                            onBackClick = { navController.popBackStack() },
-                            onFavoriteClick = { /* Handle favorite click temporarily */ },
-                            onReserveClick = { /* Handle reserve click temporarily */ }
-                        )
-                    } else {
-                        // Safe fallback state for missing offer
-                        Text(
-                            text = stringResource(R.string.navigation_offer_not_found),
-                            modifier = Modifier.padding(16.dp),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
+                    OfferDetailScreen(
+                        session = session,
+                        offerId = backStackEntry.arguments?.getString("offerId").orEmpty(),
+                        onBackClick = { navController.popBackStack() },
+                        // Reserving comes with the reservations
+                        onReserveClick = {}
+                    )
                 }
             }
         }
