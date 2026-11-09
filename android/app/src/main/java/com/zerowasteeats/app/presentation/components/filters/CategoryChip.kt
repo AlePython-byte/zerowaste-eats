@@ -9,12 +9,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.zerowasteeats.app.presentation.components.common.PRESSED_CONTROL_SCALE
+import com.zerowasteeats.app.presentation.components.common.pressable
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.SurfaceTokens
@@ -45,11 +50,17 @@ fun CategoryChip(
         SurfaceTokens.border
     }
 
+    val interactionSource = remember { MutableInteractionSource() }
     Surface(
         modifier = modifier
             .defaultMinSize(minHeight = 48.dp)
+            .pressable(interactionSource, scaleWhenPressed = PRESSED_CONTROL_SCALE)
             .clip(RoundedCornerShape(AppRadius.extraLarge))
-            .clickable(onClick = onClick),
+            .clickable(
+                interactionSource = interactionSource,
+                indication = LocalIndication.current,
+                onClick = onClick
+            ),
         shape = RoundedCornerShape(AppRadius.extraLarge),
         color = containerColor,
         border = if (!isSelected) BorderStroke(SurfaceTokens.borderWidth, borderColor) else null,

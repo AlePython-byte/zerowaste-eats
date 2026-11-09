@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -37,6 +38,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.R
+import com.zerowasteeats.app.presentation.components.common.PRESSED_CONTROL_SCALE
+import com.zerowasteeats.app.presentation.components.common.pressable
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.SurfaceTokens
@@ -60,10 +63,13 @@ fun FilterButton(
         if (activeCount > 0) shownCount = activeCount
     }
 
+    val interactionSource = remember { MutableInteractionSource() }
     Surface(
         onClick = onClick,
+        interactionSource = interactionSource,
         modifier = modifier
             .size(56.dp)
+            .pressable(interactionSource, scaleWhenPressed = PRESSED_CONTROL_SCALE)
             .semantics { contentDescription = description },
         shape = RoundedCornerShape(AppRadius.large),
         color = SurfaceTokens.surface,

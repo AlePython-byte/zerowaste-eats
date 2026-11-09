@@ -1,11 +1,9 @@
 package com.zerowasteeats.app.presentation.components.offers
 
 import android.content.res.Configuration
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,7 +26,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -41,8 +37,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zerowasteeats.app.R
-import com.zerowasteeats.app.presentation.components.common.AppMotion
-import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
+import com.zerowasteeats.app.presentation.components.common.PRESSED_CARD_RAISE
+import com.zerowasteeats.app.presentation.components.common.pressable
 import com.zerowasteeats.app.data.catalog.FakeOfferCatalogRepository
 import com.zerowasteeats.app.presentation.format.formatPesos
 import com.zerowasteeats.app.presentation.model.OfferUiModel
@@ -82,24 +78,14 @@ fun CompactOfferCard(
         offer.discountPercent
     ).let { if (offer.isAvailable) it else "$it, $unavailableText" }
 
-    // Press feedback: the card shrinks slightly instead of showing a ripple
+    // Press feedback: the card shrinks and lifts slightly instead of showing a ripple
     val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val animationsEnabled = rememberAnimationsEnabled()
-    val pressScale by animateFloatAsState(
-        targetValue = if (isPressed && animationsEnabled) 0.97f else 1f,
-        animationSpec = AppMotion.pressSpring(),
-        label = "compactOfferCardPressScale"
-    )
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .aspectRatio(4f / 5f)
-            .graphicsLayer {
-                scaleX = pressScale
-                scaleY = pressScale
-            }
+            .pressable(interactionSource, cardShape, raise = PRESSED_CARD_RAISE)
             .clip(cardShape)
             .background(fallbackBrush)
             // One spoken summary for the card; the favorite button keeps its own semantics

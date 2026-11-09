@@ -65,7 +65,8 @@ fun MetricCard(
         modifier = modifier,
         shape = RoundedCornerShape(AppRadius.large),
         color = SurfaceTokens.surface,
-        border = BorderStroke(SurfaceTokens.borderWidth, SurfaceTokens.border)
+        border = BorderStroke(SurfaceTokens.borderWidth, SurfaceTokens.border),
+        shadowElevation = SurfaceTokens.elevation
     ) {
         Column(
             modifier = Modifier.padding(AppSpacing.regular),
