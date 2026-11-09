@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import com.zerowasteeats.app.presentation.components.common.ProvideSkeletonShimmer
 import com.zerowasteeats.app.presentation.components.common.offerListItem
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -96,16 +97,18 @@ fun HomeScreen(
     // Each time the screen shows, including coming back from another tab
     LaunchedEffect(viewModel) { viewModel.onShown() }
 
-    HomeContent(
-        state = state,
-        favoriteFailures = viewModel.favoriteFailures,
-        onRetry = viewModel::retryLoad,
-        onMapClick = onMapClick,
-        onOfferClick = onOfferClick,
-        onFavoriteClick = viewModel::toggleFavorite,
-        onRetryFavorite = viewModel::setFavorite,
-        clock = clock
-    )
+    ProvideSkeletonShimmer(active = state.showSkeletons) {
+        HomeContent(
+            state = state,
+            favoriteFailures = viewModel.favoriteFailures,
+            onRetry = viewModel::retryLoad,
+            onMapClick = onMapClick,
+            onOfferClick = onOfferClick,
+            onFavoriteClick = viewModel::toggleFavorite,
+            onRetryFavorite = viewModel::setFavorite,
+            clock = clock
+        )
+    }
 }
 
 @Composable

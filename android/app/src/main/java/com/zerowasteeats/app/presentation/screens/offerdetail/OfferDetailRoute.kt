@@ -30,7 +30,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -46,7 +45,8 @@ import com.zerowasteeats.app.ZeroWasteEatsApplication
 import com.zerowasteeats.app.data.catalog.CatalogError
 import com.zerowasteeats.app.data.session.Session
 import com.zerowasteeats.app.presentation.components.common.EmptyState
-import com.zerowasteeats.app.presentation.components.common.rememberSkeletonAlpha
+import com.zerowasteeats.app.presentation.components.common.ProvideSkeletonShimmer
+import com.zerowasteeats.app.presentation.components.common.skeletonShimmer
 import com.zerowasteeats.app.presentation.screens.feed.FavoriteProblemSnackbar
 import com.zerowasteeats.app.presentation.screens.feed.LoadFailureSnackbar
 import com.zerowasteeats.app.presentation.theme.AppSpacing
@@ -199,7 +199,16 @@ private fun OfferDetailSkeleton(
     onBackClick: () -> Unit,
     snackbarHost: @Composable () -> Unit
 ) {
-    val alpha = rememberSkeletonAlpha()
+    ProvideSkeletonShimmer(active = true) {
+        OfferDetailSkeletonContent(onBackClick, snackbarHost)
+    }
+}
+
+@Composable
+private fun OfferDetailSkeletonContent(
+    onBackClick: () -> Unit,
+    snackbarHost: @Composable () -> Unit
+) {
     val block = MaterialTheme.colorScheme.surfaceVariant
     val lineShape = RoundedCornerShape(8.dp)
     val loading = stringResource(R.string.offer_detail_loading)
@@ -218,7 +227,7 @@ private fun OfferDetailSkeleton(
                 Column(
                     modifier = Modifier
                         .clearAndSetSemantics {}
-                        .alpha(alpha)
+                        .skeletonShimmer()
                 ) {
                     Box(
                         modifier = Modifier

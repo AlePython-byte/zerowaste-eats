@@ -47,7 +47,6 @@ import com.zerowasteeats.app.presentation.data.MockProfile
 import androidx.compose.foundation.background
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -59,7 +58,8 @@ import com.zerowasteeats.app.data.catalog.CatalogError
 import com.zerowasteeats.app.data.catalog.CatalogLoadState
 import com.zerowasteeats.app.data.reservations.CustomerImpact
 import com.zerowasteeats.app.data.session.Session
-import com.zerowasteeats.app.presentation.components.common.rememberSkeletonAlpha
+import com.zerowasteeats.app.presentation.components.common.ProvideSkeletonShimmer
+import com.zerowasteeats.app.presentation.components.common.skeletonShimmer
 import com.zerowasteeats.app.presentation.format.formatPesos
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.navigation.LocalBottomBarInset
@@ -303,7 +303,11 @@ private fun ImpactMetrics(impact: CustomerImpact) {
 /** The shape of the three figures while they load. Screen readers hear that they load. */
 @Composable
 private fun ImpactSkeleton() {
-    val alpha = rememberSkeletonAlpha()
+    ProvideSkeletonShimmer(active = true) { ImpactSkeletonContent() }
+}
+
+@Composable
+private fun ImpactSkeletonContent() {
     val block = MaterialTheme.colorScheme.surfaceVariant
     val shape = RoundedCornerShape(AppRadius.large)
     val loading = stringResource(R.string.profile_impact_loading)
@@ -316,12 +320,11 @@ private fun ImpactSkeleton() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clearAndSetSemantics {}
-                .alpha(alpha),
+                .clearAndSetSemantics {},
             horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
         ) {
-            Box(Modifier.weight(1f).height(92.dp).clip(shape).background(block))
-            Box(Modifier.weight(1f).height(92.dp).clip(shape).background(block))
+            Box(Modifier.weight(1f).height(92.dp).clip(shape).skeletonShimmer().background(block))
+            Box(Modifier.weight(1f).height(92.dp).clip(shape).skeletonShimmer().background(block))
         }
         Spacer(modifier = Modifier.height(AppSpacing.small))
         Box(
@@ -329,8 +332,8 @@ private fun ImpactSkeleton() {
                 .fillMaxWidth()
                 .height(104.dp)
                 .clearAndSetSemantics {}
-                .alpha(alpha)
                 .clip(shape)
+                .skeletonShimmer()
                 .background(block)
         )
     }

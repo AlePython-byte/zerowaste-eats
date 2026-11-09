@@ -59,6 +59,7 @@ import com.zerowasteeats.app.presentation.components.common.AppSearchBar
 import com.zerowasteeats.app.presentation.components.common.EmptyStateIcon
 import com.zerowasteeats.app.presentation.components.common.offerGridItem
 import com.zerowasteeats.app.presentation.components.common.offerListItem
+import com.zerowasteeats.app.presentation.components.common.ProvideSkeletonShimmer
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.components.filters.ActiveFilterChips
 import com.zerowasteeats.app.presentation.components.filters.ExploreFilterSheet
@@ -187,32 +188,34 @@ fun ExploreScreen(
                     enter = if (animationsEnabled) fadeIn(tween(VIEW_MODE_CROSSFADE_MILLIS)) else EnterTransition.None,
                     exit = ExitTransition.None
                 ) {
-                    Crossfade(
-                        targetState = state.viewMode,
-                        modifier = Modifier.fillMaxSize(),
-                        animationSpec = if (animationsEnabled) tween(VIEW_MODE_CROSSFADE_MILLIS) else snap(),
-                        label = "exploreViewMode"
-                    ) { mode ->
-                        when (mode) {
-                            ExploreViewMode.LIST -> OfferList(
-                                feed = feed,
-                                offers = filteredOffers,
-                                listState = listState,
-                                seenOfferIds = seenOfferIds,
-                                onOfferClick = onOfferClick,
-                                onFavoriteClick = onFavoriteClick,
-                                onClearFilters = state::clearAll
-                            )
-                            ExploreViewMode.GRID -> OfferGrid(
-                                feed = feed,
-                                offers = filteredOffers,
-                                gridState = gridState,
-                                seenOfferIds = seenOfferIds,
-                                onOfferClick = onOfferClick,
-                                onFavoriteClick = onFavoriteClick,
-                                onClearFilters = state::clearAll
-                            )
-                            ExploreViewMode.MAP -> Unit // shown below, outside the crossfade
+                    ProvideSkeletonShimmer(active = feed.showSkeletons) {
+                        Crossfade(
+                            targetState = state.viewMode,
+                            modifier = Modifier.fillMaxSize(),
+                            animationSpec = if (animationsEnabled) tween(VIEW_MODE_CROSSFADE_MILLIS) else snap(),
+                            label = "exploreViewMode"
+                        ) { mode ->
+                            when (mode) {
+                                ExploreViewMode.LIST -> OfferList(
+                                    feed = feed,
+                                    offers = filteredOffers,
+                                    listState = listState,
+                                    seenOfferIds = seenOfferIds,
+                                    onOfferClick = onOfferClick,
+                                    onFavoriteClick = onFavoriteClick,
+                                    onClearFilters = state::clearAll
+                                )
+                                ExploreViewMode.GRID -> OfferGrid(
+                                    feed = feed,
+                                    offers = filteredOffers,
+                                    gridState = gridState,
+                                    seenOfferIds = seenOfferIds,
+                                    onOfferClick = onOfferClick,
+                                    onFavoriteClick = onFavoriteClick,
+                                    onClearFilters = state::clearAll
+                                )
+                                ExploreViewMode.MAP -> Unit // shown below, outside the crossfade
+                            }
                         }
                     }
                 }
