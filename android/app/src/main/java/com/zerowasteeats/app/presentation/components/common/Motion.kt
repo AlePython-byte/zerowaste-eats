@@ -1,6 +1,12 @@
 package com.zerowasteeats.app.presentation.components.common
 
 import android.provider.Settings
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
@@ -13,14 +19,18 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 
 /**
@@ -204,3 +214,85 @@ fun Modifier.staggeredEntrance(index: Int, enabled: Boolean = true): Modifier =
     entranceRise(delayMillis = index.coerceIn(0, MAX_STAGGERED_SECTIONS) * STAGGER_MILLIS, enabled = enabled)
 
 private const val MAX_STAGGERED_SECTIONS = 6
+
+/**
+ * How far a screen travels on the shared axis: enough to say which way the person is going,
+ * short enough that the screen never sweeps across the display.
+ */
+private val SHARED_AXIS_DISTANCE = 30.dp
+
+/** The screen coming in waits this long, so it fades in over a screen that is already fading out. */
+private const val FADE_THROUGH_DELAY_MILLIS = AppMotion.FAST_MILLIS / 2
+
+/**
+ * The screen transitions of the app, along a shared horizontal axis. Going forward, the new
+ * screen comes in a short way from the end side while the old one drifts toward the start and
+ * fades out quickly; going back mirrors it. Sibling screens (the bottom bar tabs) are neither
+ * deeper nor shallower than each other, so they only fade through.
+ *
+ * All of them are [EnterTransition.None] / [ExitTransition.None] when the system animations are
+ * off, so screens swap at once.
+ */
+@Immutable
+class ScreenTransitions internal constructor(
+    val forwardEnter: EnterTransition,
+    val forwardExit: ExitTransition,
+    val backEnter: EnterTransition,
+    val backExit: ExitTransition,
+    val siblingEnter: EnterTransition,
+    val siblingExit: ExitTransition
+)
+
+/** [ScreenTransitions] for the current layout direction, density and animation setting. */
+@Composable
+fun rememberScreenTransitions(): ScreenTransitions {
+    val enabled = rememberAnimationsEnabled() && !LocalInspectionMode.current
+    val distance = with(LocalDensity.current) { SHARED_AXIS_DISTANCE.roundToPx() }
+    // "Forward" comes from the right in left-to-right languages and from the left otherwise
+    val towardEnd = if (LocalLayoutDirection.current == LayoutDirection.Rtl) -distance else distance
+    return remember(enabled, towardEnd) { screenTransitions(enabled, towardEnd) }
+}
+
+/**
+ * Builds the [ScreenTransitions]. [towardEnd] is the slide distance in pixels, signed so that
+ * a positive offset points to the end side of the layout.
+ */
+internal fun screenTransitions(enabled: Boolean, towardEnd: Int): ScreenTransitions {
+    if (!enabled) {
+        return ScreenTransitions(
+            forwardEnter = EnterTransition.None,
+            forwardExit = ExitTransition.None,
+            backEnter = EnterTransition.None,
+            backExit = ExitTransition.None,
+            siblingEnter = EnterTransition.None,
+            siblingExit = ExitTransition.None
+        )
+    }
+
+    val slide = tween<IntOffset>(AppMotion.MEDIUM_MILLIS, easing = AppMotion.Emphasized)
+    // The old screen is gone early, so the two never read as stacked text
+    val vanish = fadeOut(tween(AppMotion.FAST_MILLIS, easing = AppMotion.EmphasizedAccelerate))
+    val appear = fadeIn(
+        tween(
+            durationMillis = AppMotion.MEDIUM_MILLIS - FADE_THROUGH_DELAY_MILLIS,
+            delayMillis = FADE_THROUGH_DELAY_MILLIS,
+            easing = AppMotion.Emphasized
+        )
+    )
+    val siblingAppear = fadeIn(
+        tween(
+            durationMillis = AppMotion.SHORT_MILLIS,
+            delayMillis = FADE_THROUGH_DELAY_MILLIS,
+            easing = AppMotion.Emphasized
+        )
+    )
+
+    return ScreenTransitions(
+        forwardEnter = slideInHorizontally(slide) { towardEnd } + appear,
+        forwardExit = slideOutHorizontally(slide) { -towardEnd } + vanish,
+        backEnter = slideInHorizontally(slide) { -towardEnd } + appear,
+        backExit = slideOutHorizontally(slide) { towardEnd } + vanish,
+        siblingEnter = siblingAppear,
+        siblingExit = vanish
+    )
+}
