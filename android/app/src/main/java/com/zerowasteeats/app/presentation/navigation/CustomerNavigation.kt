@@ -22,6 +22,9 @@ import com.zerowasteeats.app.presentation.screens.offerdetail.OfferDetailScreen
 import com.zerowasteeats.app.presentation.screens.orders.OrdersScreen
 import com.zerowasteeats.app.presentation.screens.profile.ProfileScreen
 
+/** The offer detail, opened from any offer card. */
+private const val OFFER_DETAIL_ROUTE = "offer/{offerId}"
+
 /**
  * The customer space: its own nav controller, bottom bar and graph. Everything here is
  * remembered inside this composable, so dropping it (for example on sign out) discards
@@ -65,13 +68,23 @@ private fun CustomerNavHost(
     onSignOut: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Tabs fade through, the offer detail fades so its shared photo leads the way
+    val transitions = rememberNavTransitions(
+        tabRoutes = remember { customerTabs.map { it.route }.toSet() },
+        fadeRoutes = remember { setOf(OFFER_DETAIL_ROUTE) }
+    )
+
     // Lets the offer photo travel between the card and the detail screen
     SharedTransitionLayout(modifier = modifier) {
         CompositionLocalProvider(LocalSharedTransitionScope provides this) {
             NavHost(
                 navController = navController,
                 startDestination = CustomerDestination.HOME.route,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                enterTransition = transitions.enter,
+                exitTransition = transitions.exit,
+                popEnterTransition = transitions.popEnter,
+                popExitTransition = transitions.popExit
             ) {
                 sharedComposable(CustomerDestination.HOME.route) {
                     HomeScreen(
@@ -103,7 +116,7 @@ private fun CustomerNavHost(
                         onSignOut = onSignOut
                     )
                 }
-                sharedComposable("offer/{offerId}") { backStackEntry ->
+                sharedComposable(OFFER_DETAIL_ROUTE) { backStackEntry ->
                     OfferDetailScreen(
                         session = session,
                         offerId = backStackEntry.arguments?.getString("offerId").orEmpty(),
