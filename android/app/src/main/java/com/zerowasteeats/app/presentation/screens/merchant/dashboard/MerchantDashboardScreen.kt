@@ -41,7 +41,8 @@ import com.zerowasteeats.app.data.session.Session
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppCard
 import com.zerowasteeats.app.presentation.components.common.EmptyState
-import com.zerowasteeats.app.presentation.components.common.MetricCard
+import com.zerowasteeats.app.presentation.components.common.CountedMetricCard
+import com.zerowasteeats.app.presentation.format.formatCount
 import com.zerowasteeats.app.presentation.components.common.ModeBadge
 import com.zerowasteeats.app.presentation.components.common.staggeredEntrance
 import com.zerowasteeats.app.presentation.theme.AppRadius
@@ -177,20 +178,26 @@ private fun MetricsSection(metrics: MerchantMetrics, modifier: Modifier = Modifi
         verticalArrangement = Arrangement.spacedBy(AppSpacing.small)
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)) {
-            MetricCard(
+            CountedMetricCard(
                 label = stringResource(R.string.merchant_metric_active_offers),
-                value = metrics.activeOffers.toString(),
+                target = metrics.activeOffers.toDouble(),
+                countKey = "dashboard.activeOffers",
+                format = ::formatCount,
                 modifier = Modifier.weight(1f)
             )
-            MetricCard(
+            CountedMetricCard(
                 label = stringResource(R.string.merchant_metric_pending_reservations),
-                value = metrics.pendingReservations.toString(),
+                target = metrics.pendingReservations.toDouble(),
+                countKey = "dashboard.pendingReservations",
+                format = ::formatCount,
                 modifier = Modifier.weight(1f)
             )
         }
-        MetricCard(
+        CountedMetricCard(
             label = stringResource(R.string.merchant_metric_rescued_meals),
-            value = metrics.rescuedMeals.toString(),
+            target = metrics.rescuedMeals.toDouble(),
+            countKey = "dashboard.rescuedMeals",
+            format = ::formatCount,
             modifier = Modifier.fillMaxWidth(),
             isHighlight = true
         )

@@ -36,10 +36,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToLong
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppButtonStyle
 import com.zerowasteeats.app.presentation.components.common.AppCard
-import com.zerowasteeats.app.presentation.components.common.MetricCard
+import com.zerowasteeats.app.presentation.components.common.CountedMetricCard
 import com.zerowasteeats.app.presentation.components.settings.AppearanceSettingCard
 import com.zerowasteeats.app.presentation.components.settings.LanguageSettingCard
 import com.zerowasteeats.app.presentation.components.settings.SignOutDialog
@@ -60,6 +61,7 @@ import com.zerowasteeats.app.data.reservations.CustomerImpact
 import com.zerowasteeats.app.data.session.Session
 import com.zerowasteeats.app.presentation.components.common.ProvideSkeletonShimmer
 import com.zerowasteeats.app.presentation.components.common.skeletonShimmer
+import com.zerowasteeats.app.presentation.format.formatCount
 import com.zerowasteeats.app.presentation.format.formatPesos
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.navigation.LocalBottomBarInset
@@ -274,27 +276,32 @@ private fun ImpactMetrics(impact: CustomerImpact) {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(AppSpacing.small)
     ) {
-        MetricCard(
+        CountedMetricCard(
             label = stringResource(R.string.profile_metric_completed_orders),
-            value = impact.completedOrders.toString(),
+            target = impact.completedOrders.toDouble(),
+            countKey = "profile.completedOrders",
+            format = ::formatCount,
             modifier = Modifier.weight(1f)
         )
-        MetricCard(
+        val resources = LocalContext.current.resources
+        val foodValue = if (impact.foodIsEstimate) R.string.profile_rescued_food_value_approx
+        else R.string.profile_rescued_food_value
+        CountedMetricCard(
             label = stringResource(R.string.profile_metric_rescued_food),
-            value = stringResource(
-                if (impact.foodIsEstimate) R.string.profile_rescued_food_value_approx
-                else R.string.profile_rescued_food_value,
-                impact.foodRescuedKg
-            ),
+            target = impact.foodRescuedKg,
+            countKey = "profile.foodRescuedKg",
+            format = { kg -> resources.getString(foodValue, kg) },
             modifier = Modifier.weight(1f)
         )
     }
 
     Spacer(modifier = Modifier.height(AppSpacing.small))
 
-    MetricCard(
+    CountedMetricCard(
         label = stringResource(R.string.profile_metric_savings),
-        value = formatPesos(impact.moneySaved),
+        target = impact.moneySaved.toDouble(),
+        countKey = "profile.moneySaved",
+        format = { pesos -> formatPesos(pesos.roundToLong()) },
         modifier = Modifier.fillMaxWidth(),
         isHighlight = true
     )

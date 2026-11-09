@@ -16,6 +16,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import com.zerowasteeats.app.presentation.theme.AppRadius
@@ -24,13 +26,40 @@ import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 import com.zerowasteeats.app.presentation.theme.ThemeMode
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
 
-/** A number with its label. [isHighlight] makes the number larger, for the main figure. */
+/**
+ * A statistic whose number counts up from zero the first time [countKey] is shown (see
+ * [rememberCountedValue]). Screen readers get the final [format]ted value at once, not the
+ * numbers on the way.
+ */
+@Composable
+fun CountedMetricCard(
+    label: String,
+    target: Double,
+    countKey: String,
+    format: (Double) -> String,
+    modifier: Modifier = Modifier,
+    isHighlight: Boolean = false
+) {
+    MetricCard(
+        label = label,
+        value = format(rememberCountedValue(target, countKey)),
+        modifier = modifier,
+        isHighlight = isHighlight,
+        valueDescription = format(target)
+    )
+}
+
+/**
+ * A number with its label. [isHighlight] makes the number larger, for the main figure.
+ * [valueDescription] is what screen readers say for the number when it differs from [value].
+ */
 @Composable
 fun MetricCard(
     label: String,
     value: String,
     modifier: Modifier = Modifier,
-    isHighlight: Boolean = false
+    isHighlight: Boolean = false,
+    valueDescription: String? = null
 ) {
     Surface(
         modifier = modifier,
@@ -46,7 +75,12 @@ fun MetricCard(
                 text = value,
                 style = if (isHighlight) MaterialTheme.typography.displaySmall else MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.tertiary,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                modifier = if (valueDescription != null) {
+                    Modifier.semantics { contentDescription = valueDescription }
+                } else {
+                    Modifier
+                }
             )
             Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
             Text(
