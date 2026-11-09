@@ -1,12 +1,5 @@
 package com.zerowasteeats.app.presentation.navigation
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,8 +13,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.zerowasteeats.app.presentation.components.common.ENTRANCE_MILLIS
-import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.screens.forgotpassword.ForgotPasswordScreen
 import com.zerowasteeats.app.presentation.screens.signin.SignInScreen
 import com.zerowasteeats.app.presentation.screens.signup.SignUpScreen
@@ -45,43 +36,20 @@ fun AuthNavigation(modifier: Modifier = Modifier) {
         (LocalContext.current.applicationContext as ZeroWasteEatsApplication)
             .container.sessionManager
     val notice by sessionManager.notice
-    val animationsEnabled = rememberAnimationsEnabled()
-
-    // A short slide toward the side the screen comes from, or an instant swap when the
+    // No tabs here: every screen slides on the shared axis, and an instant swap when the
     // system animations are off
-    val enter = if (animationsEnabled) {
-        slideInHorizontally(tween(ENTRANCE_MILLIS)) { width -> width / 4 } +
-            fadeIn(tween(ENTRANCE_MILLIS))
-    } else {
-        EnterTransition.None
-    }
-    val exit = if (animationsEnabled) {
-        slideOutHorizontally(tween(ENTRANCE_MILLIS)) { width -> -width / 4 } +
-            fadeOut(tween(ENTRANCE_MILLIS))
-    } else {
-        ExitTransition.None
-    }
-    val popEnter = if (animationsEnabled) {
-        slideInHorizontally(tween(ENTRANCE_MILLIS)) { width -> -width / 4 } +
-            fadeIn(tween(ENTRANCE_MILLIS))
-    } else {
-        EnterTransition.None
-    }
-    val popExit = if (animationsEnabled) {
-        slideOutHorizontally(tween(ENTRANCE_MILLIS)) { width -> width / 4 } +
-            fadeOut(tween(ENTRANCE_MILLIS))
-    } else {
-        ExitTransition.None
-    }
+    val transitions = rememberNavTransitions(tabRoutes = emptySet())
 
     NavHost(
         navController = navController,
         startDestination = AuthDestination.WELCOME.route,
         modifier = modifier.fillMaxSize(),
-        enterTransition = { enter },
-        exitTransition = { exit },
-        popEnterTransition = { popEnter },
-        popExitTransition = { popExit }
+        enterTransition = transitions.enter,
+        exitTransition = transitions.exit,
+        popEnterTransition = transitions.popEnter,
+        popExitTransition = transitions.popExit,
+        predictivePopEnterTransition = transitions.predictivePopEnter,
+        predictivePopExitTransition = transitions.predictivePopExit
     ) {
         composable(AuthDestination.WELCOME.route) {
             WelcomeScreen(

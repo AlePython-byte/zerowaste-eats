@@ -7,7 +7,10 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Surface
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -15,6 +18,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.zerowasteeats.app.presentation.components.common.PRESSED_CONTROL_SCALE
+import com.zerowasteeats.app.presentation.components.common.pressable
 import com.zerowasteeats.app.presentation.theme.SurfaceTokens
 
 /** Round 48dp button that floats over the map. */
@@ -25,6 +30,7 @@ fun MapCircleButton(
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
     Surface(
         shape = CircleShape,
         color = SurfaceTokens.surface,
@@ -32,9 +38,15 @@ fun MapCircleButton(
         shadowElevation = SurfaceTokens.elevation,
         modifier = modifier
             .size(48.dp)
+            .pressable(interactionSource, scaleWhenPressed = PRESSED_CONTROL_SCALE)
             .clip(CircleShape)
             .semantics { this.contentDescription = contentDescription }
-            .clickable(role = Role.Button, onClick = onClick)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = LocalIndication.current,
+                role = Role.Button,
+                onClick = onClick
+            )
     ) {
         Box(contentAlignment = Alignment.Center, content = content)
     }

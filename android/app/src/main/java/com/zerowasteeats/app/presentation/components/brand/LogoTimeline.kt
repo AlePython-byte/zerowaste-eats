@@ -1,6 +1,6 @@
 package com.zerowasteeats.app.presentation.components.brand
 
-import androidx.compose.animation.core.FastOutSlowInEasing
+import com.zerowasteeats.app.presentation.components.common.AppMotion
 import com.zerowasteeats.app.presentation.components.common.LOGO_HANDLE_MILLIS
 import com.zerowasteeats.app.presentation.components.common.LOGO_HANDLE_START_MILLIS
 import com.zerowasteeats.app.presentation.components.common.LOGO_HEART_MILLIS
@@ -35,10 +35,10 @@ data class LogoFrame(
         val Start = LogoFrame(handleProgress = 0f, leafProgress = 0f, heartScale = 1f)
 
         fun at(elapsedMillis: Float): LogoFrame = LogoFrame(
-            handleProgress = FastOutSlowInEasing.transform(
+            handleProgress = AppMotion.Standard.transform(
                 phase(elapsedMillis, LOGO_HANDLE_START_MILLIS, LOGO_HANDLE_MILLIS)
             ),
-            leafProgress = FastOutSlowInEasing.transform(
+            leafProgress = AppMotion.Standard.transform(
                 phase(elapsedMillis, LOGO_LEAF_START_MILLIS, LOGO_LEAF_MILLIS)
             ),
             heartScale = 1f + HEART_BEAT_AMPLITUDE *

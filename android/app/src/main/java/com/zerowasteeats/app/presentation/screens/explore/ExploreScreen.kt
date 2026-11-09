@@ -51,6 +51,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.zerowasteeats.app.R
+import com.zerowasteeats.app.presentation.components.common.AppMotion
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppButtonStyle
 import com.zerowasteeats.app.presentation.components.common.AppCard
@@ -58,6 +59,7 @@ import com.zerowasteeats.app.presentation.components.common.AppSearchBar
 import com.zerowasteeats.app.presentation.components.common.EmptyStateIcon
 import com.zerowasteeats.app.presentation.components.common.offerGridItem
 import com.zerowasteeats.app.presentation.components.common.offerListItem
+import com.zerowasteeats.app.presentation.components.common.ProvideSkeletonShimmer
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.components.filters.ActiveFilterChips
 import com.zerowasteeats.app.presentation.components.filters.ExploreFilterSheet
@@ -92,8 +94,8 @@ import kotlinx.coroutines.launch
 // Flip to bring back the large "Explorar" title above the search bar
 private const val SHOW_EXPLORE_TITLE = false
 
-private const val VIEW_MODE_CROSSFADE_MILLIS = 150
-private const val MAP_VEIL_FADE_MILLIS = 200
+private const val VIEW_MODE_CROSSFADE_MILLIS = AppMotion.FAST_MILLIS
+private const val MAP_VEIL_FADE_MILLIS = AppMotion.SHORT_MILLIS
 private const val MAP_VEIL_TIMEOUT_MILLIS = 1500L
 
 private val GridSpacing = 12.dp
@@ -186,32 +188,34 @@ fun ExploreScreen(
                     enter = if (animationsEnabled) fadeIn(tween(VIEW_MODE_CROSSFADE_MILLIS)) else EnterTransition.None,
                     exit = ExitTransition.None
                 ) {
-                    Crossfade(
-                        targetState = state.viewMode,
-                        modifier = Modifier.fillMaxSize(),
-                        animationSpec = if (animationsEnabled) tween(VIEW_MODE_CROSSFADE_MILLIS) else snap(),
-                        label = "exploreViewMode"
-                    ) { mode ->
-                        when (mode) {
-                            ExploreViewMode.LIST -> OfferList(
-                                feed = feed,
-                                offers = filteredOffers,
-                                listState = listState,
-                                seenOfferIds = seenOfferIds,
-                                onOfferClick = onOfferClick,
-                                onFavoriteClick = onFavoriteClick,
-                                onClearFilters = state::clearAll
-                            )
-                            ExploreViewMode.GRID -> OfferGrid(
-                                feed = feed,
-                                offers = filteredOffers,
-                                gridState = gridState,
-                                seenOfferIds = seenOfferIds,
-                                onOfferClick = onOfferClick,
-                                onFavoriteClick = onFavoriteClick,
-                                onClearFilters = state::clearAll
-                            )
-                            ExploreViewMode.MAP -> Unit // shown below, outside the crossfade
+                    ProvideSkeletonShimmer(active = feed.showSkeletons) {
+                        Crossfade(
+                            targetState = state.viewMode,
+                            modifier = Modifier.fillMaxSize(),
+                            animationSpec = if (animationsEnabled) tween(VIEW_MODE_CROSSFADE_MILLIS) else snap(),
+                            label = "exploreViewMode"
+                        ) { mode ->
+                            when (mode) {
+                                ExploreViewMode.LIST -> OfferList(
+                                    feed = feed,
+                                    offers = filteredOffers,
+                                    listState = listState,
+                                    seenOfferIds = seenOfferIds,
+                                    onOfferClick = onOfferClick,
+                                    onFavoriteClick = onFavoriteClick,
+                                    onClearFilters = state::clearAll
+                                )
+                                ExploreViewMode.GRID -> OfferGrid(
+                                    feed = feed,
+                                    offers = filteredOffers,
+                                    gridState = gridState,
+                                    seenOfferIds = seenOfferIds,
+                                    onOfferClick = onOfferClick,
+                                    onFavoriteClick = onFavoriteClick,
+                                    onClearFilters = state::clearAll
+                                )
+                                ExploreViewMode.MAP -> Unit // shown below, outside the crossfade
+                            }
                         }
                     }
                 }
@@ -518,7 +522,7 @@ private fun ExploreTitle(modifier: Modifier = Modifier) {
         Text(
             text = stringResource(R.string.explore_subtitle),
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -528,7 +532,7 @@ private fun ResultsCount(count: Int, modifier: Modifier = Modifier) {
     Text(
         text = pluralStringResource(R.plurals.explore_offers_count, count, count),
         style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = modifier
     )
 }
@@ -554,7 +558,7 @@ private fun EmptyState(onClearFilters: () -> Unit, modifier: Modifier = Modifier
         Text(
             text = stringResource(R.string.explore_empty_subtitle),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(AppSpacing.regular))

@@ -4,13 +4,9 @@ import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.format.formatted
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,7 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,23 +28,25 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
+import com.zerowasteeats.app.presentation.components.common.PRESSED_CARD_RAISE
+import com.zerowasteeats.app.presentation.components.common.pressable
 import com.zerowasteeats.app.presentation.format.distanceText
 import com.zerowasteeats.app.presentation.format.formatPesos
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.navigation.sharedOfferImage
+import com.zerowasteeats.app.presentation.theme.PhotoScrim
 import com.zerowasteeats.app.presentation.theme.RescateButter
 import com.zerowasteeats.app.presentation.theme.RescateCarbon
 import com.zerowasteeats.app.presentation.theme.RescateCarbonElevated
 import com.zerowasteeats.app.presentation.theme.RescateCream
 import com.zerowasteeats.app.presentation.theme.RescateDiscountBadge
 import com.zerowasteeats.app.presentation.theme.RescateCreamMuted
+import com.zerowasteeats.app.presentation.theme.AppSpacing
 
 /**
  * Immersive offer card: the photo fills the card, and the information floats
@@ -66,24 +63,14 @@ fun OfferCard(
     val fallbackBrush = Brush.linearGradient(listOf(RescateCarbonElevated, RescateCarbon))
     val cardShape = RoundedCornerShape(28.dp)
 
-    // Press feedback: the card shrinks slightly instead of showing a ripple
+    // Press feedback: the card shrinks and lifts slightly instead of showing a ripple
     val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val animationsEnabled = rememberAnimationsEnabled()
-    val pressScale by animateFloatAsState(
-        targetValue = if (isPressed && animationsEnabled) 0.98f else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
-        label = "offerCardPressScale"
-    )
 
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(320.dp)
-            .graphicsLayer {
-                scaleX = pressScale
-                scaleY = pressScale
-            }
+            .pressable(interactionSource, cardShape, raise = PRESSED_CARD_RAISE)
             .clip(cardShape)
             .background(fallbackBrush)
             .clickable(
@@ -121,7 +108,7 @@ fun OfferCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(AppSpacing.regular),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -143,7 +130,7 @@ fun OfferCard(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .fillMaxWidth()
-                .padding(20.dp)
+                .padding(AppSpacing.large)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -179,7 +166,7 @@ fun OfferCard(
                 overflow = TextOverflow.Ellipsis
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(AppSpacing.medium))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -224,14 +211,14 @@ internal const val UNAVAILABLE_PHOTO_ALPHA = 0.45f
 @Composable
 private fun InfoPill(
     text: String,
-    background: Color = RescateCarbon.copy(alpha = 0.6f),
+    background: Color = RescateCarbon.copy(alpha = PhotoScrim.CHIP_ALPHA),
     textColor: Color = RescateCream,
 ) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
             .background(background)
-            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .padding(horizontal = AppSpacing.medium, vertical = 6.dp)
     ) {
         Text(
             text = text,

@@ -1,9 +1,7 @@
 package com.zerowasteeats.app.presentation.components.map
 
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +39,7 @@ import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import com.zerowasteeats.app.R
+import com.zerowasteeats.app.presentation.components.common.AppMotion
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppCard
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
@@ -128,7 +127,7 @@ fun OffersMap(
                     val pinScale by animateFloatAsState(
                         targetValue = if (selected) SELECTED_PIN_SCALE else 1f,
                         animationSpec = if (animationsEnabled) {
-                            spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium)
+                            AppMotion.selectSpring()
                         } else {
                             snap()
                         },

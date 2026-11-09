@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import com.zerowasteeats.app.presentation.components.common.ProvideSkeletonShimmer
 import com.zerowasteeats.app.presentation.components.common.offerListItem
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -96,16 +97,18 @@ fun HomeScreen(
     // Each time the screen shows, including coming back from another tab
     LaunchedEffect(viewModel) { viewModel.onShown() }
 
-    HomeContent(
-        state = state,
-        favoriteFailures = viewModel.favoriteFailures,
-        onRetry = viewModel::retryLoad,
-        onMapClick = onMapClick,
-        onOfferClick = onOfferClick,
-        onFavoriteClick = viewModel::toggleFavorite,
-        onRetryFavorite = viewModel::setFavorite,
-        clock = clock
-    )
+    ProvideSkeletonShimmer(active = state.showSkeletons) {
+        HomeContent(
+            state = state,
+            favoriteFailures = viewModel.favoriteFailures,
+            onRetry = viewModel::retryLoad,
+            onMapClick = onMapClick,
+            onOfferClick = onOfferClick,
+            onFavoriteClick = viewModel::toggleFavorite,
+            onRetryFavorite = viewModel::setFavorite,
+            clock = clock
+        )
+    }
 }
 
 @Composable
@@ -249,7 +252,7 @@ private fun HomeHeader(greeting: Greeting, modifier: Modifier = Modifier) {
         Text(
             text = stringResource(R.string.home_subtitle),
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -304,7 +307,7 @@ private fun EmptyState(modifier: Modifier = Modifier) {
         Text(
             text = stringResource(R.string.home_empty_subtitle),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
     }

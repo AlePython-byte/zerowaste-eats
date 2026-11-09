@@ -2,7 +2,6 @@ package com.zerowasteeats.app.presentation.screens.merchant.reservations
 
 import android.content.res.Configuration
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,7 +53,7 @@ import com.zerowasteeats.app.data.merchant.MerchantReservation
 import com.zerowasteeats.app.data.merchant.MerchantReservationStatus
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppTextField
-import com.zerowasteeats.app.presentation.components.common.ENTRANCE_MILLIS
+import com.zerowasteeats.app.presentation.components.common.AppMotion
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.ThemeMode
@@ -92,7 +91,7 @@ fun PickupCodeSheet(
     // Right code: let the check play, then slide the sheet away and report it
     LaunchedEffect(state.isConfirmed) {
         if (!state.isConfirmed) return@LaunchedEffect
-        if (animationsEnabled) delay(ENTRANCE_MILLIS * 2L)
+        if (animationsEnabled) delay(AppMotion.MEDIUM_MILLIS * 2L)
         sheetState.hide()
         onFinished()
     }
@@ -300,7 +299,7 @@ private fun ConfirmedCheck() {
     val animate = rememberAnimationsEnabled() && !LocalInspectionMode.current
     val progress = remember { Animatable(if (animate) 0f else 1f) }
     LaunchedEffect(Unit) {
-        progress.animateTo(1f, tween(ENTRANCE_MILLIS, easing = FastOutSlowInEasing))
+        progress.animateTo(1f, tween(AppMotion.MEDIUM_MILLIS, easing = AppMotion.Standard))
     }
 
     Column(

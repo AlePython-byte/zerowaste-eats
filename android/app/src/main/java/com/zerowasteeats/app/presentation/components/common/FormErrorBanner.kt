@@ -31,7 +31,7 @@ import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.ThemeMode
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
 
-private const val BANNER_MILLIS = 200
+private const val BANNER_MILLIS = AppMotion.SHORT_MILLIS
 
 /**
  * Form-level error. It expands in when [message] is set and collapses when it is null.

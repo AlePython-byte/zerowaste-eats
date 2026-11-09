@@ -37,6 +37,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.rememberUpdatedState
 import com.zerowasteeats.app.data.merchant.MerchantDataError
 import com.zerowasteeats.app.data.merchant.MerchantReservation
+import com.zerowasteeats.app.presentation.components.common.ProvideSkeletonShimmer
 import com.zerowasteeats.app.presentation.components.offers.MerchantOfferCardSkeleton
 import com.zerowasteeats.app.data.merchant.MerchantReservationStatus
 import com.zerowasteeats.app.data.session.Session
@@ -99,15 +100,17 @@ fun MerchantReservationsScreen(
         viewModel.wrongCode.collect { haptics.performHapticFeedback(HapticFeedbackType.Reject) }
     }
 
-    MerchantReservationsContent(
-        state = state,
-        timeFormatter = timeFormatter,
-        snackbarHostState = snackbarHostState,
-        onTabSelected = viewModel::selectTab,
-        onConfirmClick = viewModel::openSheet,
-        onRetry = viewModel::refresh,
-        modifier = modifier
-    )
+    ProvideSkeletonShimmer(active = state.showSkeleton) {
+        MerchantReservationsContent(
+            state = state,
+            timeFormatter = timeFormatter,
+            snackbarHostState = snackbarHostState,
+            onTabSelected = viewModel::selectTab,
+            onConfirmClick = viewModel::openSheet,
+            onRetry = viewModel::refresh,
+            modifier = modifier
+        )
+    }
 
     val sheet = viewModel.sheet
     // The reservation comes from the list, so the sheet follows it if it changes underneath

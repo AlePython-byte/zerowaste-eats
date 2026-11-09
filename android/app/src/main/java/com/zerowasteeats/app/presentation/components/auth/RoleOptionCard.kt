@@ -19,7 +19,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,6 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.R
+import com.zerowasteeats.app.presentation.components.common.PRESSED_CARD_RAISE
+import com.zerowasteeats.app.presentation.components.common.pressable
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.SurfaceTokens
@@ -56,11 +61,19 @@ fun RoleOptionCard(
         BorderStroke(SurfaceTokens.borderWidth, SurfaceTokens.border)
     }
 
+    val interactionSource = remember { MutableInteractionSource() }
     Surface(
         modifier = modifier
             .fillMaxWidth()
+            .pressable(interactionSource, shape, raise = PRESSED_CARD_RAISE)
             .clip(shape)
-            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick),
+            .selectable(
+                selected = selected,
+                interactionSource = interactionSource,
+                indication = LocalIndication.current,
+                role = Role.RadioButton,
+                onClick = onClick
+            ),
         shape = shape,
         color = SurfaceTokens.surface,
         border = border

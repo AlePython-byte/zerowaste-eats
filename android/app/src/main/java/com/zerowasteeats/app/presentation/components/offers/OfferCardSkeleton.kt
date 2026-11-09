@@ -13,11 +13,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
-import com.zerowasteeats.app.presentation.components.common.rememberSkeletonAlpha
+import com.zerowasteeats.app.presentation.components.common.skeletonShimmer
+import com.zerowasteeats.app.presentation.theme.AppSpacing
 
 /**
  * The shape of an [OfferCard] while the offers load: the card and the lines of text at its
@@ -47,7 +47,6 @@ fun CompactOfferCardSkeleton(modifier: Modifier = Modifier) {
 
 @Composable
 private fun SkeletonCard(shape: RoundedCornerShape, modifier: Modifier) {
-    val alpha = rememberSkeletonAlpha()
     val surface = MaterialTheme.colorScheme.surfaceVariant
     val line = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
     val lineShape = RoundedCornerShape(8.dp)
@@ -55,15 +54,15 @@ private fun SkeletonCard(shape: RoundedCornerShape, modifier: Modifier) {
     Box(
         modifier = modifier
             .clearAndSetSemantics {}
-            .alpha(alpha)
             .clip(shape)
+            .skeletonShimmer()
             .background(surface)
     ) {
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .fillMaxWidth()
-                .padding(20.dp)
+                .padding(AppSpacing.large)
         ) {
             Box(Modifier.fillMaxWidth(0.4f).height(12.dp).clip(lineShape).background(line))
             Spacer(Modifier.height(10.dp))

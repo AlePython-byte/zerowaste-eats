@@ -3,8 +3,6 @@ package com.zerowasteeats.app.presentation.components.brand
 import android.content.res.Configuration
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
@@ -37,6 +35,7 @@ import androidx.compose.ui.graphics.vector.toPath
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.zerowasteeats.app.presentation.components.common.AppMotion
 import com.zerowasteeats.app.presentation.components.common.LOGO_TOTAL_MILLIS
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.theme.RescateButter
@@ -77,7 +76,7 @@ fun ZeroWasteLogo(
             launch {
                 bagScale.animateTo(
                     1f,
-                    spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+                    AppMotion.celebrateSpring()
                 )
             }
             timeline.animateTo(

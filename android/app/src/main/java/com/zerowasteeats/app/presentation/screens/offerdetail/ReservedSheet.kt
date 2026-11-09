@@ -2,10 +2,11 @@ package com.zerowasteeats.app.presentation.screens.offerdetail
 
 import android.content.res.Configuration
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
@@ -29,7 +29,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -47,8 +46,11 @@ import androidx.compose.ui.unit.sp
 import com.zerowasteeats.app.R
 import com.zerowasteeats.app.data.reservations.CustomerReservation
 import com.zerowasteeats.app.data.reservations.CustomerReservationStatus
+import com.zerowasteeats.app.presentation.components.common.AppMotion
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppButtonStyle
+import com.zerowasteeats.app.presentation.components.common.DrawnCheck
+import com.zerowasteeats.app.presentation.components.common.STAGGER_MILLIS
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.format.formatPesos
 import com.zerowasteeats.app.presentation.format.formatted
@@ -110,11 +112,28 @@ internal fun ReservedSheetContent(
     val animate = rememberAnimationsEnabled() && !LocalInspectionMode.current
     val check = remember { Animatable(if (animate) 0f else 1f) }
     val code = remember { Animatable(if (animate) 0f else 1f) }
+    // The check draws itself as the badge pops in; the characters of the code follow, one by one
+    val revealMillis = codeRevealMillis(reservation.code.length)
+    val checkStroke = remember { Animatable(if (animate) 0f else 1f) }
+    val codeElapsed = remember { Animatable(if (animate) 0f else revealMillis) }
     LaunchedEffect(Unit) {
         launch {
-            check.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
+            check.animateTo(1f, AppMotion.celebrateSpring())
         }
-        code.animateTo(1f, spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow))
+        launch {
+            checkStroke.animateTo(1f, tween(AppMotion.MEDIUM_MILLIS, easing = AppMotion.Emphasized))
+        }
+        launch {
+            codeElapsed.animateTo(
+                revealMillis,
+                tween(
+                    durationMillis = revealMillis.toInt(),
+                    delayMillis = AppMotion.SHORT_MILLIS,
+                    easing = LinearEasing
+                )
+            )
+        }
+        code.animateTo(1f, AppMotion.settleSpring())
     }
 
     val quantity = pluralStringResource(R.plurals.merchant_pickup_quantity, reservation.quantity, reservation.quantity)
@@ -143,11 +162,10 @@ internal fun ReservedSheetContent(
             shape = CircleShape,
             color = MaterialTheme.colorScheme.primary
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_check),
-                contentDescription = null,
-                modifier = Modifier.padding(AppSpacing.regular),
-                tint = MaterialTheme.colorScheme.onPrimary
+            DrawnCheck(
+                progress = checkStroke.value,
+                color = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.padding(AppSpacing.regular)
             )
         }
 
@@ -181,17 +199,27 @@ internal fun ReservedSheetContent(
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Text(
-                    text = reservation.code,
-                    style = MaterialTheme.typography.displayMedium.copy(
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 6.sp
-                    ),
-                    color = MaterialTheme.colorScheme.tertiary,
-                    textAlign = TextAlign.Center,
-                    maxLines = 1
-                )
+                Row {
+                    reservation.code.forEachIndexed { index, character ->
+                        Text(
+                            text = character.toString(),
+                            modifier = Modifier.graphicsLayer {
+                                val reveal = AppMotion.Emphasized.transform(
+                                    codeCharacterFraction(codeElapsed.value, index)
+                                )
+                                alpha = reveal
+                                translationY = (1f - reveal) * 8.dp.toPx()
+                            },
+                            style = MaterialTheme.typography.displayMedium.copy(
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 6.sp
+                            ),
+                            color = MaterialTheme.colorScheme.tertiary,
+                            maxLines = 1
+                        )
+                    }
+                }
             }
         }
 
@@ -243,6 +271,17 @@ internal fun ReservedSheetContent(
         )
     }
 }
+
+/** How long each character of the code takes to appear. */
+private const val CODE_CHARACTER_MILLIS = AppMotion.SHORT_MILLIS
+
+/** Milliseconds, from the start of the reveal, until the last of [length] characters has appeared. */
+internal fun codeRevealMillis(length: Int): Float =
+    (maxOf(length - 1, 0) * STAGGER_MILLIS + CODE_CHARACTER_MILLIS).toFloat()
+
+/** How far the character at [index] has appeared (0 to 1), [elapsedMillis] after the reveal began. */
+internal fun codeCharacterFraction(elapsedMillis: Float, index: Int): Float =
+    ((elapsedMillis - index * STAGGER_MILLIS) / CODE_CHARACTER_MILLIS).coerceIn(0f, 1f)
 
 /** "ZW-7KQ3" read one character at a time, so a screen reader does not try to say it as a word. */
 internal fun spokenCode(code: String): String =

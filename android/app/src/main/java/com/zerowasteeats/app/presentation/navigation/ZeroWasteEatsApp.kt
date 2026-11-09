@@ -26,7 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import com.zerowasteeats.app.ZeroWasteEatsApplication
-import com.zerowasteeats.app.presentation.components.common.ENTRANCE_MILLIS
+import com.zerowasteeats.app.presentation.components.common.AppMotion
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 
 /**
@@ -53,7 +53,7 @@ fun ZeroWasteEatsApp() {
                 targetState = appSpaceFor(session),
                 transitionSpec = {
                     if (animationsEnabled) {
-                        fadeIn(tween(ENTRANCE_MILLIS)) togetherWith fadeOut(tween(ENTRANCE_MILLIS))
+                        fadeIn(tween(AppMotion.MEDIUM_MILLIS)) togetherWith fadeOut(tween(AppMotion.MEDIUM_MILLIS))
                     } else {
                         fadeIn(snap()) togetherWith fadeOut(snap())
                     }

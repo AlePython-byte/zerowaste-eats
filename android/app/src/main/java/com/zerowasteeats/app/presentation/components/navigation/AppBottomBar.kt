@@ -35,6 +35,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.zerowasteeats.app.presentation.components.common.AppMotion
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.theme.AppRadius
 import com.zerowasteeats.app.presentation.theme.AppSpacing
@@ -104,8 +105,8 @@ private fun AppBottomBarItem(
             verticalArrangement = Arrangement.Center
         ) {
             val animationsEnabled = rememberAnimationsEnabled()
-            val colorSpec: AnimationSpec<Color> = if (animationsEnabled) tween(200) else snap()
-            val dotSpec: AnimationSpec<Float> = if (animationsEnabled) tween(200) else snap()
+            val colorSpec: AnimationSpec<Color> = if (animationsEnabled) tween(AppMotion.SHORT_MILLIS) else snap()
+            val dotSpec: AnimationSpec<Float> = if (animationsEnabled) tween(AppMotion.SHORT_MILLIS) else snap()
 
             val contentColor by animateColorAsState(
                 targetValue = if (isSelected) {

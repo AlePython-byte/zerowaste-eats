@@ -63,8 +63,8 @@ fun ServerWakingBanner(
     AnimatedVisibility(
         visible = slow && waitingSince != null,
         modifier = modifier,
-        enter = if (animate) fadeIn(tween(ENTRANCE_MILLIS)) + slideInVertically { -it / 2 } else EnterTransition.None,
-        exit = if (animate) fadeOut(tween(ENTRANCE_MILLIS)) + slideOutVertically { -it / 2 } else ExitTransition.None
+        enter = if (animate) fadeIn(tween(AppMotion.MEDIUM_MILLIS)) + slideInVertically { -it / 2 } else EnterTransition.None,
+        exit = if (animate) fadeOut(tween(AppMotion.MEDIUM_MILLIS)) + slideOutVertically { -it / 2 } else ExitTransition.None
     ) {
         ServerWakingPill()
     }

@@ -45,7 +45,7 @@ import com.zerowasteeats.app.data.merchant.MerchantOffer
 import com.zerowasteeats.app.data.merchant.MerchantOfferStatus
 import com.zerowasteeats.app.data.merchant.OfferPhoto
 import com.zerowasteeats.app.presentation.components.common.AppCard
-import com.zerowasteeats.app.presentation.components.common.ENTRANCE_MILLIS
+import com.zerowasteeats.app.presentation.components.common.AppMotion
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.format.formatPesos
 import com.zerowasteeats.app.presentation.model.OfferCategory
@@ -191,7 +191,7 @@ fun OfferStatusPill(status: MerchantOfferStatus, modifier: Modifier = Modifier) 
     Crossfade(
         targetState = status,
         modifier = modifier,
-        animationSpec = if (animationsEnabled) tween(ENTRANCE_MILLIS) else snap(),
+        animationSpec = if (animationsEnabled) tween(AppMotion.MEDIUM_MILLIS) else snap(),
         label = "offerStatusPill"
     ) { current ->
         val (container, content) = statusColors(current)

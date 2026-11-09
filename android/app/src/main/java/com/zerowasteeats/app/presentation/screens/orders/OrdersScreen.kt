@@ -32,7 +32,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -50,7 +49,8 @@ import com.zerowasteeats.app.data.session.Session
 import com.zerowasteeats.app.presentation.components.common.EmptyState
 import com.zerowasteeats.app.presentation.components.common.EmptyStateIcon
 import com.zerowasteeats.app.presentation.components.common.offerListItem
-import com.zerowasteeats.app.presentation.components.common.rememberSkeletonAlpha
+import com.zerowasteeats.app.presentation.components.common.ProvideSkeletonShimmer
+import com.zerowasteeats.app.presentation.components.common.skeletonShimmer
 import com.zerowasteeats.app.presentation.components.orders.OrderCard
 import com.zerowasteeats.app.presentation.navigation.LocalBottomBarInset
 import com.zerowasteeats.app.presentation.navigation.aboveBottomBar
@@ -122,7 +122,7 @@ fun OrdersScreen(session: Session.Customer) {
                 Text(
                     text = stringResource(R.string.orders_subtitle),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(modifier = Modifier.height(AppSpacing.large))
@@ -166,7 +166,11 @@ fun OrdersScreen(session: Session.Customer) {
 /** The shape of a few order cards while the first load runs. Screen readers hear it loads. */
 @Composable
 private fun OrdersSkeleton() {
-    val alpha = rememberSkeletonAlpha()
+    ProvideSkeletonShimmer(active = true) { OrdersSkeletonContent() }
+}
+
+@Composable
+private fun OrdersSkeletonContent() {
     val surface = MaterialTheme.colorScheme.surfaceVariant
     val line = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
     val lineShape = RoundedCornerShape(8.dp)
@@ -184,11 +188,11 @@ private fun OrdersSkeleton() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clearAndSetSemantics {}
-                    .alpha(alpha)
                     .clip(RoundedCornerShape(AppRadius.large))
+                    .skeletonShimmer()
                     .background(surface)
                     .padding(AppSpacing.regular),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
             ) {
                 Box(Modifier.fillMaxWidth(0.35f).height(12.dp).clip(lineShape).background(line))
                 Box(Modifier.fillMaxWidth(0.75f).height(20.dp).clip(lineShape).background(line))
@@ -295,7 +299,7 @@ private fun EmptyOrdersState(selectedTab: OrdersTab, modifier: Modifier = Modifi
             Text(
                 text = text,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
         }

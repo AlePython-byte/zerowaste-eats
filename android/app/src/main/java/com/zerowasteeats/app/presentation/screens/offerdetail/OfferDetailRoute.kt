@@ -30,7 +30,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -46,9 +45,11 @@ import com.zerowasteeats.app.ZeroWasteEatsApplication
 import com.zerowasteeats.app.data.catalog.CatalogError
 import com.zerowasteeats.app.data.session.Session
 import com.zerowasteeats.app.presentation.components.common.EmptyState
-import com.zerowasteeats.app.presentation.components.common.rememberSkeletonAlpha
+import com.zerowasteeats.app.presentation.components.common.ProvideSkeletonShimmer
+import com.zerowasteeats.app.presentation.components.common.skeletonShimmer
 import com.zerowasteeats.app.presentation.screens.feed.FavoriteProblemSnackbar
 import com.zerowasteeats.app.presentation.screens.feed.LoadFailureSnackbar
+import com.zerowasteeats.app.presentation.theme.PhotoScrim
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.RescateCarbon
 import com.zerowasteeats.app.presentation.theme.RescateCream
@@ -199,7 +200,16 @@ private fun OfferDetailSkeleton(
     onBackClick: () -> Unit,
     snackbarHost: @Composable () -> Unit
 ) {
-    val alpha = rememberSkeletonAlpha()
+    ProvideSkeletonShimmer(active = true) {
+        OfferDetailSkeletonContent(onBackClick, snackbarHost)
+    }
+}
+
+@Composable
+private fun OfferDetailSkeletonContent(
+    onBackClick: () -> Unit,
+    snackbarHost: @Composable () -> Unit
+) {
     val block = MaterialTheme.colorScheme.surfaceVariant
     val lineShape = RoundedCornerShape(8.dp)
     val loading = stringResource(R.string.offer_detail_loading)
@@ -218,7 +228,7 @@ private fun OfferDetailSkeleton(
                 Column(
                     modifier = Modifier
                         .clearAndSetSemantics {}
-                        .alpha(alpha)
+                        .skeletonShimmer()
                 ) {
                     Box(
                         modifier = Modifier
@@ -227,13 +237,13 @@ private fun OfferDetailSkeleton(
                             .background(block)
                     )
                     Column(
-                        modifier = Modifier.padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        modifier = Modifier.padding(AppSpacing.large),
+                        verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
                     ) {
                         Box(Modifier.fillMaxWidth(0.4f).height(14.dp).clip(lineShape).background(block))
                         Box(Modifier.fillMaxWidth(0.85f).height(32.dp).clip(lineShape).background(block))
                         Box(Modifier.fillMaxWidth(0.6f).height(16.dp).clip(lineShape).background(block))
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(AppSpacing.small))
                         Box(Modifier.fillMaxWidth(0.35f).height(40.dp).clip(lineShape).background(block))
                     }
                 }
@@ -246,7 +256,7 @@ private fun OfferDetailSkeleton(
                     .padding(AppSpacing.regular)
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(RescateCarbon.copy(alpha = 0.55f))
+                    .background(RescateCarbon.copy(alpha = PhotoScrim.CONTROL_ALPHA))
                     .clickable(role = Role.Button, onClick = onBackClick),
                 contentAlignment = Alignment.Center
             ) {

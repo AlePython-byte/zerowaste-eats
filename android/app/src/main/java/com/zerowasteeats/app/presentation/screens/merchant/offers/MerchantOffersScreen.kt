@@ -40,6 +40,7 @@ import com.zerowasteeats.app.data.merchant.MerchantOffer
 import com.zerowasteeats.app.data.merchant.MerchantOfferStatus
 import com.zerowasteeats.app.data.merchant.OfferPhoto
 import com.zerowasteeats.app.data.session.Session
+import com.zerowasteeats.app.presentation.components.common.ProvideSkeletonShimmer
 import com.zerowasteeats.app.presentation.components.common.EmptyState
 import com.zerowasteeats.app.presentation.components.common.ModeBadge
 import com.zerowasteeats.app.presentation.components.common.offerListItem
@@ -150,15 +151,17 @@ fun MerchantOffersScreen(
         }
     }
 
-    MerchantOffersContent(
-        state = state,
-        snackbarHostState = snackbarHostState,
-        onFilterSelected = viewModel::selectFilter,
-        onNewOffer = onNewOffer,
-        onEditOffer = onEditOffer,
-        onToggleStatus = viewModel::toggleStatus,
-        modifier = modifier
-    )
+    ProvideSkeletonShimmer(active = state.showSkeletons) {
+        MerchantOffersContent(
+            state = state,
+            snackbarHostState = snackbarHostState,
+            onFilterSelected = viewModel::selectFilter,
+            onNewOffer = onNewOffer,
+            onEditOffer = onEditOffer,
+            onToggleStatus = viewModel::toggleStatus,
+            modifier = modifier
+        )
+    }
 }
 
 @Composable

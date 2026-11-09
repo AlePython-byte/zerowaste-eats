@@ -67,6 +67,10 @@ fun MerchantNavigation(
     val currentRoute = navBackStackEntry?.destination?.route
     // Carries "offer published" / "changes saved" from the editor to the offer list
     val offerSavedNotice = remember { OfferSavedNotice() }
+    // Tabs fade through, the offer editor slides in on the shared axis
+    val transitions = rememberNavTransitions(
+        tabRoutes = remember { merchantTabs.map { it.route }.toSet() }
+    )
 
     TabScaffold(
         tabs = merchantTabs,
@@ -77,7 +81,13 @@ fun MerchantNavigation(
         NavHost(
             navController = navController,
             startDestination = MerchantDestination.DASHBOARD.route,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            enterTransition = transitions.enter,
+            exitTransition = transitions.exit,
+            popEnterTransition = transitions.popEnter,
+            popExitTransition = transitions.popExit,
+            predictivePopEnterTransition = transitions.predictivePopEnter,
+            predictivePopExitTransition = transitions.predictivePopExit
         ) {
             composable(MerchantDestination.DASHBOARD.route) {
                 MerchantDashboardScreen(
