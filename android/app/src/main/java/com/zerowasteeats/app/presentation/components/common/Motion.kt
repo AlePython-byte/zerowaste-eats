@@ -2,8 +2,13 @@ package com.zerowasteeats.app.presentation.components.common
 
 import android.provider.Settings
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.CubicBezierEasing
+import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.SpringSpec
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.grid.LazyGridItemScope
@@ -30,8 +35,61 @@ fun rememberAnimationsEnabled(): Boolean {
     }
 }
 
+/**
+ * The app's motion language. Screens and components take their durations, easings and springs
+ * from here instead of writing numbers of their own, so everything moves with the same rhythm.
+ *
+ * - Durations grow with the distance and the size of what moves: [FAST_MILLIS] for small state
+ *   changes (colors, icons), [SHORT_MILLIS] for fades and reveals, [MEDIUM_MILLIS] for screens,
+ *   sheets and entrances, [LONG_MILLIS] for celebrations.
+ * - [Emphasized] decelerates hard, for what comes in; [EmphasizedAccelerate] speeds up, for what
+ *   leaves; [Standard] is for what changes in place.
+ * - Springs answer touch: [pressSpring] never bounces, [bounceSpring] and [celebrateSpring]
+ *   bounce a little, only to reward an action (favorite, reservation done).
+ *
+ * Everything that uses these still checks [rememberAnimationsEnabled] and snaps when it is off.
+ */
+object AppMotion {
+    const val FAST_MILLIS = 150
+    const val SHORT_MILLIS = 200
+    const val MEDIUM_MILLIS = 300
+    const val LONG_MILLIS = 500
+
+    /** Material 3 emphasized decelerate: for content that enters. */
+    val Emphasized: Easing = CubicBezierEasing(0.05f, 0.7f, 0.1f, 1f)
+
+    /** Material 3 emphasized accelerate: for content that leaves. */
+    val EmphasizedAccelerate: Easing = CubicBezierEasing(0.3f, 0f, 0.8f, 0.15f)
+
+    /** For content that changes in place. */
+    val Standard: Easing = FastOutSlowInEasing
+
+    /** Follows a finger: quick, no overshoot (card press). */
+    fun <T> pressSpring(): SpringSpec<T> =
+        spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium)
+
+    /** A small, lively overshoot: a toggle that answers (heart, selected map pin). */
+    fun <T> bounceSpring(): SpringSpec<T> =
+        spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium)
+
+    /** A selection that pops out a little (map pin). */
+    fun <T> selectSpring(): SpringSpec<T> =
+        spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium)
+
+    /** A slow, generous bounce for an achievement (reservation check, logo). */
+    fun <T> celebrateSpring(): SpringSpec<T> =
+        spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
+
+    /** Settles calmly into place with no overshoot (pickup code reveal). */
+    fun <T> settleSpring(): SpringSpec<T> =
+        spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+
+    /** Back to rest after a [bounceSpring]. */
+    fun <T> restSpring(): SpringSpec<T> = spring()
+}
+
 /** Also the length of the short screen and step transitions. */
-internal const val ENTRANCE_MILLIS = 300
+internal const val ENTRANCE_MILLIS = AppMotion.MEDIUM_MILLIS
 private const val PLACEMENT_MILLIS = 300
 
 /**
