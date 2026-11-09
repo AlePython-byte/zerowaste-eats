@@ -52,7 +52,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.animation.core.Animatable
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -68,7 +67,7 @@ import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.navigation.sharedOfferImage
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.RescateCarbon
-import com.zerowasteeats.app.presentation.theme.RescateCoral
+import com.zerowasteeats.app.presentation.components.offers.FavoriteButton
 import com.zerowasteeats.app.presentation.theme.RescateCream
 import kotlinx.coroutines.launch
 
@@ -86,9 +85,6 @@ internal fun OfferDetailContent(
 ) {
     val discountText = stringResource(R.string.offer_discount_off, offer.discountPercent)
     val remainingText = pluralStringResource(R.plurals.offer_remaining_count, offer.remainingQuantity, offer.remainingQuantity)
-    val heartScale = remember { Animatable(1f) }
-    val scope = rememberCoroutineScope()
-    val haptics = LocalHapticFeedback.current
     val scrollState = rememberScrollState()
     val animationsEnabled = rememberAnimationsEnabled()
 
@@ -310,26 +306,12 @@ internal fun OfferDetailContent(
                 contentDescription = stringResource(R.string.common_back_cd),
                 onClick = onBackClick
             )
-            CircleControl(
-                text = if (offer.isFavorite) "♥" else "♡",
+            FavoriteButton(
+                isFavorite = offer.isFavorite,
                 contentDescription = stringResource(
                     if (offer.isFavorite) R.string.common_favorite_remove_cd else R.string.common_favorite_add_cd
                 ),
-                tint = if (offer.isFavorite) RescateCoral else RescateCream,
-                onClick = {
-                    haptics.performHapticFeedback(
-                        if (offer.isFavorite) HapticFeedbackType.ToggleOff else HapticFeedbackType.ToggleOn
-                    )
-                    if (animationsEnabled) scope.launch {
-                        heartScale.animateTo(
-                            1.35f,
-                            AppMotion.bounceSpring()
-                        )
-                        heartScale.animateTo(1f, AppMotion.restSpring())
-                    }
-                    onFavoriteClick()
-                },
-                heartScale = heartScale
+                onClick = onFavoriteClick
             )
         }
         }
@@ -340,9 +322,7 @@ internal fun OfferDetailContent(
 private fun CircleControl(
     text: String,
     contentDescription: String,
-    onClick: () -> Unit,
-    tint: Color = RescateCream,
-    heartScale: Animatable<Float, *>? = null,
+    onClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -355,14 +335,8 @@ private fun CircleControl(
         Text(
             text = text,
             fontSize = 22.sp,
-            color = tint,
-            modifier = Modifier
-                .graphicsLayer {
-                    val s = heartScale?.value ?: 1f
-                    scaleX = s
-                    scaleY = s
-                }
-                .semantics { this.contentDescription = contentDescription }
+            color = RescateCream,
+            modifier = Modifier.semantics { this.contentDescription = contentDescription }
         )
     }
 }
