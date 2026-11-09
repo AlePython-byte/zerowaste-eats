@@ -29,6 +29,35 @@ class ScreenTransitionsTest {
     }
 
     @Test
+    fun withAnimationsOff_theBackGestureSwapsAtOnce() {
+        val transitions = screenTransitions(enabled = false, towardEnd = 90)
+
+        listOf(true, false).forEach { fromRight ->
+            assertEquals(EnterTransition.None, transitions.predictiveBackEnter(fromRight))
+            assertEquals(ExitTransition.None, transitions.predictiveBackExit(fromRight))
+        }
+        assertEquals(EnterTransition.None, transitions.predictiveSiblingEnter)
+        assertEquals(ExitTransition.None, transitions.predictiveSiblingExit)
+    }
+
+    @Test
+    fun theBackGesture_movesAwayFromTheEdgeItStartedAt() {
+        val transitions = screenTransitions(enabled = true, towardEnd = 90)
+
+        assertNotEquals(transitions.predictiveBackExit(true), transitions.predictiveBackExit(false))
+        assertNotEquals(transitions.predictiveBackEnter(true), transitions.predictiveBackEnter(false))
+    }
+
+    @Test
+    fun theBackGesture_isNotTheTimedBackTransition() {
+        val transitions = screenTransitions(enabled = true, towardEnd = 90)
+
+        // The gesture tracks the finger at an even pace; the timed one decelerates
+        assertNotEquals(transitions.backExit, transitions.predictiveBackExit(false))
+        assertNotEquals(transitions.backEnter, transitions.predictiveBackEnter(false))
+    }
+
+    @Test
     fun goingBack_mirrorsGoingForward() {
         val transitions = screenTransitions(enabled = true, towardEnd = 90)
 

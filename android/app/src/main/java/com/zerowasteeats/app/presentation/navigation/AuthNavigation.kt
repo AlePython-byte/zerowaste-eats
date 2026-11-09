@@ -13,7 +13,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.zerowasteeats.app.presentation.components.common.rememberScreenTransitions
 import com.zerowasteeats.app.presentation.screens.forgotpassword.ForgotPasswordScreen
 import com.zerowasteeats.app.presentation.screens.signin.SignInScreen
 import com.zerowasteeats.app.presentation.screens.signup.SignUpScreen
@@ -37,18 +36,20 @@ fun AuthNavigation(modifier: Modifier = Modifier) {
         (LocalContext.current.applicationContext as ZeroWasteEatsApplication)
             .container.sessionManager
     val notice by sessionManager.notice
-    // Shared axis: forward slides in from the end, back mirrors it; an instant swap when the
+    // No tabs here: every screen slides on the shared axis, and an instant swap when the
     // system animations are off
-    val transitions = rememberScreenTransitions()
+    val transitions = rememberNavTransitions(tabRoutes = emptySet())
 
     NavHost(
         navController = navController,
         startDestination = AuthDestination.WELCOME.route,
         modifier = modifier.fillMaxSize(),
-        enterTransition = { transitions.forwardEnter },
-        exitTransition = { transitions.forwardExit },
-        popEnterTransition = { transitions.backEnter },
-        popExitTransition = { transitions.backExit }
+        enterTransition = transitions.enter,
+        exitTransition = transitions.exit,
+        popEnterTransition = transitions.popEnter,
+        popExitTransition = transitions.popExit,
+        predictivePopEnterTransition = transitions.predictivePopEnter,
+        predictivePopExitTransition = transitions.predictivePopExit
     ) {
         composable(AuthDestination.WELCOME.route) {
             WelcomeScreen(

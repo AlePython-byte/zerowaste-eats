@@ -84,7 +84,9 @@ private fun CustomerNavHost(
                 enterTransition = transitions.enter,
                 exitTransition = transitions.exit,
                 popEnterTransition = transitions.popEnter,
-                popExitTransition = transitions.popExit
+                popExitTransition = transitions.popExit,
+                predictivePopEnterTransition = transitions.predictivePopEnter,
+                predictivePopExitTransition = transitions.predictivePopExit
             ) {
                 sharedComposable(CustomerDestination.HOME.route) {
                     HomeScreen(

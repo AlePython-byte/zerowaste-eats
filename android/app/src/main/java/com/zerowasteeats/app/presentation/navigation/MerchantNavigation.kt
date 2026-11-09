@@ -85,7 +85,9 @@ fun MerchantNavigation(
             enterTransition = transitions.enter,
             exitTransition = transitions.exit,
             popEnterTransition = transitions.popEnter,
-            popExitTransition = transitions.popExit
+            popExitTransition = transitions.popExit,
+            predictivePopEnterTransition = transitions.predictivePopEnter,
+            predictivePopExitTransition = transitions.predictivePopExit
         ) {
             composable(MerchantDestination.DASHBOARD.route) {
                 MerchantDashboardScreen(

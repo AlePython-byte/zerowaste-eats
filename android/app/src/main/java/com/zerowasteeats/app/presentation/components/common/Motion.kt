@@ -12,6 +12,7 @@ import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.spring
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import kotlin.math.abs
 
 /**
  * False when the user turned system animations off (animator duration scale 0).
@@ -230,6 +232,11 @@ private const val FADE_THROUGH_DELAY_MILLIS = AppMotion.FAST_MILLIS / 2
  * fades out quickly; going back mirrors it. Sibling screens (the bottom bar tabs) are neither
  * deeper nor shallower than each other, so they only fade through.
  *
+ * The predictive back ones play while the person drags the back gesture, scrubbed by the
+ * finger instead of by time. They move at an even pace with no delay, so the screen tracks the
+ * finger from the first pixel, and they never scale: the leaving screen slides away from the
+ * edge the gesture started at while the one underneath comes in from the other side.
+ *
  * All of them are [EnterTransition.None] / [ExitTransition.None] when the system animations are
  * off, so screens swap at once.
  */
@@ -240,8 +247,22 @@ class ScreenTransitions internal constructor(
     val backEnter: EnterTransition,
     val backExit: ExitTransition,
     val siblingEnter: EnterTransition,
-    val siblingExit: ExitTransition
-)
+    val siblingExit: ExitTransition,
+    private val predictiveBackEnterFromLeft: EnterTransition,
+    private val predictiveBackExitFromLeft: ExitTransition,
+    private val predictiveBackEnterFromRight: EnterTransition,
+    private val predictiveBackExitFromRight: ExitTransition,
+    val predictiveSiblingEnter: EnterTransition,
+    val predictiveSiblingExit: ExitTransition
+) {
+    /** The screen underneath, while a back gesture from the right edge (or the left) is dragged. */
+    fun predictiveBackEnter(fromRightEdge: Boolean): EnterTransition =
+        if (fromRightEdge) predictiveBackEnterFromRight else predictiveBackEnterFromLeft
+
+    /** The screen being left, while a back gesture from the right edge (or the left) is dragged. */
+    fun predictiveBackExit(fromRightEdge: Boolean): ExitTransition =
+        if (fromRightEdge) predictiveBackExitFromRight else predictiveBackExitFromLeft
+}
 
 /** [ScreenTransitions] for the current layout direction, density and animation setting. */
 @Composable
@@ -265,7 +286,13 @@ internal fun screenTransitions(enabled: Boolean, towardEnd: Int): ScreenTransiti
             backEnter = EnterTransition.None,
             backExit = ExitTransition.None,
             siblingEnter = EnterTransition.None,
-            siblingExit = ExitTransition.None
+            siblingExit = ExitTransition.None,
+            predictiveBackEnterFromLeft = EnterTransition.None,
+            predictiveBackExitFromLeft = ExitTransition.None,
+            predictiveBackEnterFromRight = EnterTransition.None,
+            predictiveBackExitFromRight = ExitTransition.None,
+            predictiveSiblingEnter = EnterTransition.None,
+            predictiveSiblingExit = ExitTransition.None
         )
     }
 
@@ -287,12 +314,26 @@ internal fun screenTransitions(enabled: Boolean, towardEnd: Int): ScreenTransiti
         )
     )
 
+    // Scrubbed by the finger: an even pace and no delay, so the progress of the gesture and of
+    // the screens stay the same. The edges are physical (left, right), not start and end.
+    val follow = tween<IntOffset>(AppMotion.MEDIUM_MILLIS, easing = LinearEasing)
+    val followAppear = fadeIn(tween(AppMotion.MEDIUM_MILLIS, easing = LinearEasing))
+    val followVanish = fadeOut(tween(AppMotion.MEDIUM_MILLIS, easing = LinearEasing))
+    val distance = abs(towardEnd)
+
     return ScreenTransitions(
         forwardEnter = slideInHorizontally(slide) { towardEnd } + appear,
         forwardExit = slideOutHorizontally(slide) { -towardEnd } + vanish,
         backEnter = slideInHorizontally(slide) { -towardEnd } + appear,
         backExit = slideOutHorizontally(slide) { towardEnd } + vanish,
         siblingEnter = siblingAppear,
-        siblingExit = vanish
+        siblingExit = vanish,
+        // From the left edge the finger moves right: the leaving screen goes right with it
+        predictiveBackEnterFromLeft = slideInHorizontally(follow) { -distance } + followAppear,
+        predictiveBackExitFromLeft = slideOutHorizontally(follow) { distance } + followVanish,
+        predictiveBackEnterFromRight = slideInHorizontally(follow) { distance } + followAppear,
+        predictiveBackExitFromRight = slideOutHorizontally(follow) { -distance } + followVanish,
+        predictiveSiblingEnter = followAppear,
+        predictiveSiblingExit = followVanish
     )
 }

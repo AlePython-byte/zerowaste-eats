@@ -1,5 +1,6 @@
 package com.zerowasteeats.app.presentation.navigation
 
+import androidx.activity.BackEventCompat
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -35,8 +36,8 @@ internal fun navTransitionKind(
 }
 
 /**
- * The four NavHost transition callbacks, built on the app's [ScreenTransitions]. Pass them
- * straight to the NavHost parameters of the same name.
+ * The NavHost transition callbacks, built on the app's [ScreenTransitions]. Pass them straight
+ * to the NavHost parameters of the same name, the predictive back ones included.
  */
 internal class NavTransitions(
     private val transitions: ScreenTransitions,
@@ -77,6 +78,26 @@ internal class NavTransitions(
             NavTransitionKind.Fade -> transitions.siblingExit
         }
     }
+
+    /**
+     * While the back gesture is dragged. Replaces the NavHost default, which shrinks the
+     * leaving screen; when the finger lifts, the host finishes these same transitions.
+     */
+    val predictivePopEnter: AnimatedContentTransitionScope<NavBackStackEntry>.(Int) -> EnterTransition =
+        { swipeEdge ->
+            when (kind()) {
+                NavTransitionKind.Axis -> transitions.predictiveBackEnter(swipeEdge == BackEventCompat.EDGE_RIGHT)
+                NavTransitionKind.Fade -> transitions.predictiveSiblingEnter
+            }
+        }
+
+    val predictivePopExit: AnimatedContentTransitionScope<NavBackStackEntry>.(Int) -> ExitTransition =
+        { swipeEdge ->
+            when (kind()) {
+                NavTransitionKind.Axis -> transitions.predictiveBackExit(swipeEdge == BackEventCompat.EDGE_RIGHT)
+                NavTransitionKind.Fade -> transitions.predictiveSiblingExit
+            }
+        }
 }
 
 /** [NavTransitions] for a nav host whose bottom bar tabs are [tabRoutes]. */
