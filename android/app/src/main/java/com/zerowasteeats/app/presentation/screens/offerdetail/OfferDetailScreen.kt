@@ -65,6 +65,7 @@ import com.zerowasteeats.app.presentation.components.offers.OfferPhotoImage
 import com.zerowasteeats.app.presentation.format.formatPesos
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.navigation.sharedOfferImage
+import com.zerowasteeats.app.presentation.theme.PhotoScrim
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.RescateCarbon
 import com.zerowasteeats.app.presentation.components.offers.FavoriteButton
@@ -149,7 +150,7 @@ internal fun OfferDetailContent(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
+                    .padding(horizontal = AppSpacing.large)
             ) {
                 Text(
                     text = offer.merchantName.uppercase(),
@@ -169,7 +170,7 @@ internal fun OfferDetailContent(
                 )
 
                 if (!offer.isAvailable) {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(AppSpacing.small))
                     Text(
                         text = stringResource(R.string.favorite_not_available),
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
@@ -178,7 +179,7 @@ internal fun OfferDetailContent(
                 }
 
                 offer.description?.takeIf { it.isNotBlank() }?.let { description ->
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(AppSpacing.small))
                     Text(
                         text = description,
                         style = MaterialTheme.typography.bodyLarge,
@@ -186,15 +187,15 @@ internal fun OfferDetailContent(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(AppSpacing.regular))
 
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(
                         text = formatPesos(offer.discountedPrice),
-                        style = MaterialTheme.typography.displayMedium.copy(fontWeight = FontWeight.ExtraBold),
+                        style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
                         color = MaterialTheme.colorScheme.tertiary
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(AppSpacing.medium))
                     Text(
                         text = formatPesos(offer.originalPrice),
                         style = MaterialTheme.typography.titleMedium.copy(textDecoration = TextDecoration.LineThrough),
@@ -203,7 +204,7 @@ internal fun OfferDetailContent(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
 
                 Text(
                     text = "$discountText · $remainingText",
@@ -215,27 +216,27 @@ internal fun OfferDetailContent(
 
                 Text(
                     text = stringResource(R.string.offer_detail_about_title),
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onBackground
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(AppSpacing.small))
 
                 Text(
                     text = stringResource(R.string.offer_detail_about_body),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(modifier = Modifier.height(28.dp))
 
                 Text(
                     text = stringResource(R.string.offer_detail_pickup_title),
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onBackground
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(AppSpacing.medium))
 
                 // Pickup card: flat surface card
                 Column(
@@ -244,24 +245,24 @@ internal fun OfferDetailContent(
                         .clip(RoundedCornerShape(24.dp))
                         .background(MaterialTheme.colorScheme.surface)
                         .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f), RoundedCornerShape(24.dp))
-                        .padding(20.dp)
+                        .padding(AppSpacing.large)
                 ) {
                     Text(
                         text = offer.merchantName,
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
                     Text(
                         text = offer.pickupWindow.formatted(withPickupPrefix = true),
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
                         color = MaterialTheme.colorScheme.tertiary
                     )
                     if (offer.address.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
                         Text(
                             text = offer.address,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -328,7 +329,7 @@ private fun CircleControl(
         modifier = Modifier
             .size(48.dp)
             .clip(CircleShape)
-            .background(RescateCarbon.copy(alpha = 0.55f))
+            .background(RescateCarbon.copy(alpha = PhotoScrim.CONTROL_ALPHA))
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
@@ -381,7 +382,7 @@ private fun ReservationPanel(
                 .clip(RoundedCornerShape(32.dp))
                 .background(MaterialTheme.colorScheme.surface)
                 .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f), RoundedCornerShape(32.dp))
-                .padding(horizontal = 20.dp, vertical = 14.dp)
+                .padding(horizontal = AppSpacing.large, vertical = AppSpacing.medium)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -391,7 +392,7 @@ private fun ReservationPanel(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = formatPesos(offer.discountedPrice),
-                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
                         color = MaterialTheme.colorScheme.tertiary
                     )
                     Text(
@@ -410,7 +411,7 @@ private fun ReservationPanel(
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(AppSpacing.medium))
 
             AppButton(
                 text = stringResource(R.string.offer_detail_reserve_total, formatPesos(reserve.totalPrice)),
@@ -442,11 +443,11 @@ private fun QuantityStepper(
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = stringResource(R.string.offer_detail_quantity_label),
-            style = MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.clearAndSetSemantics {}
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
         Row(verticalAlignment = Alignment.CenterVertically) {
             StepperButton(
                 text = "−",
@@ -479,7 +480,7 @@ private fun QuantityStepper(
             ) { value ->
                 Text(
                     text = value.toString(),
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()

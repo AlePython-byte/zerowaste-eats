@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.theme.SurfaceTokens
+import com.zerowasteeats.app.presentation.theme.AppSpacing
 
 /** Segmented control for the Explore view: list, grid or map. */
 @Composable
@@ -101,7 +102,7 @@ private fun ViewModeSegment(
             .clip(RoundedCornerShape(50))
             .background(background)
             .selectable(selected = isSelected, role = Role.RadioButton, onClick = onClick)
-            .padding(horizontal = 14.dp),
+            .padding(horizontal = AppSpacing.medium),
         contentAlignment = Alignment.Center
     ) {
         Text(

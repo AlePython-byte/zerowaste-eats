@@ -522,7 +522,7 @@ private fun ExploreTitle(modifier: Modifier = Modifier) {
         Text(
             text = stringResource(R.string.explore_subtitle),
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -532,7 +532,7 @@ private fun ResultsCount(count: Int, modifier: Modifier = Modifier) {
     Text(
         text = pluralStringResource(R.plurals.explore_offers_count, count, count),
         style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = modifier
     )
 }
@@ -558,7 +558,7 @@ private fun EmptyState(onClearFilters: () -> Unit, modifier: Modifier = Modifier
         Text(
             text = stringResource(R.string.explore_empty_subtitle),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(AppSpacing.regular))

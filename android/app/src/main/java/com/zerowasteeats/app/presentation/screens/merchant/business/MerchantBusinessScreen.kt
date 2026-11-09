@@ -224,7 +224,7 @@ private fun DetailRow(label: String, value: String?) {
             color = if (value != null) {
                 MaterialTheme.colorScheme.onSurface
             } else {
-                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                MaterialTheme.colorScheme.onSurfaceVariant
             }
         )
     }

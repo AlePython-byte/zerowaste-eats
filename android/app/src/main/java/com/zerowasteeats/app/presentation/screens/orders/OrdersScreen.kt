@@ -122,7 +122,7 @@ fun OrdersScreen(session: Session.Customer) {
                 Text(
                     text = stringResource(R.string.orders_subtitle),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(modifier = Modifier.height(AppSpacing.large))
@@ -192,7 +192,7 @@ private fun OrdersSkeletonContent() {
                     .skeletonShimmer()
                     .background(surface)
                     .padding(AppSpacing.regular),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
             ) {
                 Box(Modifier.fillMaxWidth(0.35f).height(12.dp).clip(lineShape).background(line))
                 Box(Modifier.fillMaxWidth(0.75f).height(20.dp).clip(lineShape).background(line))
@@ -299,7 +299,7 @@ private fun EmptyOrdersState(selectedTab: OrdersTab, modifier: Modifier = Modifi
             Text(
                 text = text,
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
         }

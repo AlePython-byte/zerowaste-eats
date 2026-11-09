@@ -24,7 +24,8 @@ import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.presentation.components.common.AppMotion
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.theme.RescateCarbon
-import com.zerowasteeats.app.presentation.theme.RescateCoral
+import com.zerowasteeats.app.presentation.theme.PhotoScrim
+import com.zerowasteeats.app.presentation.theme.RescateCoralOnPhoto
 import com.zerowasteeats.app.presentation.theme.RescateCream
 import kotlinx.coroutines.launch
 
@@ -75,17 +76,17 @@ fun FavoriteButton(
             modifier = Modifier
                 .size(44.dp)
                 .clip(CircleShape)
-                .background(RescateCarbon.copy(alpha = 0.55f)),
+                .background(RescateCarbon.copy(alpha = PhotoScrim.CONTROL_ALPHA)),
             contentAlignment = Alignment.Center
         ) {
             HeartBurst(
                 progress = burst.value,
-                color = RescateCoral,
+                color = RescateCoralOnPhoto,
                 modifier = Modifier.fillMaxSize()
             )
             HeartIcon(
                 filled = isFavorite,
-                color = if (isFavorite) RescateCoral else RescateCream,
+                color = if (isFavorite) RescateCoralOnPhoto else RescateCream,
                 size = 22.dp,
                 modifier = Modifier.graphicsLayer {
                     scaleX = heartScale.value

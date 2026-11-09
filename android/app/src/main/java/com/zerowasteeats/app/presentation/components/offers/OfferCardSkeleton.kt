@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import com.zerowasteeats.app.presentation.components.common.skeletonShimmer
+import com.zerowasteeats.app.presentation.theme.AppSpacing
 
 /**
  * The shape of an [OfferCard] while the offers load: the card and the lines of text at its
@@ -61,7 +62,7 @@ private fun SkeletonCard(shape: RoundedCornerShape, modifier: Modifier) {
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .fillMaxWidth()
-                .padding(20.dp)
+                .padding(AppSpacing.large)
         ) {
             Box(Modifier.fillMaxWidth(0.4f).height(12.dp).clip(lineShape).background(line))
             Spacer(Modifier.height(10.dp))

@@ -54,3 +54,17 @@ val RescatePrimaryContainerDark = Color(0xFF4A3410)
 val RescateOnPrimaryContainerDark = Color(0xFFFBE3AE)
 val RescateErrorContainerDark = Color(0xFF5C1F14)
 val RescateOnErrorContainerDark = Color(0xFFFFDAD3)
+
+// Controls over photos. A photo can be anything up to plain white, so the checks below assume
+// the worst case, a white photo under the scrim:
+//   Cream on Carbon at 70% 6.2 (chips), Cream on Carbon at 85% 10.8 (round buttons),
+//   CoralOnPhoto on Carbon at 85% 4.7 (plain Coral would be 3.4).
+val RescateCoralOnPhoto = Color(0xFFFF7A66)
+
+object PhotoScrim {
+    /** Carbon behind text chips on a photo. */
+    const val CHIP_ALPHA = 0.70f
+
+    /** Carbon behind round icon buttons on a photo (back, favorite). */
+    const val CONTROL_ALPHA = 0.85f
+}

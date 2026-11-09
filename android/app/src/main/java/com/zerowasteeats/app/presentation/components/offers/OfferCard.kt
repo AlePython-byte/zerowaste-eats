@@ -39,12 +39,14 @@ import com.zerowasteeats.app.presentation.format.distanceText
 import com.zerowasteeats.app.presentation.format.formatPesos
 import com.zerowasteeats.app.presentation.model.OfferUiModel
 import com.zerowasteeats.app.presentation.navigation.sharedOfferImage
+import com.zerowasteeats.app.presentation.theme.PhotoScrim
 import com.zerowasteeats.app.presentation.theme.RescateButter
 import com.zerowasteeats.app.presentation.theme.RescateCarbon
 import com.zerowasteeats.app.presentation.theme.RescateCarbonElevated
 import com.zerowasteeats.app.presentation.theme.RescateCream
 import com.zerowasteeats.app.presentation.theme.RescateDiscountBadge
 import com.zerowasteeats.app.presentation.theme.RescateCreamMuted
+import com.zerowasteeats.app.presentation.theme.AppSpacing
 
 /**
  * Immersive offer card: the photo fills the card, and the information floats
@@ -106,7 +108,7 @@ fun OfferCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(AppSpacing.regular),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -128,7 +130,7 @@ fun OfferCard(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .fillMaxWidth()
-                .padding(20.dp)
+                .padding(AppSpacing.large)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -164,7 +166,7 @@ fun OfferCard(
                 overflow = TextOverflow.Ellipsis
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(AppSpacing.medium))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -209,14 +211,14 @@ internal const val UNAVAILABLE_PHOTO_ALPHA = 0.45f
 @Composable
 private fun InfoPill(
     text: String,
-    background: Color = RescateCarbon.copy(alpha = 0.6f),
+    background: Color = RescateCarbon.copy(alpha = PhotoScrim.CHIP_ALPHA),
     textColor: Color = RescateCream,
 ) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(50))
             .background(background)
-            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .padding(horizontal = AppSpacing.medium, vertical = 6.dp)
     ) {
         Text(
             text = text,

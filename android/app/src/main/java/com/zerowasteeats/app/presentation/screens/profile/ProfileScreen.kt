@@ -187,8 +187,8 @@ private fun ProfileHeader(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(AppSpacing.extraSmall))
         Text(
             text = stringResource(R.string.profile_subtitle),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -225,7 +225,7 @@ private fun ProfileHeroCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = displayName,
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
@@ -421,7 +421,7 @@ private fun InfoSection(modifier: Modifier = Modifier) {
     AppCard(modifier = modifier.fillMaxWidth()) {
         Text(
             text = stringResource(R.string.profile_about_impact_title),
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Bold
         )

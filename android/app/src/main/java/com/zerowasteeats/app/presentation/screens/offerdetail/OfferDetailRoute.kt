@@ -49,6 +49,7 @@ import com.zerowasteeats.app.presentation.components.common.ProvideSkeletonShimm
 import com.zerowasteeats.app.presentation.components.common.skeletonShimmer
 import com.zerowasteeats.app.presentation.screens.feed.FavoriteProblemSnackbar
 import com.zerowasteeats.app.presentation.screens.feed.LoadFailureSnackbar
+import com.zerowasteeats.app.presentation.theme.PhotoScrim
 import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.RescateCarbon
 import com.zerowasteeats.app.presentation.theme.RescateCream
@@ -236,13 +237,13 @@ private fun OfferDetailSkeletonContent(
                             .background(block)
                     )
                     Column(
-                        modifier = Modifier.padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        modifier = Modifier.padding(AppSpacing.large),
+                        verticalArrangement = Arrangement.spacedBy(AppSpacing.medium)
                     ) {
                         Box(Modifier.fillMaxWidth(0.4f).height(14.dp).clip(lineShape).background(block))
                         Box(Modifier.fillMaxWidth(0.85f).height(32.dp).clip(lineShape).background(block))
                         Box(Modifier.fillMaxWidth(0.6f).height(16.dp).clip(lineShape).background(block))
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(AppSpacing.small))
                         Box(Modifier.fillMaxWidth(0.35f).height(40.dp).clip(lineShape).background(block))
                     }
                 }
@@ -255,7 +256,7 @@ private fun OfferDetailSkeletonContent(
                     .padding(AppSpacing.regular)
                     .size(48.dp)
                     .clip(CircleShape)
-                    .background(RescateCarbon.copy(alpha = 0.55f))
+                    .background(RescateCarbon.copy(alpha = PhotoScrim.CONTROL_ALPHA))
                     .clickable(role = Role.Button, onClick = onBackClick),
                 contentAlignment = Alignment.Center
             ) {
