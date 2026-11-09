@@ -51,6 +51,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.zerowasteeats.app.R
+import com.zerowasteeats.app.presentation.components.common.AppMotion
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppButtonStyle
 import com.zerowasteeats.app.presentation.components.common.AppCard
@@ -92,8 +93,8 @@ import kotlinx.coroutines.launch
 // Flip to bring back the large "Explorar" title above the search bar
 private const val SHOW_EXPLORE_TITLE = false
 
-private const val VIEW_MODE_CROSSFADE_MILLIS = 150
-private const val MAP_VEIL_FADE_MILLIS = 200
+private const val VIEW_MODE_CROSSFADE_MILLIS = AppMotion.FAST_MILLIS
+private const val MAP_VEIL_FADE_MILLIS = AppMotion.SHORT_MILLIS
 private const val MAP_VEIL_TIMEOUT_MILLIS = 1500L
 
 private val GridSpacing = 12.dp

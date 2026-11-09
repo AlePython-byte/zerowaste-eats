@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import com.zerowasteeats.app.R
 import com.zerowasteeats.app.data.ai.SuggestionError
+import com.zerowasteeats.app.presentation.components.common.AppMotion
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppButtonStyle
 import com.zerowasteeats.app.presentation.components.common.AppCard
@@ -39,7 +40,7 @@ import com.zerowasteeats.app.presentation.theme.AppSpacing
 import com.zerowasteeats.app.presentation.theme.ThemeMode
 import com.zerowasteeats.app.presentation.theme.ZeroWasteEatsTheme
 
-private const val REVEAL_MILLIS = 200
+private const val REVEAL_MILLIS = AppMotion.SHORT_MILLIS
 
 /** Asking for a suggestion from the merchant's photo, and what came of it. */
 class SuggestionPanel(

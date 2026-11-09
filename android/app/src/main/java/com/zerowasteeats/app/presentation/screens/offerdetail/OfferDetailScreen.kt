@@ -58,9 +58,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.ui.graphics.graphicsLayer
+import com.zerowasteeats.app.presentation.components.common.AppMotion
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.components.offers.OfferPhotoImage
@@ -324,9 +323,9 @@ internal fun OfferDetailContent(
                     if (animationsEnabled) scope.launch {
                         heartScale.animateTo(
                             1.35f,
-                            spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium)
+                            AppMotion.bounceSpring()
                         )
-                        heartScale.animateTo(1f, spring())
+                        heartScale.animateTo(1f, AppMotion.restSpring())
                     }
                     onFavoriteClick()
                 },

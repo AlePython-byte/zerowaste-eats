@@ -1,6 +1,5 @@
 package com.zerowasteeats.app.presentation.components.common
 
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -23,7 +22,7 @@ fun rememberSkeletonAlpha(): Float {
         initialValue = 1f,
         targetValue = 0.5f,
         animationSpec = infiniteRepeatable(
-            animation = tween(PULSE_MILLIS, easing = FastOutSlowInEasing),
+            animation = tween(PULSE_MILLIS, easing = AppMotion.Standard),
             repeatMode = RepeatMode.Reverse
         ),
         label = "skeletonAlpha"

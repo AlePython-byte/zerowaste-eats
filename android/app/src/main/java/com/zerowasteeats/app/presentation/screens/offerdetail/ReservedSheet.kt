@@ -2,8 +2,6 @@ package com.zerowasteeats.app.presentation.screens.offerdetail
 
 import android.content.res.Configuration
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -47,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import com.zerowasteeats.app.R
 import com.zerowasteeats.app.data.reservations.CustomerReservation
 import com.zerowasteeats.app.data.reservations.CustomerReservationStatus
+import com.zerowasteeats.app.presentation.components.common.AppMotion
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppButtonStyle
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
@@ -112,9 +111,9 @@ internal fun ReservedSheetContent(
     val code = remember { Animatable(if (animate) 0f else 1f) }
     LaunchedEffect(Unit) {
         launch {
-            check.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
+            check.animateTo(1f, AppMotion.celebrateSpring())
         }
-        code.animateTo(1f, spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow))
+        code.animateTo(1f, AppMotion.settleSpring())
     }
 
     val quantity = pluralStringResource(R.plurals.merchant_pickup_quantity, reservation.quantity, reservation.quantity)

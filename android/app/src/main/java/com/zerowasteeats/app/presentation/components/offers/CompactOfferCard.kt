@@ -1,9 +1,7 @@
 package com.zerowasteeats.app.presentation.components.offers
 
 import android.content.res.Configuration
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -43,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zerowasteeats.app.R
+import com.zerowasteeats.app.presentation.components.common.AppMotion
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.data.catalog.FakeOfferCatalogRepository
 import com.zerowasteeats.app.presentation.format.formatPesos
@@ -89,7 +88,7 @@ fun CompactOfferCard(
     val animationsEnabled = rememberAnimationsEnabled()
     val pressScale by animateFloatAsState(
         targetValue = if (isPressed && animationsEnabled) 0.97f else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
+        animationSpec = AppMotion.pressSpring(),
         label = "compactOfferCardPressScale"
     )
 

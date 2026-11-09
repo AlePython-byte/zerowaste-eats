@@ -45,7 +45,7 @@ import com.zerowasteeats.app.data.session.UserRole
 import com.zerowasteeats.app.presentation.components.auth.RoleOptionCard
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppTextField
-import com.zerowasteeats.app.presentation.components.common.ENTRANCE_MILLIS
+import com.zerowasteeats.app.presentation.components.common.AppMotion
 import com.zerowasteeats.app.presentation.components.common.PasswordField
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.screens.auth.AuthErrorBanner
@@ -171,11 +171,11 @@ private fun AnimatedContentTransitionScope<SignUpStep>.stepTransition(
             .using(SizeTransform(clip = false) { _, _ -> snap() })
     }
     val direction = if (targetState.ordinal > initialState.ordinal) 1 else -1
-    val transition = slideInHorizontally(tween(ENTRANCE_MILLIS)) { width -> direction * width / 4 } +
-        fadeIn(tween(ENTRANCE_MILLIS)) togetherWith
-        slideOutHorizontally(tween(ENTRANCE_MILLIS)) { width -> -direction * width / 4 } +
-        fadeOut(tween(ENTRANCE_MILLIS))
-    return transition.using(SizeTransform(clip = false) { _, _ -> tween(ENTRANCE_MILLIS) })
+    val transition = slideInHorizontally(tween(AppMotion.MEDIUM_MILLIS)) { width -> direction * width / 4 } +
+        fadeIn(tween(AppMotion.MEDIUM_MILLIS)) togetherWith
+        slideOutHorizontally(tween(AppMotion.MEDIUM_MILLIS)) { width -> -direction * width / 4 } +
+        fadeOut(tween(AppMotion.MEDIUM_MILLIS))
+    return transition.using(SizeTransform(clip = false) { _, _ -> tween(AppMotion.MEDIUM_MILLIS) })
 }
 
 @Composable

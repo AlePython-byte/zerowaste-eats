@@ -88,9 +88,6 @@ object AppMotion {
     fun <T> restSpring(): SpringSpec<T> = spring()
 }
 
-/** Also the length of the short screen and step transitions. */
-internal const val ENTRANCE_MILLIS = AppMotion.MEDIUM_MILLIS
-private const val PLACEMENT_MILLIS = 300
 
 /**
  * Modifier for an offer card inside a LazyColumn: it glides to its new position when the
@@ -124,7 +121,7 @@ fun LazyGridItemScope.offerGridItem(seen: MutableSet<String>, id: String): Modif
 }
 
 private fun offerPlacementSpec(): FiniteAnimationSpec<IntOffset> =
-    tween(PLACEMENT_MILLIS, easing = FastOutSlowInEasing)
+    tween(AppMotion.MEDIUM_MILLIS, easing = AppMotion.Standard)
 
 /** Fade-in with a slight rise, played once per id while it is not in [seen]. */
 @Composable
@@ -139,7 +136,7 @@ private fun Modifier.offerEntrance(
     LaunchedEffect(Unit) {
         seen.add(id)
         if (progress.value < 1f) {
-            progress.animateTo(1f, tween(ENTRANCE_MILLIS, easing = FastOutSlowInEasing))
+            progress.animateTo(1f, tween(AppMotion.MEDIUM_MILLIS, easing = AppMotion.Standard))
         }
     }
 
@@ -154,12 +151,12 @@ private fun Modifier.offerEntrance(
  * springs in on its own clock from 0; the other three steps follow this timeline, each starting
  * while the one before is still settling so the sequence reads as one movement.
  */
-internal const val LOGO_HANDLE_START_MILLIS = ENTRANCE_MILLIS
-internal const val LOGO_HANDLE_MILLIS = ENTRANCE_MILLIS + 100
-internal const val LOGO_LEAF_START_MILLIS = 2 * ENTRANCE_MILLIS
-internal const val LOGO_LEAF_MILLIS = ENTRANCE_MILLIS + 50
+internal const val LOGO_HANDLE_START_MILLIS = AppMotion.MEDIUM_MILLIS
+internal const val LOGO_HANDLE_MILLIS = AppMotion.MEDIUM_MILLIS + 100
+internal const val LOGO_LEAF_START_MILLIS = 2 * AppMotion.MEDIUM_MILLIS
+internal const val LOGO_LEAF_MILLIS = AppMotion.MEDIUM_MILLIS + 50
 internal const val LOGO_HEART_START_MILLIS = LOGO_LEAF_START_MILLIS + LOGO_LEAF_MILLIS
-internal const val LOGO_HEART_MILLIS = ENTRANCE_MILLIS - 50
+internal const val LOGO_HEART_MILLIS = AppMotion.MEDIUM_MILLIS - 50
 internal const val LOGO_TOTAL_MILLIS = LOGO_HEART_START_MILLIS + LOGO_HEART_MILLIS
 
 /** One slow breath of the halo behind the logo: out and back. */
@@ -186,7 +183,7 @@ fun Modifier.entranceRise(
         if (progress.value < 1f) {
             progress.animateTo(
                 1f,
-                tween(ENTRANCE_MILLIS, delayMillis = delayMillis, easing = FastOutSlowInEasing)
+                tween(AppMotion.MEDIUM_MILLIS, delayMillis = delayMillis, easing = AppMotion.Standard)
             )
         }
     }

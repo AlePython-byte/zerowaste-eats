@@ -17,11 +17,12 @@ import coil3.request.crossfade
 import com.zerowasteeats.app.data.merchant.OfferPhoto
 import com.zerowasteeats.app.data.merchant.PhotoSelection
 import com.zerowasteeats.app.data.merchant.PickedPhoto
+import com.zerowasteeats.app.presentation.components.common.AppMotion
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import java.io.File
 
 /** Short and quiet: the photo settles in, it does not perform. */
-private const val PHOTO_FADE_MILLIS = 200
+private const val PHOTO_FADE_MILLIS = AppMotion.SHORT_MILLIS
 
 /**
  * Draws an offer's photo, or the one being edited. Photos from the server, and photos on the

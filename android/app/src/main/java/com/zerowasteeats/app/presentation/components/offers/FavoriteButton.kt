@@ -1,8 +1,6 @@
 package com.zerowasteeats.app.presentation.components.offers
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -23,6 +21,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.zerowasteeats.app.presentation.components.common.AppMotion
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.theme.RescateCarbon
 import com.zerowasteeats.app.presentation.theme.RescateCoral
@@ -58,9 +57,9 @@ fun FavoriteButton(
                 if (animationsEnabled) scope.launch {
                     heartScale.animateTo(
                         1.35f,
-                        spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium)
+                        AppMotion.bounceSpring()
                     )
-                    heartScale.animateTo(1f, spring())
+                    heartScale.animateTo(1f, AppMotion.restSpring())
                 }
                 onClick()
             },

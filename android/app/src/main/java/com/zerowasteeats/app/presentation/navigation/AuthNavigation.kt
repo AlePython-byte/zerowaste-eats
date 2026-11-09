@@ -20,7 +20,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.zerowasteeats.app.presentation.components.common.ENTRANCE_MILLIS
+import com.zerowasteeats.app.presentation.components.common.AppMotion
 import com.zerowasteeats.app.presentation.components.common.rememberAnimationsEnabled
 import com.zerowasteeats.app.presentation.screens.forgotpassword.ForgotPasswordScreen
 import com.zerowasteeats.app.presentation.screens.signin.SignInScreen
@@ -50,26 +50,26 @@ fun AuthNavigation(modifier: Modifier = Modifier) {
     // A short slide toward the side the screen comes from, or an instant swap when the
     // system animations are off
     val enter = if (animationsEnabled) {
-        slideInHorizontally(tween(ENTRANCE_MILLIS)) { width -> width / 4 } +
-            fadeIn(tween(ENTRANCE_MILLIS))
+        slideInHorizontally(tween(AppMotion.MEDIUM_MILLIS)) { width -> width / 4 } +
+            fadeIn(tween(AppMotion.MEDIUM_MILLIS))
     } else {
         EnterTransition.None
     }
     val exit = if (animationsEnabled) {
-        slideOutHorizontally(tween(ENTRANCE_MILLIS)) { width -> -width / 4 } +
-            fadeOut(tween(ENTRANCE_MILLIS))
+        slideOutHorizontally(tween(AppMotion.MEDIUM_MILLIS)) { width -> -width / 4 } +
+            fadeOut(tween(AppMotion.MEDIUM_MILLIS))
     } else {
         ExitTransition.None
     }
     val popEnter = if (animationsEnabled) {
-        slideInHorizontally(tween(ENTRANCE_MILLIS)) { width -> -width / 4 } +
-            fadeIn(tween(ENTRANCE_MILLIS))
+        slideInHorizontally(tween(AppMotion.MEDIUM_MILLIS)) { width -> -width / 4 } +
+            fadeIn(tween(AppMotion.MEDIUM_MILLIS))
     } else {
         EnterTransition.None
     }
     val popExit = if (animationsEnabled) {
-        slideOutHorizontally(tween(ENTRANCE_MILLIS)) { width -> width / 4 } +
-            fadeOut(tween(ENTRANCE_MILLIS))
+        slideOutHorizontally(tween(AppMotion.MEDIUM_MILLIS)) { width -> width / 4 } +
+            fadeOut(tween(AppMotion.MEDIUM_MILLIS))
     } else {
         ExitTransition.None
     }

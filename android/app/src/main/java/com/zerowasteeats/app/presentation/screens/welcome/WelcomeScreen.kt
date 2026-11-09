@@ -1,7 +1,6 @@
 package com.zerowasteeats.app.presentation.screens.welcome
 
 import android.content.res.Configuration
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -54,7 +53,7 @@ import com.zerowasteeats.app.R
 import com.zerowasteeats.app.presentation.components.common.AppButton
 import com.zerowasteeats.app.presentation.components.common.AppButtonStyle
 import com.zerowasteeats.app.presentation.components.brand.ZeroWasteLogo
-import com.zerowasteeats.app.presentation.components.common.ENTRANCE_MILLIS
+import com.zerowasteeats.app.presentation.components.common.AppMotion
 import com.zerowasteeats.app.presentation.components.common.FormErrorBanner
 import com.zerowasteeats.app.presentation.components.common.HALO_BREATH_MILLIS
 import com.zerowasteeats.app.presentation.components.common.LOGO_TOTAL_MILLIS
@@ -138,7 +137,7 @@ fun WelcomeScreen(
                 // (and after a rotation) they are simply there
                 var introSeen by rememberSaveable { mutableStateOf(false) }
                 LaunchedEffect(Unit) {
-                    delay((LOGO_TOTAL_MILLIS + 3 * STAGGER_MILLIS + ENTRANCE_MILLIS).toLong())
+                    delay((LOGO_TOTAL_MILLIS + 3 * STAGGER_MILLIS + AppMotion.MEDIUM_MILLIS).toLong())
                     introSeen = true
                 }
                 Column(modifier = Modifier.fillMaxWidth()) {
@@ -218,7 +217,7 @@ private fun BrandHero(background: Color, modifier: Modifier = Modifier) {
             initialValue = 0.94f,
             targetValue = 1.04f,
             animationSpec = infiniteRepeatable(
-                animation = tween(HALO_BREATH_MILLIS / 2, easing = FastOutSlowInEasing),
+                animation = tween(HALO_BREATH_MILLIS / 2, easing = AppMotion.Standard),
                 repeatMode = RepeatMode.Reverse
             ),
             label = "haloScale"
